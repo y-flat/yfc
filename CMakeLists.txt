@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.10)
+set (CMAKE_CXX_STANDARD 11)
+project(yfc)
+add_compile_options(-O3 -Wall -Wpedantic -g -Wno-gnu-zero-variadic-macro-arguments)
+file(GLOB_RECURSE SOURCES src/*.c)
+add_executable(yfc ${SOURCES})
+target_include_directories(yfc PRIVATE src)

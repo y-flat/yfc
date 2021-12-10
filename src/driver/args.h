@@ -5,8 +5,33 @@
 #ifndef DRIVER_ARGS_H
 #define DRIVER_ARGS_H
 
+#include <stdbool.h>
+
+/**
+ * Any of the possible outputs wanted.
+ */
+enum yf_info_output {
+    YF_NONE,
+    YF_VERSION,
+    YF_HELP,
+    YF_ERROR,
+    YF_ERROR_NO_ARGS, /* SPECIFICALLY if no arguments are given. */
+};
+
 struct yf_args {
-    /* TODO */
+    
+    /**
+     * The wanted output message, or none if just compiling.
+     */
+    enum yf_info_output wanted_output;
+
+    /**
+     * Whether an error has occurred.
+     */
+    bool error;
+
+    /* TODO - actual compilation options */
+
 };
 
 /**
@@ -21,7 +46,7 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args);
  * compilation should happen. This ALSO returns 0 if there's some error in the
  * arguments given.
  */
-int yf_should_compile(struct yf_args * args);
+bool yf_should_compile(struct yf_args * args);
 
 /**
  * Output any information requested, like a version number. This should ONLY be

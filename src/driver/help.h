@@ -10,7 +10,8 @@
 extern const char
     * VERSION_MSG,
     * FLAGS_MSG,
-    * HELP_HINT_MSG
+    * HELP_HINT_MSG,
+    * NO_ARGS_MSG
 ;
 
 #endif /* DRIVER_HELP_H */

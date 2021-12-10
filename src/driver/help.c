@@ -6,5 +6,7 @@ const char
       "-h, --help: Display this message.\n"
       "-v, --version: Display version.\n",
     * HELP_HINT_MSG = "Invalid command. "
-      "Use \"-h\" or \"--help\" for a list of possible commands.\n"
+      "Use \"-h\" or \"--help\" for a list of possible commands.\n",
+    * NO_ARGS_MSG = "yfc: Use \"-h\" or \"--help\""
+      "for a list of possible commands.\n"
 ;

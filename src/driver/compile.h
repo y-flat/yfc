@@ -13,6 +13,6 @@
  * Do actual compilation with the given arguments. Return an error code through
  * the return value (non-zero) if something goes wrong.
  */
-int yf_compile(struct yf_args * args);
+int yf_run_compiler(struct yf_args * args);
 
 #endif /* DRIVER_COMPILE_H */

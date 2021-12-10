@@ -23,4 +23,12 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args);
  */
 int yf_should_compile(struct yf_args * args);
 
+/**
+ * Output any information requested, like a version number. This should ONLY be
+ * called if yf_should_compile() returns 0. Also, if there's an error in the
+ * arguments, this will output the diagnostic. This function exits the program
+ * (with a 0 value if no error and 1 otherwise).
+ */
+void yf_output_info(struct yf_args * args);
+
 #endif /* DRIVER_ARGS_H */

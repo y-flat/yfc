@@ -10,6 +10,10 @@ int main(int argc, char ** argv) {
     struct yf_args args;
     yf_parse_args(argc, argv, &args);
 
-    yf_compile(&args);
+    if (yf_should_compile(&args)) {
+        yf_compile(&args);
+    } else {
+        yf_output_info(&args);
+    }
 
 }

@@ -33,7 +33,7 @@ struct yf_args {
     /**
      * Which compiler the user wants to use
      * This is a pointer rather than an array in case the user has some insanely
-     * convoluted path or whatever.
+     * convoluted path or whatever. It still can't be > 255.
      * Set to NULL if none is specified.
      */
     const char * compiler;

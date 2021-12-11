@@ -38,6 +38,9 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
     
     int i;
     char * flag;
+    
+    /* If the next option we're parsing is the native C compiler name */
+    bool want_compiler_name = false;
 
     /* Zero the args structure. */
     memset(args, 0, sizeof *args);
@@ -53,6 +56,19 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
 
         flag = argv[i];
 
+        /* Skip all flag-checking if compiler name expected */
+        if (want_compiler_name) {
+            want_compiler_name = false;
+            if (!args->compiler) {
+                args->compiler = flag;
+            } else {
+                /* Name has already been set */
+                yf_set_error(args);
+                return;
+            }
+            continue;
+        }
+
         if (STREQ(flag, "-h") || STREQ(flag, "--help")) {
             yf_check_action(args, YF_HELP);
             continue;
@@ -60,6 +76,11 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
 
         if (STREQ(flag, "-v") || STREQ(flag, "--version")) {
             yf_check_action(args, YF_VERSION);
+            continue;
+        }
+
+        if (STREQ(flag, "-native-compiler")) {
+            want_compiler_name = true;
             continue;
         }
 

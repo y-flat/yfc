@@ -30,6 +30,14 @@ struct yf_args {
      */
     bool error;
 
+    /**
+     * Which compiler the user wants to use
+     * This is a pointer rather than an array in case the user has some insanely
+     * convoluted path or whatever.
+     * Set to NULL if none is specified.
+     */
+    const char * compiler;
+
     /* TODO - actual compilation options */
 
 };

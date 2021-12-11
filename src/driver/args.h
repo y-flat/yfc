@@ -38,7 +38,11 @@ struct yf_args {
      */
     const char * compiler;
 
-    /* TODO - actual compilation options */
+    /**
+     * The indiviidual files to compile, as well as how many files.
+     */
+    const char * files[16];
+    int num_files;
 
 };
 

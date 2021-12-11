@@ -34,10 +34,27 @@ static void yf_check_action(struct yf_args * args, enum yf_info_output out) {
     }
 }
 
+/**
+ * Internal - add a file. Return 1 if too many files.
+ */
+static int yf_add_file(struct yf_args * args, const char * file) {
+    if (args->num_files >= 16) {
+        yf_set_error(args);
+        return 1;
+    }
+    /* No actions allowed. e.g. : no "yfc --version foo.yf" */
+    if (args->wanted_output != YF_NONE) {
+        yf_set_error(args);
+        return 1;
+    }
+    args->files[args->num_files++] = file;
+    return 0;
+}
+
 void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
     
     int i;
-    char * flag;
+    char * arg;
     
     /* If the next option we're parsing is the native C compiler name */
     bool want_compiler_name = false;
@@ -54,13 +71,13 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
     /* Start at 1 - avoid program name */
     for (i = 1; i < argc; ++i) {
 
-        flag = argv[i];
+        arg = argv[i];
 
         /* Skip all flag-checking if compiler name expected */
         if (want_compiler_name) {
             want_compiler_name = false;
             if (!args->compiler) {
-                args->compiler = flag;
+                args->compiler = arg;
             } else {
                 /* Name has already been set */
                 yf_set_error(args);
@@ -69,17 +86,17 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
             continue;
         }
 
-        if (STREQ(flag, "-h") || STREQ(flag, "--help")) {
+        if (STREQ(arg, "-h") || STREQ(arg, "--help")) {
             yf_check_action(args, YF_HELP);
             continue;
         }
 
-        if (STREQ(flag, "-v") || STREQ(flag, "--version")) {
+        if (STREQ(arg, "-v") || STREQ(arg, "--version")) {
             yf_check_action(args, YF_VERSION);
             continue;
         }
 
-        if (STREQ(flag, "-native-compiler")) {
+        if (STREQ(arg, "-native-compiler")) {
             want_compiler_name = true;
             /* Make sure there actually is a compiler to parse after */
             if (i + 1 == argc) {
@@ -89,9 +106,17 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
             continue;
         }
 
+        /* No other options are known. Yet. */
+        if (arg[0] == '-') {
+            yf_set_error(args);
+            return;
+        }
+
         /* TODO - file parsing, etc. */
-        /* Other options are errors for now. */
-        yf_set_error(args);
+        if (yf_add_file(args, arg)) {
+            yf_set_error(args);
+            return;
+        }
 
     }
 

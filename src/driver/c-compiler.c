@@ -2,8 +2,9 @@
 
 #include <stdio.h> /* sprintf */
 #include <stdlib.h> /* malloc */
+#include <string.h> /* strlen */
 
-const char * YF_C_COMPILER[256];
+const char YF_C_COMPILER[256];
 
 /**
  * Internal - determine whether a compiler exists on this machine.
@@ -34,5 +35,5 @@ int compiler_exists(const char * compiler) {
 }
 
 enum yf_c_compiler_status yf_determine_c_compiler(struct yf_args * args) {
-
+    return YF_OK;
 }

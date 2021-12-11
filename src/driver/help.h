@@ -9,7 +9,7 @@
 
 extern const char
     * VERSION_MSG,
-    * FLAGS_MSG,
+    * USAGE_MSG,
     * HELP_HINT_MSG,
     * NO_ARGS_MSG
 ;

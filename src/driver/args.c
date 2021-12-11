@@ -135,7 +135,7 @@ void yf_output_info(struct yf_args * args) {
             printf("%s", VERSION_MSG);
             break;
         case YF_HELP:
-            printf("%s", FLAGS_MSG);
+            printf("%s", USAGE_MSG);
             break;
         case YF_ERROR:
             printf("%s", HELP_HINT_MSG);

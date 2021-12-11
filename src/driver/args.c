@@ -81,6 +81,11 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
 
         if (STREQ(flag, "-native-compiler")) {
             want_compiler_name = true;
+            /* Make sure there actually is a compiler to parse after */
+            if (i + 1 == argc) {
+                yf_set_error(args);
+                return;
+            }
             continue;
         }
 

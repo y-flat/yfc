@@ -23,7 +23,9 @@ struct yf_project_compilation_data {
     /* To start - also for error messages */
     const char * project_name;
 
-    /* TODO - individual file compilations, etc. */
+    /* There are indeed a lot of pointers here, but this is so that a project\
+    with 5 files does not take up as much space ass a project with 1000. */
+    struct yf_file_compilation_data * files [1000];
 
 };
 

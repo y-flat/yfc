@@ -28,7 +28,7 @@ struct yf_project_compilation_data {
 };
 
 /**
- * To clarify - this namee might be a bit misleading. This is NOT for compiling
+ * To clarify - this name might be a bit misleading. This is NOT for compiling
  * one file, this is for compiling multiple files at once that are NOT part of a
  * project (for example, "yfc foo.yf bar.yf").
  */

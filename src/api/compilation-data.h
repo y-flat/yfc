@@ -9,12 +9,16 @@
 #ifndef API_COMPILATION_DATA_H
 #define API_COMPILATION_DATA_H
 
+#include <api/parse-tree.h>
+
 struct yf_file_compilation_data {
 
     /* To start - for error messages */
     const char * file_name;
 
-    /* TODO - actual data, like parse trees, etc. */
+    struct yf_parse_tree * parse_tree;
+
+    /* TODO - more actual data */
 
 };
 

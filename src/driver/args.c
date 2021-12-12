@@ -47,6 +47,11 @@ static int yf_add_file(struct yf_args * args, const char * file) {
         yf_set_error(args);
         return 1;
     }
+    /* No project allowed. */
+    if (args->project) {
+        yf_set_error(args);
+        return 1;
+    }
     args->files[args->num_files++] = file;
     return 0;
 }
@@ -100,6 +105,16 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
             want_compiler_name = true;
             /* Make sure there actually is a compiler to parse after */
             if (i + 1 == argc) {
+                yf_set_error(args);
+                return;
+            }
+            continue;
+        }
+
+        if (STREQ(arg, "--project")) {
+            args->project = 1;
+            if (args->num_files) {
+                /* --project specifies which files to use. */
                 yf_set_error(args);
                 return;
             }

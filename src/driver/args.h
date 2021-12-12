@@ -44,6 +44,12 @@ struct yf_args {
     const char * files[16];
     int num_files;
 
+    /**
+     * Project flag, for if we're doing project setup and compiling all files in
+     * it, instead of the user manually passing in files.
+     */
+    bool project;
+
 };
 
 /**

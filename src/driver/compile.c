@@ -1,6 +1,9 @@
 #include "compile.h"
 
+#include <stdio.h> /* fopen, etc. */
+
 #include <api/compilation-data.h>
+#include <api/lexer-input.h>
 #include <driver/compile.h>
 #include <parser/parser.h>
 
@@ -38,5 +41,18 @@ static int yf_compile_files(struct yf_args * args) {
  * Run the lexing and parsing on one file.
  */
 static int yf_run_frontend(struct yf_file_compilation_data * file) {
-    return yf_parse_file(file->file_name, file->parse_tree);
+
+    struct yf_lexer_input input;
+    struct yf_lexer lexer;
+    
+    input = (struct yf_lexer_input) {
+        .input = fopen(file->file_name, "r"),
+        .getc = getc,
+        .ungetc = ungetc
+    };
+
+    yfl_init(&lexer, &input);
+
+    return yf_parse(&lexer, file->parse_tree);
+    
 }

@@ -47,12 +47,12 @@ static int yf_run_frontend(struct yf_file_compilation_data * file) {
     
     input = (struct yf_lexer_input) {
         .input = fopen(file->file_name, "r"),
-        .getc = getc,
-        .ungetc = ungetc
+        .getc = (int (*)(void*)) getc,
+        .ungetc = (int (*)(int, void*)) ungetc
     };
 
     yfl_init(&lexer, &input);
 
     return yf_parse(&lexer, file->parse_tree);
-    
+
 }

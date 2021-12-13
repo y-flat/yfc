@@ -7,11 +7,12 @@
 #define PARSER_PARSER_H
 
 #include <api/parse-tree.h>
+#include <lexer/lexer.h>
 
 /**
- * Parse data from file into tree.
+ * Parse data from lexer into tree.
  * Returns: error code, or 0 if successful.
  */
-int yf_parse_file(const char * filename, struct yf_parse_tree * tree);
+int yf_parse(struct yf_lexer * lexer, struct yf_parse_tree * tree);
 
 #endif /* PARSER_PARSER_H */

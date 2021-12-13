@@ -7,8 +7,8 @@
  * Example usage (with a file):
  * struct yf_lexer_input input {
  *   .input = fopen("file.txt", "r"),
- *   .getc = fgtec,
- *   .ungetc = fungetc
+ *   .getc = getc,
+ *   .ungetc = ungetc
  * };
  */
 
@@ -31,8 +31,8 @@ struct yf_lexer_input {
      * This function must "unget" the last character of input data. This does
      * NOT need to hold more than 16 chars.
      */
-    void (*ungetc)(int c, void * input);
+    int (*ungetc)(int c, void * input);
 
-}
+};
 
 #endif /* API_LEXER_INPUT_H */

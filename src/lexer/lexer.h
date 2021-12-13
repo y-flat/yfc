@@ -22,6 +22,11 @@ struct yf_lexer {
 };
 
 /**
+ * Init a lexer.
+ */
+void yfl_init(struct yf_lexer * lexer, struct yf_lexer_input * input);
+
+/**
  * Stuff a token with data.
  */
 void yfl_lex(struct yf_lexer * lexer, struct yf_token * token);

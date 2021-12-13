@@ -32,6 +32,11 @@ void yfl_init(struct yf_lexer * lexer, struct yf_lexer_input * input);
 void yfl_lex(struct yf_lexer * lexer, struct yf_token * token);
 
 /**
+ * Unlex one token (only up to 16!) Return 1 if failed.
+ */
+int yfl_unlex(struct yf_lexer * lexer, struct yf_token * token);
+
+/**
  * Unlex a token, up to 16.
  */
 

@@ -33,9 +33,9 @@ int yf_run_compiler(struct yf_args * args) {
 static int yf_compile_project(struct yf_args * args) {
 
     struct yf_project_compilation_data data;
-    int numf;
+    int numf, i;
 
-    numf = yf_find_project_files(args, &data);
+    numf = yf_find_project_files(&data);
     
     /* Parse the frontend for all */
     for (i = 0; i < numf; ++i) {
@@ -100,7 +100,7 @@ static int yf_run_frontend(struct yf_file_compilation_data * file) {
  * Stuff the project compilation data with all files that need to be compiled.
  * Returns the number of files.
  */
-static int yf_find_project_files(struct yf_project_compilation_data *) {
+static int yf_find_project_files(struct yf_project_compilation_data * data) {
     /* TODO */
     return 0;
 }

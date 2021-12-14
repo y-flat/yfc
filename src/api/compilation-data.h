@@ -16,7 +16,7 @@ struct yf_file_compilation_data {
     /* To start - for error messages */
     const char * file_name;
 
-    struct yf_parse_tree * parse_tree;
+    struct yf_parse_tree parse_tree;
 
     /* TODO - more actual data */
 

@@ -1,6 +1,7 @@
 #include "compile.h"
 
 #include <stdio.h> /* fopen, etc. */
+#include <stdlib.h> /* malloc */
 
 #include <api/compilation-data.h>
 #include <api/lexer-input.h>
@@ -28,8 +29,24 @@ int yf_run_compiler(struct yf_args * args) {
 }
 
 static int yf_compile_project(struct yf_args * args) {
-    /* TODO */
-    return 0;
+    
+    struct yf_individual_compilation_data data;
+    int i;
+
+    for (i = 0; i < args->num_files; ++i) {
+        data.files[i] = malloc(sizeof (struct yf_file_compilation_data));
+        data.files[i]->file_name = args->files[i];
+        /* TODO - more data */
+    }
+    data.num_files = args->num_files;
+
+    /* Parse the frontend for all */
+    for (i = 0; i < args->num_files; ++i) {
+        yf_run_frontend(data.files[i]);
+    }
+
+    /* TODO - semantic analysis, code gen */
+
 }
 
 static int yf_compile_files(struct yf_args * args) {
@@ -53,6 +70,6 @@ static int yf_run_frontend(struct yf_file_compilation_data * file) {
 
     yfl_init(&lexer, &input);
 
-    return yf_parse(&lexer, file->parse_tree);
+    return yf_parse(&lexer, &file->parse_tree);
 
 }

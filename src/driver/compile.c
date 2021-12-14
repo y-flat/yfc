@@ -7,6 +7,7 @@
 #include <api/lexer-input.h>
 #include <driver/compile.h>
 #include <parser/parser.h>
+#include <util/yfc-out.h>
 
 /* Forward decls for whole file */
 static int yf_compile_project(struct yf_args *);
@@ -68,7 +69,7 @@ static int yf_run_frontend(struct yf_file_compilation_data * file) {
 
     file_src = fopen(file->file_name, "r");
     if (!file_src) {
-        fprintf(stderr, "Could not open file \"%s\".\n", file->file_name);
+        YF_PRINT_ERROR("Could not open file %s", file->file_name);
         return 1;
     }
     

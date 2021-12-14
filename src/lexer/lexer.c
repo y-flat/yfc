@@ -44,8 +44,8 @@ int yfl_unlex(struct yf_lexer * lexer, struct yf_token * token) {
 }
 
 /**
- * @brief This ACTUALLY does lexing. The yfl_lex function checks the unlexed
- * buffer and returns the top tokens.
+ * This ACTUALLY does lexing. The yfl_lex function checks the unlexed
+ * buffer and returns the top tokens, if any.
  */
 static void yfl_core_lex(struct yf_lexer * lexer, struct yf_token * token) {
 

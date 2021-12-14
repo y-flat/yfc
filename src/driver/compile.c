@@ -30,6 +30,13 @@ int yf_run_compiler(struct yf_args * args) {
 
 static int yf_compile_project(struct yf_args * args) {
     
+    /* TODO */
+    return 0;
+
+}
+
+static int yf_compile_files(struct yf_args * args) {
+    
     struct yf_individual_compilation_data data;
     int i;
 
@@ -46,12 +53,8 @@ static int yf_compile_project(struct yf_args * args) {
     }
 
     /* TODO - semantic analysis, code gen */
-
-}
-
-static int yf_compile_files(struct yf_args * args) {
-    /* TODO */
     return 0;
+
 }
 
 /**

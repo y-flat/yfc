@@ -13,6 +13,7 @@
 static int yf_compile_project(struct yf_args *);
 static int yf_compile_files(struct yf_args *);
 static int yf_run_frontend(struct yf_file_compilation_data *);
+static int yf_find_project_files(struct yf_project_compilation_data *);
 
 /**
  * This is it. This is the actual compile function for a set of arguments. It
@@ -30,8 +31,18 @@ int yf_run_compiler(struct yf_args * args) {
 }
 
 static int yf_compile_project(struct yf_args * args) {
+
+    struct yf_project_compilation_data data;
+    int numf;
+
+    numf = yf_find_project_files(args, &data);
     
-    /* TODO */
+    /* Parse the frontend for all */
+    for (i = 0; i < numf; ++i) {
+        yf_run_frontend(data.files[i]);
+    }
+
+    /* TODO - semantic analysis, code gen */
     return 0;
 
 }
@@ -83,4 +94,13 @@ static int yf_run_frontend(struct yf_file_compilation_data * file) {
 
     return yf_parse(&lexer, &file->parse_tree);
 
+}
+
+/**
+ * Stuff the project compilation data with all files that need to be compiled.
+ * Returns the number of files.
+ */
+static int yf_find_project_files(struct yf_project_compilation_data *) {
+    /* TODO */
+    return 0;
 }

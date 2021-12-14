@@ -64,9 +64,16 @@ static int yf_run_frontend(struct yf_file_compilation_data * file) {
 
     struct yf_lexer_input input;
     struct yf_lexer lexer;
+    FILE * file_src;
+
+    file_src = fopen(file->file_name, "r");
+    if (!file_src) {
+        fprintf(stderr, "Could not open file \"%s\".\n", file->file_name);
+        return 1;
+    }
     
     input = (struct yf_lexer_input) {
-        .input = fopen(file->file_name, "r"),
+        .input = file_src,
         .getc = (int (*)(void*)) getc,
         .ungetc = (int (*)(int, void*)) ungetc
     };

@@ -200,7 +200,7 @@ static int yfl_getc(struct yf_lexer * lexer) {
         ++lexer->col;
     }
 
-    return 0;
+    return c;
 
 }
 

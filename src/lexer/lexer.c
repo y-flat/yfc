@@ -159,7 +159,11 @@ static void yfl_core_lex(struct yf_lexer * lexer, struct yf_token * token) {
 
     charpos = 0;
 
+    curchar = startchar;
+
     for (;;) {
+
+        token->data[charpos++] = curchar;
 
         if (charpos >= 256) {
             /* Too big! */
@@ -176,8 +180,6 @@ static void yfl_core_lex(struct yf_lexer * lexer, struct yf_token * token) {
             token->type = get_type(token->data);
             return;
         }
-
-        token->data[charpos++] = curchar;
 
     }
 

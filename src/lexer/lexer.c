@@ -2,6 +2,7 @@
 
 #include <ctype.h>
 #include <stdio.h>
+#include <string.h>
 
 /* Forward decls */
 static void yfl_core_lex(struct yf_lexer * lexer, struct yf_token * token);
@@ -9,6 +10,7 @@ static int yfl_getc(struct yf_lexer * lexer);
 static int yfl_ungetc(struct yf_lexer * lexer, int c);
 static int yfl_skip_whitespace(struct yf_lexer * lexer);
 static int yfl_skip_comment(struct yf_lexer * lexer);
+static int yfl_skip_all(struct yf_lexer * lexer);
 
 void yfl_init(struct yf_lexer * lexer, struct yf_lexer_input * input) {
     
@@ -55,6 +57,25 @@ int yfl_unlex(struct yf_lexer * lexer, struct yf_token * token) {
  * buffer and returns the top tokens, if any.
  */
 static void yfl_core_lex(struct yf_lexer * lexer, struct yf_token * token) {
+
+    int startchar;
+
+    /* Skip all irrelevant characters. */
+    yfl_skip_all(lexer);
+
+    /* Get the start position */
+    token->lineno = lexer->line;
+    token->colno  = lexer->col;
+
+    startchar = yfl_getc(lexer);
+
+    /* First, EOF check. */
+    if (startchar == EOF) {
+        token->type = YFT_EOF;
+        strcpy(token->data, "[EOF]");
+        return;
+    }
+    /* More coming ... */
 
 }
 
@@ -174,5 +195,25 @@ static int yfl_skip_comment(struct yf_lexer * lexer) {
 
     /* Check the count. */
     return skipped != 0;
+
+}
+
+/**
+ * Skip whitespace and comments, if any. Return whether any was skipped.
+ */
+static int yfl_skip_all(struct yf_lexer * lexer) {
+
+    /**
+     * How this works - we try to skip whitespace and comments repeatedly
+     * until we try to skip both in a row and neither works.
+     */
+    int skipped; /* The number of skipped chars */
+    for (;;) {
+        skipped = 0;
+        skipped += yfl_skip_whitespace(lexer);
+        skipped += yfl_skip_comment(lexer);
+        if (!skipped)
+            return 1;
+    }
 
 }

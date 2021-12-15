@@ -345,6 +345,6 @@ const char * yf_get_toktype(enum yf_token_type type) {
         "operator"    ,
         "[TOO LARGE]"
     };
-    /* I don't actually know why -1 is needed. But it is. So. */
+    
     return types[type];
 }

@@ -9,9 +9,10 @@ enum yf_token_type {
 
     /* Not much yet */
 
+    YFT_INVALID,
+
     YFT_EOF,
-    YFT_IDENTIFIER, /* NOT types */
-    YFT_TYPE, /* YES types */
+    YFT_IDENTIFIER, /* Types or not */
     YFT_LITERAL,
     YFT_SEMICOLON,
     YFT_COMMA,
@@ -20,6 +21,7 @@ enum yf_token_type {
     YFT_CPAREN, /* ) */
     YFT_OBRACE, /* { */
     YFT_CBRACE, /* } */
+    YFT_TOO_LARGE, /* A token was too large */
 
 };
 

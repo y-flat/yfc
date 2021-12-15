@@ -53,12 +53,88 @@ int yfl_unlex(struct yf_lexer * lexer, struct yf_token * token) {
 }
 
 /**
+ * Now, here's the way the lexer works. The first character of a token will
+ * determine what type of token it is (ident, number, etc.), and also what
+ * characters can end it. So we have functions that determine possible end types
+ * from a beginning type, and then we consume characters until we reach an end.
+ */
+
+enum yfl_char_type {
+    /* Just a note - these are NOT the same as token types. */
+    YFL_UNKNOWN     = 0x00000000,
+    YFL_IDENT       = 0x00000001,
+    YFL_NUM         = 0x00000010,
+    YFL_PUNCT       = 0x00000100,
+    YFL_WHITESPACE  = 0x00001000,
+    YFL_EOF         = 0x00010000,
+};
+
+static enum yfl_char_type yfl_get_type(int c) {
+    
+    if (isalpha(c)) {
+        return YFL_IDENT;
+    } else if (isdigit(c)) {
+        return YFL_NUM;
+    } else if (ispunct(c)) {
+        return YFL_PUNCT;
+    } else if (c == EOF) {
+        return YFL_EOF;
+    } else {
+        return YFL_UNKNOWN;
+    }
+
+}
+
+/**
+ * Get a bit field of all characters which end a token.
+ */
+static enum yfl_char_type yfl_end_types(enum yfl_char_type type) {
+
+    switch (type) {
+        /* There should be an error for this. */
+        case YFL_UNKNOWN:
+            return YFL_UNKNOWN;
+        case YFL_IDENT:
+            return YFL_PUNCT | YFL_WHITESPACE | YFL_EOF;
+        case YFL_NUM:
+            return YFL_PUNCT | YFL_WHITESPACE | YFL_EOF;
+        case YFL_PUNCT:
+            return YFL_IDENT | YFL_NUM | YFL_PUNCT | YFL_WHITESPACE | YFL_EOF;
+        /* Should also never happen. */
+        case YFL_WHITESPACE:
+        case YFL_EOF:
+            return YFL_UNKNOWN;
+    }
+
+}
+
+/**
+ * Get the token type from a charbuf.
+ */
+static enum yf_token_type get_type(char * buf) {
+
+    if (isalpha(buf[0])) return YFT_IDENTIFIER;
+    if (isdigit(buf[0])) return YFT_LITERAL;
+    if (buf[0] == ';') return YFT_COLON;
+    if (buf[0] == ',') return YFT_COMMA;
+    if (buf[0] == ':') return YFT_COLON;
+    if (buf[0] == '(') return YFT_OPAREN;
+    if (buf[0] == ')') return YFT_CPAREN;
+    if (buf[0] == '{') return YFT_OBRACE;
+    if (buf[0] == '}') return YFT_CBRACE;
+    return YFT_INVALID;
+
+}
+
+/**
  * This ACTUALLY does lexing. The yfl_lex function checks the unlexed
  * buffer and returns the top tokens, if any.
  */
 static void yfl_core_lex(struct yf_lexer * lexer, struct yf_token * token) {
 
-    int startchar;
+    int startchar, curchar;
+    enum yfl_char_type starttype, endconditions;
+    int charpos; /* The character being added. */
 
     /* Skip all irrelevant characters. */
     yfl_skip_all(lexer);
@@ -75,7 +151,34 @@ static void yfl_core_lex(struct yf_lexer * lexer, struct yf_token * token) {
         strcpy(token->data, "[EOF]");
         return;
     }
-    /* More coming ... */
+    
+    /* Now, get the type of the first character. */
+    starttype = yfl_get_type(startchar);
+    endconditions = yfl_end_types(starttype);
+
+    charpos = 0;
+
+    for (;;) {
+
+        if (charpos >= 256) {
+            /* Too big! */
+            /* TODO - indicate an error. */
+            token->type = YFT_TOO_LARGE;
+            break;
+        }
+
+        /* Add characters until an end condition is encountered. */
+        curchar = yfl_getc(lexer);
+        if (yfl_get_type(curchar) & endconditions) {
+            yfl_ungetc(lexer, curchar);
+            token->data[charpos] = '\0';
+            token->type = get_type(token->data);
+            return;
+        }
+
+        token->data[charpos++] = curchar;
+
+    }
 
 }
 

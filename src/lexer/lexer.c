@@ -117,7 +117,7 @@ static enum yf_token_type get_type(char * buf) {
 
     if (isalpha(buf[0])) return YFT_IDENTIFIER;
     if (isdigit(buf[0])) return YFT_LITERAL;
-    if (buf[0] == ';') return YFT_COLON;
+    if (buf[0] == ';') return YFT_SEMICOLON;
     if (buf[0] == ',') return YFT_COMMA;
     if (buf[0] == ':') return YFT_COLON;
     if (buf[0] == '(') return YFT_OPAREN;
@@ -324,4 +324,27 @@ static int yfl_skip_all(struct yf_lexer * lexer) {
             return 1;
     }
 
+}
+
+/**
+ * Token type representations for debugging purposes.
+ */
+const char * yf_get_toktype(enum yf_token_type type) {
+    static const char * types[] = {
+        "!!INVALID!!",
+        "end-of-file",
+        "identifier",
+        "literal",
+        "semicolon",
+        "comma",
+        "colon",
+        "opening paren",
+        "closing paren",
+        "opening brace",
+        "closing brace",
+        "operator"    ,
+        "[TOO LARGE]"
+    };
+    /* I don't actually know why -1 is needed. But it is. So. */
+    return types[type];
 }

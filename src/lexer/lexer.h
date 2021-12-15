@@ -40,6 +40,11 @@ void yfl_lex(struct yf_lexer * lexer, struct yf_token * token);
 int yfl_unlex(struct yf_lexer * lexer, struct yf_token * token);
 
 /**
+ * Get the string of a token type.
+ */
+const char * yf_get_toktype(enum yf_token_type type);
+
+/**
  * Unlex a token, up to 16.
  */
 

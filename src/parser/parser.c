@@ -14,8 +14,8 @@ int yf_parse(struct yf_lexer * lexer, struct yf_parse_tree * tree) {
             break;
         }
         printf(
-            "%20s, line: %3d, col %3d\n",
-            token.data, token.lineno, token.colno
+            "%20s, line: %3d, col: %3d, type: %20s\n",
+            token.data, token.lineno, token.colno, yf_get_toktype(token.type)
         );
     }
 

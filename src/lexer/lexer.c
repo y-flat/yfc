@@ -1,9 +1,14 @@
 #include "lexer.h"
 
+#include <ctype.h>
+#include <stdio.h>
+
 /* Forward decls */
 static void yfl_core_lex(struct yf_lexer * lexer, struct yf_token * token);
 static int yfl_getc(struct yf_lexer * lexer);
 static int yfl_ungetc(struct yf_lexer * lexer, int c);
+static int yfl_skip_whitespace(struct yf_lexer * lexer);
+static int yfl_skip_comment(struct yf_lexer * lexer);
 
 void yfl_init(struct yf_lexer * lexer, struct yf_lexer_input * input) {
     
@@ -89,5 +94,85 @@ static int yfl_ungetc(struct yf_lexer * lexer, int c) {
     }
 
     return 0;
+
+}
+
+/**
+ * Skip whitespace, if any. Return whether any was skipped.
+ */
+static int yfl_skip_whitespace(struct yf_lexer * lexer) {
+
+    int c;
+    int skipped; /* The number of whitespace chars skipped */
+
+    skipped = 0;
+
+    while (1) {
+        c = yfl_getc(lexer);
+        if (!isspace(c)) {
+            yfl_ungetc(lexer, c);
+            break;
+        }
+        ++skipped;
+    }
+
+    /* Check the count. */
+    return skipped != 0;
+
+}
+
+/**
+ * Skip one comment, if any. Return whether any was skipped. Return -1 if the
+ * comment was unclosed.
+ */
+static int yfl_skip_comment(struct yf_lexer * lexer) {
+
+    int c;
+    int skipped; /* The number of comment chars skipped */
+
+    skipped = 0;
+
+    /* Comments are delimited by two tildes on either side. */
+    c = yfl_getc(lexer);
+    if (c != '~') {
+        yfl_ungetc(lexer, c);
+        return 0;
+    }
+    c = yfl_getc(lexer);
+    if (c != '~') {
+        /* We're on the second char, so unlex both. */
+        yfl_ungetc(lexer, c);
+        yfl_ungetc(lexer, '~');
+        return 0;
+    }
+
+    skipped = 2; /* ~, and then ~ */
+
+    /* Now we go through until we reach either two tildes or a file end. */
+    for (;;) {
+        c = yfl_getc(lexer);
+        if (c == '~') {
+            /* Is it the end of the comment??? */
+            c = yfl_getc(lexer);
+            if (c == '~') {
+                /* Yes, it is. */
+                skipped += 2;
+                break;
+            } else {
+                /* No, it's just a tilde alone. We were TRICKED! */
+                yfl_ungetc(lexer, c);
+                /* Don't forget to unlex the tilde. */
+                yfl_ungetc(lexer, '~');
+                skipped += 1;
+            }
+        }
+        if (c == EOF) {
+            /* We hit the end of the file. */
+            return -1;
+        }
+    }
+
+    /* Check the count. */
+    return skipped != 0;
 
 }

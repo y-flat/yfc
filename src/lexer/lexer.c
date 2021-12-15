@@ -190,7 +190,7 @@ static void yfl_core_lex(struct yf_lexer * lexer, struct yf_token * token) {
 static int yfl_getc(struct yf_lexer * lexer) {
 
     int c;
-    c = lexer->input->getc(lexer->input);
+    c = lexer->input->getc(lexer->input->input);
 
     if (c == '\n') {
         ++lexer->line;
@@ -206,7 +206,7 @@ static int yfl_getc(struct yf_lexer * lexer) {
 
 static int yfl_ungetc(struct yf_lexer * lexer, int c) {
 
-    lexer->input->ungetc(c, lexer->input);
+    lexer->input->ungetc(c, lexer->input->input);
 
     if (c != '\n') {
         --lexer->col;

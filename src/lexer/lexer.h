@@ -14,6 +14,9 @@ struct yf_lexer {
     /* Current parsing data */
     int line, col;
 
+    /* There's an explanation for this in yfl_ungetc */
+    int prev_col;
+
     struct yf_lexer_input * input;
 
     struct yf_token unlex_buf[16];

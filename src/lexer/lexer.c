@@ -77,6 +77,8 @@ static enum yfl_char_type yfl_get_type(int c) {
         return YFL_NUM;
     } else if (ispunct(c)) {
         return YFL_PUNCT;
+    } else if (isspace(c)) {
+        return YFL_WHITESPACE;
     } else if (c == EOF) {
         return YFL_EOF;
     } else {

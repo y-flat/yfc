@@ -12,8 +12,9 @@
 /* Forward decls for whole file */
 static int yf_compile_project(struct yf_args *);
 static int yf_compile_files(struct yf_args *);
-static int yf_run_frontend(struct yf_file_compilation_data *);
+static int yf_run_frontend(struct yf_file_compilation_data *, struct yf_args *);
 static int yf_find_project_files(struct yf_project_compilation_data *);
+static int dump_tokens(struct yf_lexer *);
 
 /**
  * This is it. This is the actual compile function for a set of arguments. It
@@ -39,7 +40,7 @@ static int yf_compile_project(struct yf_args * args) {
     
     /* Parse the frontend for all */
     for (i = 0; i < numf; ++i) {
-        yf_run_frontend(data.files[i]);
+        yf_run_frontend(data.files[i], args);
     }
 
     /* TODO - semantic analysis, code gen */
@@ -61,7 +62,7 @@ static int yf_compile_files(struct yf_args * args) {
 
     /* Parse the frontend for all */
     for (i = 0; i < args->num_files; ++i) {
-        yf_run_frontend(data.files[i]);
+        yf_run_frontend(data.files[i], args);
     }
 
     /* TODO - semantic analysis, code gen */
@@ -72,7 +73,9 @@ static int yf_compile_files(struct yf_args * args) {
 /**
  * Run the lexing and parsing on one file.
  */
-static int yf_run_frontend(struct yf_file_compilation_data * file) {
+static int yf_run_frontend(
+    struct yf_file_compilation_data * file, struct yf_args * args
+) {
 
     struct yf_lexer_input input;
     struct yf_lexer lexer;
@@ -92,7 +95,11 @@ static int yf_run_frontend(struct yf_file_compilation_data * file) {
 
     yfl_init(&lexer, &input);
 
-    return yf_parse(&lexer, &file->parse_tree);
+    if (args->tdump) {
+        return dump_tokens(&lexer);
+    } else {
+        return yf_parse(&lexer, &file->parse_tree);
+    }
 
 }
 
@@ -103,4 +110,26 @@ static int yf_run_frontend(struct yf_file_compilation_data * file) {
 static int yf_find_project_files(struct yf_project_compilation_data * data) {
     /* TODO */
     return 0;
+}
+
+/**
+ * Dump all file tokens.
+ */
+static int dump_tokens(struct yf_lexer * lexer) {
+
+    struct yf_token token;
+    for (;;) {
+        yfl_lex(lexer, &token);
+        if (token.type == YFT_EOF) {
+            break;
+        }
+        printf(
+            "%20s, line: %3d, col: %3d, type: %20s\n",
+            token.data, token.lineno, token.colno, yf_get_toktype(token.type)
+        );
+    }
+
+    return -1; /* Indicates that nothing should else should be done (meaning no
+    semantic analysis, etc. */
+
 }

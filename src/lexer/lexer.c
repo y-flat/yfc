@@ -5,7 +5,7 @@
 #include <string.h>
 
 /* Forward decls */
-static void yfl_core_lex(struct yf_lexer * lexer, struct yf_token * token);
+static enum yfl_code yfl_core_lex(struct yf_lexer *, struct yf_token *);
 static int yfl_getc(struct yf_lexer * lexer);
 static int yfl_ungetc(struct yf_lexer * lexer, int c);
 static int yfl_skip_whitespace(struct yf_lexer * lexer);

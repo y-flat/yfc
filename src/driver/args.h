@@ -50,6 +50,11 @@ struct yf_args {
      */
     bool project;
 
+    /**
+     * Are we just dumping tokens for each file?
+     */
+    bool tdump;
+
 };
 
 /**

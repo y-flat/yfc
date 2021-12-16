@@ -25,14 +25,15 @@ void yfl_init(struct yf_lexer * lexer, struct yf_lexer_input * input) {
 /**
  * Stuff a token with data.
  */
-void yfl_lex(struct yf_lexer * lexer, struct yf_token * token) {
+enum yfl_code yfl_lex(struct yf_lexer * lexer, struct yf_token * token) {
     
     if (lexer->unlex_ct > 0) {
         /* We have unlexed tokens, so use them */
         *token = lexer->unlex_buf[lexer->unlex_ct - 1];
         lexer->unlex_ct--;
+        return YFLC_OK;
     } else {
-        yfl_core_lex(lexer, token);
+        return yfl_core_lex(lexer, token);
     }
 
 }
@@ -133,14 +134,16 @@ static enum yf_token_type get_type(char * buf) {
  * This ACTUALLY does lexing. The yfl_lex function checks the unlexed
  * buffer and returns the top tokens, if any.
  */
-static void yfl_core_lex(struct yf_lexer * lexer, struct yf_token * token) {
+static enum yfl_code yfl_core_lex(
+    struct yf_lexer * lexer, struct yf_token * token
+) {
 
     int startchar, curchar;
     enum yfl_char_type starttype, endconditions;
     int charpos; /* The character being added. */
 
     /* Skip all irrelevant characters. */
-    yfl_skip_all(lexer);
+    if (yfl_skip_all(lexer) == -1) return YFLC_OPEN_COMMENT;
 
     /* Get the start position */
     token->lineno = lexer->line;
@@ -152,7 +155,7 @@ static void yfl_core_lex(struct yf_lexer * lexer, struct yf_token * token) {
     if (startchar == EOF) {
         token->type = YFT_EOF;
         strcpy(token->data, "[EOF]");
-        return;
+        return YFLC_OK;
     }
     
     /* Now, get the type of the first character. */
@@ -171,7 +174,7 @@ static void yfl_core_lex(struct yf_lexer * lexer, struct yf_token * token) {
             /* Too big! */
             /* TODO - indicate an error. */
             token->type = YFT_TOO_LARGE;
-            break;
+            return YFLC_OVERFLOW;
         }
 
         /* Add characters until an end condition is encountered. */
@@ -180,7 +183,7 @@ static void yfl_core_lex(struct yf_lexer * lexer, struct yf_token * token) {
             yfl_ungetc(lexer, curchar);
             token->data[charpos] = '\0';
             token->type = get_type(token->data);
-            return;
+            return YFLC_OK;
         }
 
     }
@@ -307,7 +310,8 @@ static int yfl_skip_comment(struct yf_lexer * lexer) {
 }
 
 /**
- * Skip whitespace and comments, if any. Return whether any was skipped.
+ * Skip whitespace and comments, if any. Return whether any was skipped. Return
+ * -1 if the comment was unclosed.
  */
 static int yfl_skip_all(struct yf_lexer * lexer) {
 
@@ -316,10 +320,13 @@ static int yfl_skip_all(struct yf_lexer * lexer) {
      * until we try to skip both in a row and neither works.
      */
     int skipped; /* The number of skipped chars */
+    int cskipped; /* Comments skipped. */
     for (;;) {
         skipped = 0;
         skipped += yfl_skip_whitespace(lexer);
-        skipped += yfl_skip_comment(lexer);
+        cskipped = yfl_skip_comment(lexer);
+        if (cskipped == -1) return -1;
+        skipped += cskipped;
         if (!skipped)
             return 1;
     }

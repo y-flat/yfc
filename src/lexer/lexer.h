@@ -25,6 +25,18 @@ struct yf_lexer {
 };
 
 /**
+ * All possible error codes for lexer.
+ */
+enum yfl_code {
+
+    YFLC_OK,
+    YFLC_UNKNOWN_ERROR,
+    YFLC_OPEN_COMMENT,
+    YFLC_OVERFLOW,
+
+};
+
+/**
  * Init a lexer.
  */
 void yfl_init(struct yf_lexer * lexer, struct yf_lexer_input * input);
@@ -32,7 +44,7 @@ void yfl_init(struct yf_lexer * lexer, struct yf_lexer_input * input);
 /**
  * Stuff a token with data.
  */
-void yfl_lex(struct yf_lexer * lexer, struct yf_token * token);
+enum yfl_code yfl_lex(struct yf_lexer * lexer, struct yf_token * token);
 
 /**
  * Unlex one token (only up to 16!) Return 1 if failed.

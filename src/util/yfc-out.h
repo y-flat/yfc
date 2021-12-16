@@ -5,6 +5,8 @@
 #ifndef UTIL_OUT_H
 #define UTIL_OUT_H
 
+#include <stdio.h>
+
 #define YF_CODE_RED 31
 #define YF_CODE_YELLOW 33
 #define YF_CODE_GREEN 32

@@ -8,7 +8,8 @@ const char
       "-native-compiler <compiler>: specify the native C compiler to use.\n"
       "yfc <file1> <file2> ...: compile and link the given files, up to 16.\n"
       "--project: Compile all files in src/ that need to be compiled. "
-      "Read documentation for more specifics on this flag.\n",
+      "Read documentation for more specifics on this flag.\n"
+      "--dump-tokens: Test lexer by printing out all tokens.\n",
     * HELP_HINT_MSG = "Invalid command. "
       "Use \"-h\" or \"--help\" for a list of possible commands.\n",
     * NO_ARGS_MSG = "yfc: Use \"-h\" or \"--help\" "

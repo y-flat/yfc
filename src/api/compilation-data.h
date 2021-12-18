@@ -9,7 +9,7 @@
 #ifndef API_COMPILATION_DATA_H
 #define API_COMPILATION_DATA_H
 
-#include <api/parse-tree.h>
+#include <api/concrete-tree.h>
 
 struct yf_file_compilation_data {
 

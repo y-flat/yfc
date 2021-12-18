@@ -6,7 +6,7 @@
 #ifndef PARSER_PARSER_H
 #define PARSER_PARSER_H
 
-#include <api/parse-tree.h>
+#include <api/concrete-tree.h>
 #include <lexer/lexer.h>
 
 /**

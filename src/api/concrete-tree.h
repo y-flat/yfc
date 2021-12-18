@@ -2,8 +2,8 @@
  * All parse tree data structure definitions.
  */
 
-#ifndef API_AST_H
-#define API_AST_H
+#ifndef API_CST_H
+#define API_CST_H
 
 /**
  * This is the output of the lexer and parser. No semantic definitions, only
@@ -13,4 +13,4 @@ struct yf_parse_tree {
     /* TODO */
 };
 
-#endif /* API_AST_H */
+#endif /* API_CST_H */

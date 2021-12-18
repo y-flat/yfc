@@ -5,11 +5,7 @@
 #ifndef API_CST_H
 #define API_CST_H
 
-/**
- * This is the output of the lexer and parser. No semantic definitions, only
- * syntax checks.
- */
-struct yf_parse_tree {
+struct yf_parse_node {
     /* TODO */
 };
 

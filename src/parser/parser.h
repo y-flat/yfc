@@ -13,6 +13,6 @@
  * Parse data from lexer into tree.
  * Returns: error code, or 0 if successful.
  */
-int yf_parse(struct yf_lexer * lexer, struct yf_parse_tree * tree);
+int yf_parse(struct yf_lexer * lexer, struct yf_parse_node * tree);
 
 #endif /* PARSER_PARSER_H */

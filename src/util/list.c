@@ -1,6 +1,7 @@
 #include "list.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 #include <util/allocator.h>
 
@@ -48,7 +49,7 @@ void yf_list_reset(struct yf_list * list) {
 
 }
 
-void yf_list_add(struct yf_list * list, void * element) {
+int yf_list_add(struct yf_list * list, void * element) {
 
     struct yf_list_block * block = list->current;
 
@@ -76,6 +77,8 @@ void yf_list_add(struct yf_list * list, void * element) {
 
     block->data[list->current_index] = element;
     ++block->numfull;
+
+    return 0;
 
 }
 

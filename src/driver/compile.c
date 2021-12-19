@@ -17,7 +17,9 @@ static int yf_find_project_files(struct yf_project_compilation_data *);
 static int dump_tokens(struct yf_lexer *);
 static int yf_build_symtab(struct yf_file_compilation_data *);
 static int yf_validate_ast(struct yf_file_compilation_data *, struct yf_args *);
-static int yf_run_backend(struct yf_file_compilation_data *, struct yf_args *);
+static int yf_run_backend(
+    struct yf_project_compilation_data *, struct yf_args *
+);
 
 /**
  * This is it. This is the actual compile function for a set of arguments. It
@@ -53,9 +55,7 @@ static int yf_run_compiler_on_data(
     }
 
     /* Finally, generate code. */
-    for (i = 0; i < data->num_files; ++i) {
-        yf_run_backend(data->files[i], args);
-    }
+    yf_run_backend(data, args);
 
     return 0;
 
@@ -182,7 +182,7 @@ static int yf_validate_ast(
  * Generate C code, run the C compiler, and link the resulting binary.
  */
 static int yf_run_backend(
-    struct yf_file_compilation_data * data,
+    struct yf_project_compilation_data * data,
     struct yf_args * args
 ) {
 

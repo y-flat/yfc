@@ -170,7 +170,7 @@ static int yf_build_symtab(struct yf_file_compilation_data * data) {
  */
 static int yf_validate_ast(
     struct yf_file_compilation_data * data,
-    struct yf_args * project
+    struct yf_args * args
 ) {
 
     /* TODO */

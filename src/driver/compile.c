@@ -15,6 +15,9 @@ static int yf_compile_files(struct yf_args *);
 static int yf_run_frontend(struct yf_file_compilation_data *, struct yf_args *);
 static int yf_find_project_files(struct yf_project_compilation_data *);
 static int dump_tokens(struct yf_lexer *);
+static int yf_build_symtab(struct yf_file_compilation_data *);
+static int yf_validate_ast(struct yf_file_compilation_data *, struct yf_args *);
+static int yf_run_backend(struct yf_file_compilation_data *, struct yf_args *);
 
 /**
  * This is it. This is the actual compile function for a set of arguments. It
@@ -31,26 +34,48 @@ int yf_run_compiler(struct yf_args * args) {
 
 }
 
+static int yf_run_compiler_on_data(
+    struct yf_project_compilation_data * data,
+    struct yf_args * args
+) {
+
+    int i;
+
+    /* Parse the frontend for all and create symtabs */
+    for (i = 0; i < data->num_files; ++i) {
+        yf_run_frontend(data->files[i], args);
+        yf_build_symtab(data->files[i]);
+    }
+
+    /* Now validate everything. */
+    for (i = 0; i < data->num_files; ++i) {
+        yf_validate_ast(data->files[i], args);
+    }
+
+    /* Finally, generate code. */
+    for (i = 0; i < data->num_files; ++i) {
+        yf_run_backend(data->files[i], args);
+    }
+
+    return 0;
+
+}
+
 static int yf_compile_project(struct yf_args * args) {
 
     struct yf_project_compilation_data data;
-    int numf, i;
+    int numf;
 
     numf = yf_find_project_files(&data);
+    data.num_files = numf;
     
-    /* Parse the frontend for all */
-    for (i = 0; i < numf; ++i) {
-        yf_run_frontend(data.files[i], args);
-    }
-
-    /* TODO - semantic analysis, code gen */
-    return 0;
+    return yf_run_compiler_on_data(&data, args);
 
 }
 
 static int yf_compile_files(struct yf_args * args) {
     
-    struct yf_individual_compilation_data data;
+    struct yf_project_compilation_data data;
     int i;
 
     for (i = 0; i < args->num_files; ++i) {
@@ -58,15 +83,10 @@ static int yf_compile_files(struct yf_args * args) {
         data.files[i]->file_name = args->files[i];
         /* TODO - more data */
     }
+
     data.num_files = args->num_files;
 
-    /* Parse the frontend for all */
-    for (i = 0; i < args->num_files; ++i) {
-        yf_run_frontend(data.files[i], args);
-    }
-
-    /* TODO - semantic analysis, code gen */
-    return 0;
+    return yf_run_compiler_on_data(&data, args);
 
 }
 
@@ -131,5 +151,42 @@ static int dump_tokens(struct yf_lexer * lexer) {
 
     return -1; /* Indicates that nothing should else should be done (meaning no
     semantic analysis, etc. */
+
+}
+
+/**
+ * Build a table of all externally visible symbols.
+ */
+static int yf_build_symtab(struct yf_file_compilation_data * data) {
+
+    /* TODO */
+    return 0;
+
+}
+
+/**
+ * Create an AST from the concrete syntax tree, and validate it against the
+ * combined symbol tables loaded so far.
+ */
+static int yf_validate_ast(
+    struct yf_file_compilation_data * data,
+    struct yf_args * project
+) {
+
+    /* TODO */
+    return 0;
+
+}
+
+/**
+ * Generate C code, run the C compiler, and link the resulting binary.
+ */
+static int yf_run_backend(
+    struct yf_file_compilation_data * data,
+    struct yf_args * args
+) {
+
+    /* TODO */
+    return 0;
 
 }

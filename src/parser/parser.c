@@ -68,6 +68,15 @@ static int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer) {
          * So we just parse an identifier and see whether the next token is a
          * colon or a left paren.
          */
+
+        /* Do end-of-file peek back here. */
+        lex_err = yfl_lex(lexer, &tok);
+        if (tok.type == YFT_EOF) {
+            free(decl);
+            return 0;
+        } else {
+            yfl_unlex(lexer, &tok);
+        }
         
         yfp_ident(&ident, lexer);
 
@@ -94,10 +103,6 @@ static int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer) {
                 );
                 yfp_funcdecl(decl, lexer);
                 break;
-            case YFT_EOF:
-                /* We're done! */
-                free(decl);
-                return 0;
             default:
                 YF_TOKERR(tok, "colon or left paren");
                 break;

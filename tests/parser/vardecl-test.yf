@@ -1,0 +1,4 @@
+~~ Vardecl ~~
+x: int = 4;
+
+y: float;

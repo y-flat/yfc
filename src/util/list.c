@@ -10,12 +10,13 @@ int yf_list_init(struct yf_list * list) {
     list->first->numfull = 0;
     list->first->next = NULL;
     list->current = list->first;
+    list->current_index = 0;
     return 0;
 }
 
 int yf_list_get(struct yf_list * list, void ** elem) {
 
-    if (list->current_index > list->current->numfull) {
+    if (list->current_index >= list->current->numfull) {
         return -1;
     }
 

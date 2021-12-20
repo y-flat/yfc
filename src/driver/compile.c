@@ -4,6 +4,7 @@
 #include <stdlib.h> /* malloc */
 
 #include <api/compilation-data.h>
+#include <api/cst-dump.h>
 #include <api/lexer-input.h>
 #include <driver/compile.h>
 #include <parser/parser.h>
@@ -20,6 +21,7 @@ static int yf_validate_ast(struct yf_file_compilation_data *, struct yf_args *);
 static int yf_run_backend(
     struct yf_project_compilation_data *, struct yf_args *
 );
+static int yf_do_cst_dump(struct yf_parse_node * tree);
 
 /**
  * This is it. This is the actual compile function for a set of arguments. It
@@ -101,6 +103,8 @@ static int yf_run_frontend(
     struct yf_lexer lexer;
     FILE * file_src;
 
+    int retval;
+
     file_src = fopen(file->file_name, "r");
     if (!file_src) {
         YF_PRINT_ERROR("Could not open file %s", file->file_name);
@@ -118,7 +122,11 @@ static int yf_run_frontend(
     if (args->tdump) {
         return dump_tokens(&lexer);
     } else {
-        return yf_parse(&lexer, &file->parse_tree);
+        retval = yf_parse(&lexer, &file->parse_tree);
+        if (args->cstdump) {
+            retval = yf_do_cst_dump(&file->parse_tree);
+        }
+        return retval;
     }
 
 }
@@ -152,6 +160,14 @@ static int dump_tokens(struct yf_lexer * lexer) {
     return -1; /* Indicates that nothing should else should be done (meaning no
     semantic analysis, etc. */
 
+}
+
+/**
+ * Dump the CST.
+ */
+static int yf_do_cst_dump(struct yf_parse_node * tree) {
+    yf_dump_cst(tree, stderr);
+    return 0;
 }
 
 /**

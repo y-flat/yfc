@@ -33,7 +33,7 @@ struct yfcs_value {
     union {
         struct yfcs_identifier identifier;
         struct yfcs_literal literal;
-    };
+    } as;
 
 };
 
@@ -41,6 +41,7 @@ struct yfcs_value {
  * types like "class<type> follows constraint". */
 struct yfcs_type {
     char databuf[256];
+    int datalen;
 };
 
 /**
@@ -54,7 +55,7 @@ struct yfcs_vardecl {
     struct yfcs_identifier name;
     struct yfcs_type type;
     /* Can be NULL, and is always of type expr, is the right-hand side */
-    struct yfcs_expr expr;
+    struct yf_parse_node * expr;
 };
 
 struct yfcs_funcdecl {

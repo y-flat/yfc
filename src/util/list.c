@@ -33,7 +33,7 @@ int yf_list_next(struct yf_list * list) {
         }
     } else {
         ++list->current_index;
-        if (list->current_index > list->current->numfull) {
+        if (!list->current || (list->current_index > list->current->numfull)) {
             return -1;
         }
     }
@@ -61,7 +61,7 @@ int yf_list_add(struct yf_list * list, void * element) {
         block = block->next;
     }
 
-    if (!block || (block->numfull = YF_LIST_BLOCK_SIZE)) {
+    if (!block || (block->numfull == YF_LIST_BLOCK_SIZE)) {
         if (!block) {
             block = yf_malloc(sizeof (struct yf_list_block));
         } else {

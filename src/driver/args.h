@@ -55,6 +55,11 @@ struct yf_args {
      */
     bool tdump;
 
+    /**
+     * How about ... just dumping the CST?
+     */
+    bool cstdump;
+
 };
 
 /**

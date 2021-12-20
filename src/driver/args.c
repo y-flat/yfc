@@ -122,7 +122,20 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
         }
 
         if (STREQ(arg, "--dump-tokens")) {
+            if (args->cstdump) {
+                yf_set_error(args);
+                return;
+            }
             args->tdump = 1;
+            continue;
+        }
+
+        if (STREQ(arg, "--dump-cst")) {
+            if (args->tdump) {
+                yf_set_error(args);
+                return;
+            }
+            args->cstdump = 1;
             continue;
         }
 

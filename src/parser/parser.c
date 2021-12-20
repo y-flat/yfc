@@ -121,6 +121,8 @@ static int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer) {
 static int yfp_vardecl(struct yf_parse_node * node, struct yf_lexer * lexer) {
 
     struct yf_token tok;
+
+    node->type = YFCS_VARDECL;
     
     /* We've parsed all of this: [name] colon */
     /* So now, we expect a type. */
@@ -161,6 +163,8 @@ static int yfp_stmt(struct yf_parse_node * node, struct yf_lexer * lexer) {
 static int yfp_expr(struct yf_parse_node * node, struct yf_lexer * lexer) {
     
     struct yf_token tok;
+
+    node->type = YFCS_EXPR;
     
     yfl_lex(lexer, &tok);
     /* TODO - handle recursive exprs */

@@ -47,8 +47,8 @@ int yfl_unlex(struct yf_lexer * lexer, struct yf_token * token) {
         return 1;
     }
 
-    lexer->unlex_ct++;
     lexer->unlex_buf[lexer->unlex_ct] = *token;
+    lexer->unlex_ct++;
     return 0;
 
 }

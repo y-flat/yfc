@@ -47,8 +47,9 @@ static void yf_dump_program(struct yfcs_program * node, FILE *out) {
 
     yf_print_line(out, "program");
     indent();
-    while (yf_list_next(&node->decls) != -1) {
+    for (;;) {
         yf_list_get(&node->decls, (void **) &child);
+        if (!child) break;
         yf_dump_cst(child, out);
     }
     dedent();

@@ -64,19 +64,25 @@ struct yfcs_funcdecl {
     struct yf_list params;
 };
 
+struct yfcs_program {
+    struct yf_list decls;
+};
+
 struct yf_parse_node {
     
     enum {
         YFCS_EXPR,
         YFCS_VARDECL,
         YFCS_FUNCDECL,
-    } as;
+        YFCS_PROGRAM,
+    } type;
 
     union {
         struct yfcs_expr expr;
         struct yfcs_vardecl vardecl;
         struct yfcs_funcdecl funcdecl;
-    };
+        struct yfcs_program program;
+    } as;
 
 };
 

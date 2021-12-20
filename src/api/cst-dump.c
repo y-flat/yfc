@@ -74,6 +74,13 @@ static void yf_dump_vardecl(struct yfcs_vardecl * node, FILE * out) {
     yf_print_line(out, "name: %s", node->name.name.databuf);
     yf_print_line(out, "type: %s", node->type.databuf);
 
+    yf_print_line(out, "initialization value:");
+    if (node->expr) {
+        yf_dump_cst(node->expr, out);
+    } else {
+        yf_print_line(out, "<none>");
+    }
+
     dedent();
     yf_print_line(out, "end vardecl");
 
@@ -86,7 +93,16 @@ static void yf_dump_funcdecl(struct yfcs_funcdecl * node, FILE * out) {
 }
 
 static void yf_dump_expr(struct yfcs_expr * node, FILE * out) {
-    /* TODO */
+
     yf_print_line(out, "expr");
+    indent();
+
+    yf_print_line(out, "value: %s",
+        node->value.type == YFCS_IDENT ? node->value.as.identifier.name.databuf
+        : node->value.as.literal.value.databuf
+    );
+
+    dedent();
     yf_print_line(out, "end expr");
+
 }

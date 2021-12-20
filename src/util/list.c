@@ -6,14 +6,16 @@
 #include <util/allocator.h>
 
 int yf_list_init(struct yf_list * list) {
-    list->current = NULL;
-    list->current_index = YF_LIST_BLOCK_SIZE;
+    list->first = malloc(sizeof(struct yf_list_block));
+    list->first->numfull = 0;
+    list->first->next = NULL;
+    list->current = list->first;
     return 0;
 }
 
 int yf_list_get(struct yf_list * list, void ** elem) {
 
-    if (!list->current || (list->current_index > list->current->numfull)) {
+    if (list->current_index > list->current->numfull) {
         return -1;
     }
 
@@ -33,7 +35,7 @@ int yf_list_next(struct yf_list * list) {
         }
     } else {
         ++list->current_index;
-        if (!list->current || (list->current_index > list->current->numfull)) {
+        if (list->current_index > list->current->numfull) {
             return -1;
         }
     }
@@ -51,32 +53,23 @@ void yf_list_reset(struct yf_list * list) {
 
 int yf_list_add(struct yf_list * list, void * element) {
 
-    struct yf_list_block * block = list->current;
+    struct yf_list_block * block = list->first;
 
-    /* Get to the end of the list. */
-    for (;;) {
-        if (block == NULL || block->next == NULL) {
-            break;
-        }
+    /* Get to the end */
+    while (block->next != NULL) {
         block = block->next;
     }
 
-    if (!block || (block->numfull == YF_LIST_BLOCK_SIZE)) {
-        if (!block) {
-            block = yf_malloc(sizeof (struct yf_list_block));
-        } else {
-            block->next = yf_malloc(sizeof (struct yf_list_block));
-            block = block->next;
-        }
-        if (!block) {
-            return -1;
-        }
-        memset(block, 0, sizeof (struct yf_list_block));
-        list->current_index = 0;
+    if (block->numfull == YF_LIST_BLOCK_SIZE) {
+        block->next = malloc(sizeof(struct yf_list_block));
+        block->next->next = NULL;
+        block = block->next;
+        block->numfull = 0;
     }
 
-    block->data[list->current_index] = element;
-    ++block->numfull;
+    /* Add the element */
+    block->data[block->numfull] = element;
+    block->numfull++;
 
     return 0;
 

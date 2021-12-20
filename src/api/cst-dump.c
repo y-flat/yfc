@@ -1,5 +1,6 @@
 #include "cst-dump.h"
 
+#include <stdarg.h>
 #include <stdio.h>
 
 /* Forwards */
@@ -8,7 +9,7 @@ static void yf_dump_vardecl(struct yfcs_vardecl * node, FILE * out);
 static void yf_dump_funcdecl(struct yfcs_funcdecl * node, FILE * out);
 static void yf_dump_expr(struct yfcs_expr * node, FILE * out);
 
-/* TODO - non-static this, maybe by puting in a struct or something. */
+/* TODO - non-static this, maybe by putting in a struct or something. */
 static int yf_dump_indent = 0;
 
 static void indent() { ++yf_dump_indent; }
@@ -33,12 +34,16 @@ void yf_dump_cst(struct yf_parse_node * root, FILE *out) {
 
 }
 
-static void yf_print_line(FILE * out, char * data) {
+static void yf_print_line(FILE * out, char * data, ...) {
     int i;
+    va_list args;
+    va_start(args, data);
     for (i = 0; i < yf_dump_indent; i++) {
         fprintf(out, "\t");
     }
-    fprintf(out, "%s\n", data);
+    vfprintf(out, data, args);
+    fprintf(out, "\n");
+    va_end(args);
 }
 
 static void yf_dump_program(struct yfcs_program * node, FILE *out) {
@@ -62,9 +67,16 @@ static void yf_dump_program(struct yfcs_program * node, FILE *out) {
 }
 
 static void yf_dump_vardecl(struct yfcs_vardecl * node, FILE * out) {
-    /* TODO */
+
     yf_print_line(out, "vardecl");
+    indent();
+
+    yf_print_line(out, "name: %s", node->name.name.databuf);
+    yf_print_line(out, "type: %s", node->type.databuf);
+
+    dedent();
     yf_print_line(out, "end vardecl");
+
 }
 
 static void yf_dump_funcdecl(struct yfcs_funcdecl * node, FILE * out) {

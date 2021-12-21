@@ -9,6 +9,7 @@
 #ifndef API_COMPILATION_DATA_H
 #define API_COMPILATION_DATA_H
 
+#include <api/abstract-tree.h>
 #include <api/concrete-tree.h>
 
 struct yf_file_compilation_data {
@@ -18,7 +19,7 @@ struct yf_file_compilation_data {
 
     struct yf_parse_node parse_tree;
 
-    /* TODO - more actual data */
+    struct yf_ast_node ast_tree;
 
 };
 

@@ -5,6 +5,7 @@
 
 #include <api/tokens.h>
 #include <lexer/lexer.h>
+#include <parser/parser-internals.h>
 #include <util/allocator.h>
 #include <util/yfc-out.h>
 
@@ -24,17 +25,6 @@
     ); \
     return 4; /* TODO */ \
 } while (0)
-
-/**
- * Forward decls
- */
-static int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer);
-static int yfp_vardecl(struct yf_parse_node * node, struct yf_lexer * lexer);
-static int yfp_funcdecl(struct yf_parse_node * node, struct yf_lexer * lexer);
-static int yfp_stmt(struct yf_parse_node * node, struct yf_lexer * lexer);
-static int yfp_expr(struct yf_parse_node * node, struct yf_lexer * lexer);
-static int yfp_ident(struct yfcs_identifier * node, struct yf_lexer * lexer);
-static int yfp_type(struct yfcs_type * node, struct yf_lexer * lexer);
 
 int yf_parse(struct yf_lexer * lexer, struct yf_parse_node * tree) {
     

@@ -51,4 +51,16 @@ enum yfo_assoc {
 
 enum yfo_assoc yf_get_operator_assoc(enum yf_operator op);
 
+/**
+ * GREATER - op1 binds MORE tightly than op2
+ * LESS - op1 binds LESS tightly than op2
+ */
+enum yfo_precedence {
+    GREATER,
+    LESS,
+    EQUAL,
+};
+
+enum yfo_precedence yfo_prec(enum yf_operator op1, enum yf_operator op2);
+
 #endif /* API_OPERATOR_H */

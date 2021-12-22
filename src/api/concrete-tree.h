@@ -5,6 +5,7 @@
 #ifndef API_CST_H
 #define API_CST_H
 
+#include <api/operator.h>
 #include <util/list.h>
 
 struct yf_parse_node;
@@ -45,10 +46,24 @@ struct yfcs_type {
 };
 
 /**
- * TODO - future binary expr parsing
+ * TODO - funccalls, etc.
  */
 struct yfcs_expr {
-    struct yfcs_value value;
+
+    union {
+        struct yfcs_value value;
+        struct {
+            struct yfcs_expr *left;
+            struct yfcs_expr *right;
+            enum yf_operator op;
+        } binary;
+    } as;
+
+    enum {
+        YFCS_VALUE,
+        YFCS_BINARY,
+    } type;
+    
 };
 
 struct yfcs_vardecl {

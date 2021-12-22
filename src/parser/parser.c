@@ -3,38 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <api/tokens.h>
-#include <lexer/lexer.h>
-#include <util/allocator.h>
-#include <util/yfc-out.h>
-
-/**
- * Print error if token type unexpected.
- * Example: YF_TOKERR(tok, "comma or colon")
- */
-#define YF_TOKERR(tok, expected) do { \
-    YF_PRINT_ERROR( \
-        "Unexpected token %s, line %d column %d:" \
-        "expected %s, found token of type \"%s\"", \
-        tok.data, \
-        tok.lineno, \
-        tok.colno, \
-        expected, \
-        yf_get_toktype(tok.type) \
-    ); \
-    return 4; /* TODO */ \
-} while (0)
-
-/**
- * Forward decls
- */
-static int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer);
-static int yfp_vardecl(struct yf_parse_node * node, struct yf_lexer * lexer);
-static int yfp_funcdecl(struct yf_parse_node * node, struct yf_lexer * lexer);
-static int yfp_stmt(struct yf_parse_node * node, struct yf_lexer * lexer);
-static int yfp_expr(struct yf_parse_node * node, struct yf_lexer * lexer);
-static int yfp_ident(struct yfcs_identifier * node, struct yf_lexer * lexer);
-static int yfp_type(struct yfcs_type * node, struct yf_lexer * lexer);
+#include <parser/parser-internals.h>
 
 int yf_parse(struct yf_lexer * lexer, struct yf_parse_node * tree) {
     
@@ -46,7 +15,7 @@ int yf_parse(struct yf_lexer * lexer, struct yf_parse_node * tree) {
  * Parse program - check whether we're parsing a vardecl or a funcdecl, then
  * parse one of those, forever.
  */
-static int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer) {
+int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer) {
 
     struct yf_token tok;
     struct yfcs_identifier ident;
@@ -121,7 +90,7 @@ static int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer) {
 /**
  * ASSUMES THE VARIABLE NAME AND COLON HAVE ALREADY BEEN PARSED.
  */
-static int yfp_vardecl(struct yf_parse_node * node, struct yf_lexer * lexer) {
+int yfp_vardecl(struct yf_parse_node * node, struct yf_lexer * lexer) {
 
     struct yf_token tok;
 
@@ -155,43 +124,15 @@ static int yfp_vardecl(struct yf_parse_node * node, struct yf_lexer * lexer) {
 /**
  * ASSUMES THE FUNCTION NAME AND LEFT PAREN HAVE ALREADY BEEN PARSED.
  */
-static int yfp_funcdecl(struct yf_parse_node * node, struct yf_lexer * lexer) {
+int yfp_funcdecl(struct yf_parse_node * node, struct yf_lexer * lexer) {
     return 0; /* TODO */
 }
 
-static int yfp_stmt(struct yf_parse_node * node, struct yf_lexer * lexer) {
+int yfp_stmt(struct yf_parse_node * node, struct yf_lexer * lexer) {
     return 0; /* TODO */
 }
 
-static int yfp_expr(struct yf_parse_node * node, struct yf_lexer * lexer) {
-    
-    struct yf_token tok;
-
-    node->type = YFCS_EXPR;
-    
-    yfl_lex(lexer, &tok);
-    /* TODO - handle recursive exprs */
-    switch (tok.type) {
-    case YFT_IDENTIFIER:
-        yfl_unlex(lexer, &tok);
-        yfp_ident(&node->as.expr.value.as.identifier, lexer);
-        break;
-    case YFT_LITERAL:
-        strcpy(
-            node->as.expr.value.as.literal.value.databuf, tok.data
-        );
-        node->as.expr.value.type = YFCS_LITERAL;
-        break;
-    default:
-        YF_TOKERR(tok, "identifier or literal");
-        break;
-    }
-
-    return 0;
-
-}
-
-static int yfp_ident(struct yfcs_identifier * node, struct yf_lexer * lexer) {
+int yfp_ident(struct yfcs_identifier * node, struct yf_lexer * lexer) {
     /* TODO - parse compound names like "foo.bar.baz" */
     struct yf_token tok;
     yfl_lex(lexer, &tok);
@@ -204,7 +145,7 @@ static int yfp_ident(struct yfcs_identifier * node, struct yf_lexer * lexer) {
     return 0;
 }
 
-static int yfp_type(struct yfcs_type * node, struct yf_lexer * lexer) {
+int yfp_type(struct yfcs_type * node, struct yf_lexer * lexer) {
     /* TODO - parse compound types */
     struct yf_token tok;
     yfl_lex(lexer, &tok);

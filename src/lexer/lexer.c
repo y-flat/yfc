@@ -127,7 +127,7 @@ static enum yf_token_type get_type(char * buf) {
     if (buf[0] == ')') return YFT_CPAREN;
     if (buf[0] == '{') return YFT_OBRACE;
     if (buf[0] == '}') return YFT_CBRACE;
-    if (buf[0] == '=') return YFT_OP; /* More */
+    if (ispunct(buf[0])) return YFT_OP; /* More */
     return YFT_INVALID;
 
 }
@@ -182,6 +182,12 @@ static enum yfl_code yfl_core_lex(
         /* Add characters until an end condition is encountered. */
         curchar = yfl_getc(lexer);
         if (yfl_get_type(curchar) & endconditions) {
+            /* This is kind of an ugly hack but oh well - if the first character
+            is an operator, and this is the next character and is an equals,
+            then lex it as one operator, like +=. */
+            if (starttype == YFL_PUNCT && curchar == '=' && charpos == 1) {
+                continue;
+            }
             yfl_ungetc(lexer, curchar);
             token->data[charpos] = '\0';
             token->type = get_type(token->data);

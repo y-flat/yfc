@@ -1,4 +1,4 @@
-# yfc
+# yfc ![cmake](https://img.shields.io/github/workflow/status/adamhutchings/yfc/cmake?style=for-the-badge)
 
 ## Overview
 Compiler for the Y-flat programming language. This is part of the wider Y-flat

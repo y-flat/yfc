@@ -1,0 +1,13 @@
+package:
+  name: 'yfc'
+  description: 'Compiler for the Y-flat programming language. This is part of the wider Y-flat programming language project, which includes the installer and other components in the future.'
+  version: 0.1.0
+  url: 'https://github.com/adamhutchings/yfc'
+
+  authors:
+    - 'Adam Hutchings'
+
+  license: 'GPL3'
+
+depends:
+  # Add the yflib here when it is made

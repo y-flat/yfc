@@ -40,8 +40,8 @@ enum yf_operator yf_get_operator(const char * str);
 
 /**
  * Which direction the operator is associative.
- * Left: a @ b @ c -> a @ (b @ c)
- * Right: a @ b @ c -> (a @ b) @ c
+ * Left:  a @ b @ c -> (a @ b) @ c
+ * Right: a @ b @ c -> a @ (b @ c)
  */
 enum yfo_assoc {
     YFOA_INVAL,

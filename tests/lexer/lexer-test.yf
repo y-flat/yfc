@@ -6,3 +6,5 @@ x: int = 4;
 x += 3;
 ~~ This should lex as x, +, -=, 3 ~~
 x +-= 3;
+~~ This should lex as x, +=, =, 3 ~~
+x +== 3;

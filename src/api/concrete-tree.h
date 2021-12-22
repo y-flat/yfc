@@ -5,6 +5,7 @@
 #ifndef API_CST_H
 #define API_CST_H
 
+#include <api/operator.h>
 #include <util/list.h>
 
 struct yf_parse_node;
@@ -54,7 +55,7 @@ struct yfcs_expr {
         struct {
             struct yfcs_expr *left;
             struct yfcs_expr *right;
-            char op[5]; /* Abstract operators will exist in the AST */
+            enum yf_operator op;
         } binary;
     } as;
 

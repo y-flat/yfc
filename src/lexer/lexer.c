@@ -6,6 +6,21 @@
 
 #include <util/yfc-out.h>
 
+
+/**
+ * Get error message from parsing
+ */
+char * get_error_message(int error_code) {
+    static char* yfl_code_message[4] = {
+        "Okay",
+        "Unknown Error",
+        "Open comment",
+        "Overflow",
+    };
+
+	return yfl_code_message[error_code];
+}
+
 /* Forward decls */
 static enum yfl_code yfl_core_lex(struct yf_lexer *, struct yf_token *);
 static int yfl_getc(struct yf_lexer * lexer);
@@ -196,16 +211,6 @@ static enum yfl_code yfl_core_lex(
 
     }
 
-}
-
-/**
- * Check if error code is needed to print.
- * If so, print error message from code.
- */
-void yfl_lexer_error(int lex_err) {
-    if (lex_err > 0) {
-        YF_PRINT_ERROR("%s", YFL_CODE_MESSAGE[lex_err]);
-    }
 }
 
 /**

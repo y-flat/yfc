@@ -39,8 +39,7 @@ int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer) {
          */
 
         /* Do end-of-file peek back here. */
-        lex_err = yfl_lex(lexer, &tok);
-        yfl_lexer_error(lex_err);
+        P_LEX(lexer, &tok);
         if (tok.type == YFT_EOF) {
             free(decl);
             return 0;
@@ -50,8 +49,7 @@ int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer) {
         
         yfp_ident(&ident, lexer);
 
-        lex_err = yfl_lex(lexer, &tok);
-        yfl_lexer_error(lex_err);
+        P_LEX(lexer, &tok);
         switch (tok.type) {
             case YFT_COLON:
                 decl->as.vardecl.name.name.datalen = ident.name.datalen;
@@ -61,8 +59,7 @@ int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer) {
                 );
                 yfp_vardecl(decl, lexer);
                 /* It's a top-level decl, so expect a semicolon. */
-                lex_err = yfl_lex(lexer, &tok);
-                yfl_lexer_error(lex_err);
+                P_LEX(lexer, &tok);
                 if (tok.type != YFT_SEMICOLON) {
                     YF_TOKERR(tok, "semicolon");
                 }

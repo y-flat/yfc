@@ -36,12 +36,10 @@ enum yfl_code {
 
 };
 
-static char* YFL_CODE_MESSAGE[4] = {
-    "Okay",
-    "Unknown Error",
-    "Open comment",
-    "Overflow",
-};
+/**
+ * Get error message from parsing
+ */
+char * get_error_message(int error_code);
 
 /**
  * Check if error code is needed to print.

@@ -26,6 +26,13 @@
     return 4; /* TODO */ \
 } while (0)
 
+#define P_LEX(lexer, tok) do { \
+  if ((lex_err = yfl_lex(lexer, tok)) > 0) { \
+    YF_PRINT_ERROR("%s", get_error_message(lex_err)); \
+  return 4; \
+  } \
+} while (0)
+
 int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer);
 int yfp_vardecl(struct yf_parse_node * node, struct yf_lexer * lexer);
 int yfp_funcdecl(struct yf_parse_node * node, struct yf_lexer * lexer);

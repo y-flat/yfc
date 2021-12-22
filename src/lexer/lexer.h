@@ -37,6 +37,17 @@ enum yfl_code {
 };
 
 /**
+ * Get error message from parsing
+ */
+char * get_error_message(int error_code);
+
+/**
+ * Check if error code is needed to print.
+ * If so, print error message from code.
+ */
+void yfl_lexer_error(int lex_err);
+
+/**
  * Init a lexer.
  */
 void yfl_init(struct yf_lexer * lexer, struct yf_lexer_input * input);

@@ -4,6 +4,23 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <util/yfc-out.h>
+
+
+/**
+ * Get error message from parsing
+ */
+char * get_error_message(int error_code) {
+    static char* yfl_code_message[4] = {
+        "Okay",
+        "Unknown Error",
+        "Open comment",
+        "Overflow",
+    };
+
+	return yfl_code_message[error_code];
+}
+
 /* Forward decls */
 static enum yfl_code yfl_core_lex(struct yf_lexer *, struct yf_token *);
 static int yfl_getc(struct yf_lexer * lexer);

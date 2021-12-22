@@ -45,10 +45,24 @@ struct yfcs_type {
 };
 
 /**
- * TODO - future binary expr parsing
+ * TODO - funccalls, etc.
  */
 struct yfcs_expr {
-    struct yfcs_value value;
+
+    union {
+        struct yfcs_value value;
+        struct {
+            struct yfcs_expr *left;
+            struct yfcs_expr *right;
+            char op[5]; /* Abstract operators will exist in the AST */
+        } binary;
+    } as;
+
+    enum {
+        YFCS_VALUE,
+        YFCS_BINARY,
+    } type;
+    
 };
 
 struct yfcs_vardecl {

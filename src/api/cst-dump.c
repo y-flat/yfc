@@ -97,10 +97,14 @@ static void yf_dump_expr(struct yfcs_expr * node, FILE * out) {
     yf_print_line(out, "expr");
     indent();
 
-    yf_print_line(out, "value: %s",
-        node->value.type == YFCS_IDENT ? node->value.as.identifier.name.databuf
-        : node->value.as.literal.value.databuf
-    );
+    if (node->type == YFCS_VALUE) {
+        yf_print_line(out, "value: %s",
+            node->as.value.type == YFCS_IDENT ? node->as.value.as.identifier.name.databuf
+            : node->as.value.as.literal.value.databuf
+        );
+    } else {
+        /* TODO */
+    }
 
     dedent();
     yf_print_line(out, "end expr");

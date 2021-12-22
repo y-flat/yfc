@@ -27,13 +27,13 @@ int yfp_atomic_expr(struct yf_parse_node * node, struct yf_lexer * lexer) {
     switch (tok.type) {
     case YFT_IDENTIFIER:
         yfl_unlex(lexer, &tok);
-        yfp_ident(&node->as.expr.value.as.identifier, lexer);
+        yfp_ident(&node->as.expr.as.value.as.identifier, lexer);
         break;
     case YFT_LITERAL:
         strcpy(
-            node->as.expr.value.as.literal.value.databuf, tok.data
+            node->as.expr.as.value.as.literal.value.databuf, tok.data
         );
-        node->as.expr.value.type = YFCS_LITERAL;
+        node->as.expr.as.value.type = YFCS_LITERAL;
         break;
     default:
         YF_TOKERR(tok, "identifier or literal");

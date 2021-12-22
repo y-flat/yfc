@@ -36,6 +36,19 @@ enum yfl_code {
 
 };
 
+static char* YFL_CODE_MESSAGE[4] = {
+    "Okay",
+    "Unknown Error",
+    "Open comment",
+    "Overflow",
+};
+
+/**
+ * Check if error code is needed to print.
+ * If so, print error message from code.
+ */
+void yfl_lexer_error(int lex_err);
+
 /**
  * Init a lexer.
  */

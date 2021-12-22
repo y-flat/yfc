@@ -46,3 +46,37 @@ enum yf_operator yf_get_operator(const char * str) {
     return YFO_INVALID;
 
 }
+
+enum yfo_assoc yf_get_operator_assoc(enum yf_operator op) {
+    
+        switch (op) {
+            case YFO_ADD:
+            case YFO_SUB:
+            case YFO_MUL:
+            case YFO_DIV:
+            case YFO_MOD:
+            case YFO_EQ:
+            case YFO_NEQ:
+            case YFO_LT:
+            case YFO_LTE:
+            case YFO_GT:
+            case YFO_GTE:
+            case YFO_AND:
+            case YFO_OR:
+            case YFO_XOR:
+                return YFOA_LEFT;
+            case YFO_AADD:
+            case YFO_ASUB:
+            case YFO_AMUL:
+            case YFO_ADIV:
+            case YFO_AMOD:
+            case YFO_AAND:
+            case YFO_AOR:
+            case YFO_AXOR:
+            case YFO_ASSIGN:
+                return YFOA_RIGHT;
+            default:
+                return YFOA_INVAL;
+        }
+    
+}

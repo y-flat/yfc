@@ -38,4 +38,17 @@ enum yf_operator {
  */
 enum yf_operator yf_get_operator(const char * str);
 
+/**
+ * Which direction the operator is associative.
+ * Left: a @ b @ c -> a @ (b @ c)
+ * Right: a @ b @ c -> (a @ b) @ c
+ */
+enum yfo_assoc {
+    YFOA_INVAL,
+    YFOA_LEFT,
+    YFOA_RIGHT,
+};
+
+enum yfo_assoc yf_get_operator_assoc(enum yf_operator op);
+
 #endif /* API_OPERATOR_H */

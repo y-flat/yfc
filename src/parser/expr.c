@@ -159,6 +159,10 @@ static int yfp_sort_expr_tree(
     node->type = YFCS_BINARY;
     node->as.binary.left = malloc(sizeof(struct yf_parse_node));
     node->as.binary.right = malloc(sizeof(struct yf_parse_node));
+    if (!node->as.binary.left || !node->as.binary.right) {
+        return 1;
+    }
+    node->as.binary.op = operators[index];
     yfp_sort_expr_tree(
         nodes,
         index + 1,

@@ -103,7 +103,9 @@ static void yf_dump_expr(struct yfcs_expr * node, FILE * out) {
             : node->as.value.as.literal.value.databuf
         );
     } else {
-        yf_print_line(out, "operator: %d", node->as.binary.op);
+        yf_print_line(out,
+            "operator: %s", get_op_string(node->as.binary.op)
+        );
         yf_print_line(out, "left:");
         yf_dump_expr(node->as.binary.left, out);
         yf_print_line(out, "right:");

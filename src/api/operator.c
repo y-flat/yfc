@@ -127,3 +127,36 @@ enum yfo_precedence yfo_prec(enum yf_operator op1, enum yf_operator op2) {
         return EQUAL;
     }
 }
+
+char * get_op_string(enum yf_operator op) {
+
+    static char * op_strings[] = {
+        "INVALID",
+        "+",
+        "-",
+        "*",
+        "/",
+        "%",
+        "=",
+        "==",
+        "!=",
+        "<",
+        "<=",
+        ">",
+        ">=",
+        "&",
+        "|",
+        "^",
+        "+=",
+        "-=",
+        "*=",
+        "/=",
+        "%=",
+        "&=",
+        "|=",
+        "^=",
+    };
+
+    return op_strings[op];
+
+}

@@ -161,13 +161,13 @@ static int yfp_sort_expr_tree(
     node->as.binary.right = malloc(sizeof(struct yf_parse_node));
     yfp_sort_expr_tree(
         nodes,
-        index,
+        index + 1,
         operators,
         node->as.binary.left
     );
     yfp_sort_expr_tree(
         nodes + index + 1,
-        num_nodes - index,
+        num_nodes - index - 1,
         operators + index + 1,
         node->as.binary.right
     );

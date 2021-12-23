@@ -88,8 +88,8 @@ static int get_precedence_tier(enum yf_operator op) {
         0, /* YFO_INVALID */
         4, /* YFO_ADD */
         4, /* YFO_SUB */
-        4, /* YFO_MUL */
-        4, /* YFO_DIV */
+        5, /* YFO_MUL */
+        5, /* YFO_DIV */
         4, /* YFO_MOD */
         1, /* YFO_ASSIGN */
         3, /* YFO_EQ */

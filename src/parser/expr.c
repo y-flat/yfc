@@ -19,16 +19,19 @@
  * split up expressions in parentheses.
  */
 int yfp_atomic_expr(struct yf_parse_node * node, struct yf_lexer * lexer) {
+
+    int lex_err;
     
     struct yf_token tok;
 
     node->type = YFCS_EXPR;
     
-    yfl_lex(lexer, &tok);
+    P_LEX(lexer, &tok);
     switch (tok.type) {
     case YFT_IDENTIFIER:
         yfl_unlex(lexer, &tok);
-        yfp_ident(&node->as.expr.as.value.as.identifier, lexer);
+        if (yfp_ident(&node->as.expr.as.value.as.identifier, lexer))
+            return 1;
         break;
     case YFT_LITERAL:
     node->as.expr.type = YFCS_VALUE;
@@ -38,8 +41,9 @@ int yfp_atomic_expr(struct yf_parse_node * node, struct yf_lexer * lexer) {
         node->as.expr.as.value.type = YFCS_LITERAL;
         break;
     case YFT_OPAREN:
-        yfp_expr(node, lexer);
-        yfl_lex(lexer, &tok);
+        if (yfp_expr(node, lexer))
+            return 1;
+        P_LEX(lexer, &tok);
         if (tok.type != YFT_CPAREN) {
             YF_TOKERR(tok, "closing parenthesis");
         }

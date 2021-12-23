@@ -57,7 +57,10 @@ int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer) {
                     decl->as.vardecl.name.name.databuf, ident.name.databuf,
                     decl->as.vardecl.name.name.datalen
                 );
-                yfp_vardecl(decl, lexer);
+                if (yfp_vardecl(decl, lexer)) {
+                    free(decl);
+                    return 1;
+                }
                 /* It's a top-level decl, so expect a semicolon. */
                 P_LEX(lexer, &tok);
                 if (tok.type != YFT_SEMICOLON) {
@@ -70,7 +73,10 @@ int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer) {
                     decl->as.funcdecl.name.name.databuf, ident.name.databuf,
                     decl->as.funcdecl.name.name.datalen
                 );
-                yfp_funcdecl(decl, lexer);
+                if (yfp_funcdecl(decl, lexer)) {
+                    free(decl);
+                    return 1;
+                }
                 break;
             default:
                 YF_TOKERR(tok, "colon or left paren");
@@ -90,23 +96,29 @@ int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer) {
 int yfp_vardecl(struct yf_parse_node * node, struct yf_lexer * lexer) {
 
     struct yf_token tok;
+    int lex_err;
 
     node->type = YFCS_VARDECL;
     
     /* We've parsed all of this: [name] colon */
     /* So now, we expect a type. */
-    yfp_type(&node->as.vardecl.type, lexer);
+    if (yfp_type(&node->as.vardecl.type, lexer)) {
+        return 1;
+    }
 
     /**
      * If there's an equal sign, we have an initializer.
      * Otherwise, don't worry about any of it, because vardecls can be nested
      * in other things and practically any token could follow.
      */
-    yfl_lex(lexer, &tok);
+    P_LEX(lexer, &tok);
     switch (tok.type) {
         case YFT_OP: /* TODO - do an equals sign check */
             node->as.vardecl.expr = yf_malloc(sizeof(struct yf_parse_node));
-            yfp_expr(node->as.vardecl.expr, lexer);
+            if (yfp_expr(node->as.vardecl.expr, lexer)) {
+                free(node->as.vardecl.expr);
+                return 1;
+            }
             break;
         default:
             /* Unlex unimportant token. */
@@ -131,8 +143,9 @@ int yfp_stmt(struct yf_parse_node * node, struct yf_lexer * lexer) {
 
 int yfp_ident(struct yfcs_identifier * node, struct yf_lexer * lexer) {
     /* TODO - parse compound names like "foo.bar.baz" */
+    int lex_err;
     struct yf_token tok;
-    yfl_lex(lexer, &tok);
+    P_LEX(lexer, &tok);
     if (tok.type != YFT_IDENTIFIER) {
         YF_TOKERR(tok, "identifier");
     } else {
@@ -143,9 +156,10 @@ int yfp_ident(struct yfcs_identifier * node, struct yf_lexer * lexer) {
 }
 
 int yfp_type(struct yfcs_type * node, struct yf_lexer * lexer) {
+    int lex_err;
     /* TODO - parse compound types */
     struct yf_token tok;
-    yfl_lex(lexer, &tok);
+    P_LEX(lexer, &tok);
     if (tok.type != YFT_IDENTIFIER) {
         YF_TOKERR(tok, "identifier");
     } else {

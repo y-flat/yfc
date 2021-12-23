@@ -40,8 +40,8 @@ enum yf_operator yf_get_operator(const char * str);
 
 /**
  * Which direction the operator is associative.
- * Left: a @ b @ c -> a @ (b @ c)
- * Right: a @ b @ c -> (a @ b) @ c
+ * Left:  a @ b @ c -> (a @ b) @ c
+ * Right: a @ b @ c -> a @ (b @ c)
  */
 enum yfo_assoc {
     YFOA_INVAL,
@@ -50,5 +50,19 @@ enum yfo_assoc {
 };
 
 enum yfo_assoc yf_get_operator_assoc(enum yf_operator op);
+
+/**
+ * GREATER - op1 binds MORE tightly than op2
+ * LESS - op1 binds LESS tightly than op2
+ */
+enum yfo_precedence {
+    GREATER,
+    LESS,
+    EQUAL,
+};
+
+enum yfo_precedence yfo_prec(enum yf_operator op1, enum yf_operator op2);
+
+char * get_op_string(enum yf_operator op);
 
 #endif /* API_OPERATOR_H */

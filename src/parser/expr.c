@@ -31,10 +31,18 @@ int yfp_atomic_expr(struct yf_parse_node * node, struct yf_lexer * lexer) {
         yfp_ident(&node->as.expr.as.value.as.identifier, lexer);
         break;
     case YFT_LITERAL:
+    node->as.expr.type = YFCS_VALUE;
         strcpy(
             node->as.expr.as.value.as.literal.value.databuf, tok.data
         );
         node->as.expr.as.value.type = YFCS_LITERAL;
+        break;
+    case YFT_OPAREN:
+        yfp_expr(node, lexer);
+        yfl_lex(lexer, &tok);
+        if (tok.type != YFT_CPAREN) {
+            YF_TOKERR(tok, "closing parenthesis");
+        }
         break;
     default:
         YF_TOKERR(tok, "identifier or literal");

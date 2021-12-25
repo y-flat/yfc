@@ -95,7 +95,7 @@ int yfp_expr(struct yf_parse_node * node, struct yf_lexer * lexer,
      * We parse one atomic expr first, and then we parse [op], [atomic expr]
      * until done.
      */
-    if (first) {
+    if (!first) {
         if (yfp_atomic_expr(&atomics[0], lexer)) {
             return 4;
         }

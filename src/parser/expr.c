@@ -3,6 +3,7 @@
  * own file. Yikes!
  */
 
+#include <stdbool.h>
 #include <string.h>
 
 #include <api/operator.h>
@@ -41,7 +42,7 @@ int yfp_atomic_expr(struct yf_parse_node * node, struct yf_lexer * lexer) {
         node->as.expr.as.value.type = YFCS_LITERAL;
         break;
     case YFT_OPAREN:
-        if (yfp_expr(node, lexer))
+        if (yfp_expr(node, lexer, 0, NULL))
             return 1;
         P_LEX(lexer, &tok);
         if (tok.type != YFT_CPAREN) {
@@ -68,8 +69,12 @@ static int yfp_sort_expr_tree(
  * 0 - all OK
  * 1 - too many subbranches
  * 2 - invalid operator
+ * first is whether the first atomic expr has already been parsed. If so, supply
+ * the first node. This first node passed in will be copied - free it after
+ * calling.
  */
-int yfp_expr(struct yf_parse_node * node, struct yf_lexer * lexer) {
+int yfp_expr(struct yf_parse_node * node, struct yf_lexer * lexer,
+    bool first, struct yf_parse_node * first_node) {
 
     struct yf_parse_node atomics[64];
     enum yf_operator operators[63];
@@ -90,8 +95,12 @@ int yfp_expr(struct yf_parse_node * node, struct yf_lexer * lexer) {
      * We parse one atomic expr first, and then we parse [op], [atomic expr]
      * until done.
      */
-    if (yfp_atomic_expr(&atomics[0], lexer)) {
-        return 4;
+    if (first) {
+        if (yfp_atomic_expr(&atomics[0], lexer)) {
+            return 4;
+        }
+    } else {
+        atomics[0] = *first_node;
     }
 
     for (i = 0; i < 64; i++) {

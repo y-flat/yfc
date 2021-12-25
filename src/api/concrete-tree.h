@@ -84,6 +84,13 @@ struct yfcs_program {
     struct yf_list decls;
 };
 
+/**
+ * A block statement.
+ */
+struct yfcs_bstmt {
+    struct yf_list stmts;
+};
+
 struct yf_parse_node {
     
     enum {
@@ -91,6 +98,7 @@ struct yf_parse_node {
         YFCS_VARDECL,
         YFCS_FUNCDECL,
         YFCS_PROGRAM,
+        YFCS_BSTMT,
     } type;
 
     union {
@@ -98,6 +106,7 @@ struct yf_parse_node {
         struct yfcs_vardecl vardecl;
         struct yfcs_funcdecl funcdecl;
         struct yfcs_program program;
+        struct yfcs_bstmt bstmt;
     } as;
 
 };

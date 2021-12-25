@@ -115,7 +115,7 @@ int yfp_vardecl(struct yf_parse_node * node, struct yf_lexer * lexer) {
     switch (tok.type) {
         case YFT_OP: /* TODO - do an equals sign check */
             node->as.vardecl.expr = yf_malloc(sizeof(struct yf_parse_node));
-            if (yfp_expr(node->as.vardecl.expr, lexer)) {
+            if (yfp_expr(node->as.vardecl.expr, lexer, 0, NULL)) {
                 free(node->as.vardecl.expr);
                 return 1;
             }
@@ -134,10 +134,6 @@ int yfp_vardecl(struct yf_parse_node * node, struct yf_lexer * lexer) {
  * ASSUMES THE FUNCTION NAME AND LEFT PAREN HAVE ALREADY BEEN PARSED.
  */
 int yfp_funcdecl(struct yf_parse_node * node, struct yf_lexer * lexer) {
-    return 0; /* TODO */
-}
-
-int yfp_stmt(struct yf_parse_node * node, struct yf_lexer * lexer) {
     return 0; /* TODO */
 }
 
@@ -167,4 +163,35 @@ int yfp_type(struct yfcs_type * node, struct yf_lexer * lexer) {
         strcpy(node->databuf, tok.data);
     }
     return 0;
+}
+
+int yfp_bstmt(struct yf_parse_node * node, struct yf_lexer * lexer) {
+
+    struct yf_token tok;
+    struct yf_parse_node * stmt;
+
+    /* '{' [ statements ] '}' */
+
+    yfl_lex(lexer, &tok);
+    if (tok.type != YFT_OBRACE) {
+        YF_TOKERR(tok, "'{'");
+    }
+
+    node->type = YFCS_BSTMT;
+    yf_list_init(&node->as.bstmt.stmts);
+
+    for (;;) {
+        yfl_lex(lexer, &tok);
+        yfl_unlex(lexer, &tok);
+        if (tok.type == YFT_CBRACE) {
+            return 0;
+        }
+        stmt = yf_malloc(sizeof (struct yf_parse_node));
+        if (yfp_stmt(stmt, lexer)) {
+            free(stmt);
+            return 1;
+        }
+        yf_list_add(&node->as.bstmt.stmts, stmt);
+    }
+
 }

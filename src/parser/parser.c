@@ -175,10 +175,10 @@ int yfp_bstmt(struct yf_parse_node * node, struct yf_lexer * lexer) {
 
     for (;;) {
         yfl_lex(lexer, &tok);
-        yfl_unlex(lexer, &tok);
         if (tok.type == YFT_CBRACE) {
             return 0;
         }
+        yfl_unlex(lexer, &tok);
         stmt = yf_malloc(sizeof (struct yf_parse_node));
         if (yfp_stmt(stmt, lexer)) {
             free(stmt);

@@ -130,13 +130,6 @@ int yfp_vardecl(struct yf_parse_node * node, struct yf_lexer * lexer) {
 
 }
 
-/**
- * ASSUMES THE FUNCTION NAME AND LEFT PAREN HAVE ALREADY BEEN PARSED.
- */
-int yfp_funcdecl(struct yf_parse_node * node, struct yf_lexer * lexer) {
-    return 0; /* TODO */
-}
-
 int yfp_ident(struct yfcs_identifier * node, struct yf_lexer * lexer) {
     /* TODO - parse compound names like "foo.bar.baz" */
     int lex_err;

@@ -76,8 +76,9 @@ struct yfcs_vardecl {
 struct yfcs_funcdecl {
     struct yfcs_identifier name;
     struct yfcs_type ret; /* The return type */
-    /* All parameters aree stored as vardecls. expr WILL be null for these. */
+    /* All parameters are stored as vardecls. expr WILL be null for these. */
     struct yf_list params;
+    struct yf_parse_node * body; /* The function body */
 };
 
 struct yfcs_program {

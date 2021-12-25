@@ -17,7 +17,7 @@
  */
 #define YF_TOKERR(tok, expected) do { \
     YF_PRINT_ERROR( \
-        "Unexpected token %s, line %d column %d:" \
+        "Unexpected token \"%s\", line %d column %d: " \
         "expected %s, found token of type \"%s\"", \
         tok.data, \
         tok.lineno, \

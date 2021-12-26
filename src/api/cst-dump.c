@@ -94,6 +94,7 @@ static void yf_dump_funcdecl(struct yfcs_funcdecl * node, FILE * out) {
     indent();
     /* TODO - args */
     yf_print_line(out, "function body");
+    yf_dump_bstmt(&node->body->as.bstmt, out);
     yf_print_line(out, "end function body");
     dedent();
     yf_print_line(out, "end funcdecl");

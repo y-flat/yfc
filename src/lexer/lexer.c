@@ -89,7 +89,7 @@ enum yfl_char_type {
 
 static enum yfl_char_type yfl_get_type(int c) {
     
-    if (isalpha(c)) {
+    if (isalpha(c) || c == '_') {
         return YFL_IDENT;
     } else if (isdigit(c)) {
         return YFL_NUM;

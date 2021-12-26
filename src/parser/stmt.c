@@ -43,9 +43,7 @@ int yfp_stmt(struct yf_parse_node * node, struct yf_lexer * lexer) {
                     ident.as.expr.as.value.as.identifier.name.databuf,
                     node->as.vardecl.name.name.datalen
                 );
-                if (yfp_vardecl(node, lexer)) {
-                    return 1;
-                }
+                ret = yfp_vardecl(node, lexer);
                 goto out;
             } else if (tok.type == YFT_OP) {
                 yfl_unlex(lexer, &tok);

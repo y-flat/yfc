@@ -42,7 +42,7 @@ struct yf_sym {
 
 struct yfs_symtab {
 
-    struct yf_hashmap table;
+    struct yf_hashmap * table;
 
 };
 

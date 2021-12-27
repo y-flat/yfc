@@ -2,13 +2,16 @@
 
 #include <stdio.h> /* fopen, etc. */
 #include <stdlib.h> /* malloc */
+#include <string.h> /* strcpy */
+#include <unistd.h> /* getcwd */
 
 #include <api/compilation-data.h>
 #include <api/cst-dump.h>
 #include <api/lexer-input.h>
-#include <driver/compile.h>
+#include <driver/find-files.h>
 #include <parser/parser.h>
 #include <semantics/symtab.h>
+#include <util/allocator.h>
 #include <util/yfc-out.h>
 
 /* Forward decls for whole file */
@@ -23,6 +26,7 @@ static int yf_run_backend(
     struct yf_project_compilation_data *, struct yf_args *
 );
 static int yf_do_cst_dump(struct yf_parse_node * tree);
+static int yf_cleanup(struct yf_project_compilation_data *);
 
 /**
  * This is it. This is the actual compile function for a set of arguments. It
@@ -78,19 +82,35 @@ static int yf_run_compiler_on_data(
 static int yf_compile_project(struct yf_args * args) {
 
     struct yf_project_compilation_data data;
-    int numf;
+    int numf, ret;
+
+    data.ext_modules = yfh_new();
+
+    /**
+     * Project name is current directory
+     */
+    data.project_name = yf_malloc(50);
+    getcwd(data.project_name, 50);
 
     numf = yf_find_project_files(&data);
     data.num_files = numf;
     
-    return yf_run_compiler_on_data(&data, args);
+    ret = yf_run_compiler_on_data(&data, args);
+
+    yf_cleanup(&data);
+
+    return ret;
 
 }
 
 static int yf_compile_files(struct yf_args * args) {
     
     struct yf_project_compilation_data data;
-    int i;
+    int i, ret;
+
+    /* No project name */
+    data.project_name = yf_malloc(50);
+    strcpy(data.project_name, "<none>");
 
     for (i = 0; i < args->num_files; ++i) {
         data.files[i] = malloc(sizeof (struct yf_file_compilation_data));
@@ -100,7 +120,9 @@ static int yf_compile_files(struct yf_args * args) {
 
     data.num_files = args->num_files;
 
-    return yf_run_compiler_on_data(&data, args);
+    ret = yf_run_compiler_on_data(&data, args);
+    yf_cleanup(&data);
+    return ret;
 
 }
 
@@ -148,8 +170,7 @@ static int yf_run_frontend(
  * Returns the number of files.
  */
 static int yf_find_project_files(struct yf_project_compilation_data * data) {
-    /* TODO */
-    return 0;
+    return yfd_find_projfiles(data);
 }
 
 /**
@@ -212,6 +233,25 @@ static int yf_run_backend(
 ) {
 
     /* TODO */
+    return 0;
+
+}
+
+/**
+ * Destroy all objects and whatnot.
+ */
+static int yf_cleanup(struct yf_project_compilation_data * data) {
+
+    int iter; /* For all iterations needed */
+
+    yfh_destroy(data->ext_modules, 1);
+    
+    for (iter = 0; iter < data->num_files; ++iter) {
+        yf_free(data->files[iter]);
+    }
+
+    yf_free(data->project_name);
+
     return 0;
 
 }

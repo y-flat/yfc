@@ -11,6 +11,7 @@
 
 #include <api/abstract-tree.h>
 #include <api/concrete-tree.h>
+#include <api/sym.h>
 
 struct yf_file_compilation_data {
 
@@ -18,6 +19,8 @@ struct yf_file_compilation_data {
     const char * file_name;
 
     struct yf_parse_node parse_tree;
+
+    struct yfs_symtab symtab;
 
     struct yf_ast_node ast_tree;
 

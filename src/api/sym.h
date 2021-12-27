@@ -9,6 +9,8 @@
 #ifndef API_SYM_H
 #define API_SYM_H
 
+#include <util/hashmap.h>
+
 struct yfs_type {
 
     /* Nothing much yet */
@@ -35,6 +37,12 @@ struct yf_sym {
 
     char * file; /* Source file */
     int line; /* Line number of declaration */
+
+};
+
+struct yfs_symtab {
+
+    struct yf_hashmap table;
 
 };
 

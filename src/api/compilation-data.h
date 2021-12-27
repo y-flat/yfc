@@ -24,6 +24,8 @@ struct yf_file_compilation_data {
 
     struct yf_ast_node ast_tree;
 
+    int error; /* If an error has occurred */
+
 };
 
 struct yf_project_compilation_data {

@@ -48,19 +48,28 @@ static int yf_run_compiler_on_data(
 
     /* Parse the frontend for all and create symtabs */
     for (i = 0; i < data->num_files; ++i) {
-        if (yf_run_frontend(data->files[i], args)) continue;
-        yf_build_symtab(data->files[i]);
+        data->files[i]->error = 0; /* Starting off clean */
+        if (yf_run_frontend(data->files[i], args)) {
+            data->files[i]->error = 1;
+        }
+        if (!data->files[i]->error && yf_build_symtab(data->files[i])) {
+            data->files[i]->error = 1;
+        }
     }
 
     /* TODO - set flags so we can efficiently avoid compiling the bad ones */
 
     /* Now validate everything. */
     for (i = 0; i < data->num_files; ++i) {
-        yf_validate_ast(data->files[i], args);
+        if (!data->files[i]->error && yf_validate_ast(data->files[i], args)) {
+            data->files[i]->error = 1;
+        }
     }
 
     /* Finally, generate code. */
-    yf_run_backend(data, args);
+    if (!data->files[i]->error && yf_run_backend(data, args)) {
+        data->files[i]->error = 1;
+    }
 
     return 0;
 

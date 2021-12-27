@@ -8,6 +8,7 @@
 #include <api/lexer-input.h>
 #include <driver/compile.h>
 #include <parser/parser.h>
+#include <semantics/symtab.h>
 #include <util/yfc-out.h>
 
 /* Forward decls for whole file */
@@ -174,10 +175,7 @@ static int yf_do_cst_dump(struct yf_parse_node * tree) {
  * Build a table of all externally visible symbols.
  */
 static int yf_build_symtab(struct yf_file_compilation_data * data) {
-
-    /* TODO */
-    return 0;
-
+    return yfs_build_symtab(data);
 }
 
 /**

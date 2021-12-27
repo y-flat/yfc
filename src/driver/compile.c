@@ -8,7 +8,7 @@
 #include <api/compilation-data.h>
 #include <api/cst-dump.h>
 #include <api/lexer-input.h>
-#include <driver/compile.h>
+#include <driver/find-files.h>
 #include <parser/parser.h>
 #include <semantics/symtab.h>
 #include <util/allocator.h>
@@ -170,8 +170,7 @@ static int yf_run_frontend(
  * Returns the number of files.
  */
 static int yf_find_project_files(struct yf_project_compilation_data * data) {
-    /* TODO */
-    return 0;
+    return yfd_find_projfiles(data);
 }
 
 /**

@@ -16,6 +16,7 @@ struct yfcs_databuf {
 };
 
 struct yfcs_identifier {
+    int lineno, colno;
     struct yfcs_databuf name;
 };
 
@@ -43,6 +44,7 @@ struct yfcs_value {
 struct yfcs_type {
     char databuf[256];
     int datalen;
+    int lineno, colno;
 };
 
 /**
@@ -109,6 +111,8 @@ struct yf_parse_node {
         struct yfcs_program program;
         struct yfcs_bstmt bstmt;
     } as;
+
+    int lineno, colno;
 
 };
 

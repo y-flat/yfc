@@ -16,7 +16,23 @@ static int yf_dump_indent = 0;
 static void indent() { ++yf_dump_indent; }
 static void dedent() { --yf_dump_indent; }
 
+static void yf_print_line(FILE * out, char * data, ...) {
+    int i;
+    va_list args;
+    va_start(args, data);
+    for (i = 0; i < yf_dump_indent; i++) {
+        fprintf(out, "\t");
+    }
+    vfprintf(out, data, args);
+    fprintf(out, "\n");
+    va_end(args);
+}
+
+
 void yf_dump_cst(struct yf_parse_node * root, FILE *out) {
+
+    if (root->lineno && root->colno)
+        yf_print_line(out, "line: %d, colno: %d", root->lineno, root->colno);
 
     switch (root->type) {
         case YFCS_PROGRAM:
@@ -35,18 +51,6 @@ void yf_dump_cst(struct yf_parse_node * root, FILE *out) {
             yf_dump_bstmt(&root->as.bstmt, out);
     }
 
-}
-
-static void yf_print_line(FILE * out, char * data, ...) {
-    int i;
-    va_list args;
-    va_start(args, data);
-    for (i = 0; i < yf_dump_indent; i++) {
-        fprintf(out, "\t");
-    }
-    vfprintf(out, data, args);
-    fprintf(out, "\n");
-    va_end(args);
 }
 
 static void yf_dump_program(struct yfcs_program * node, FILE *out) {
@@ -94,7 +98,7 @@ static void yf_dump_funcdecl(struct yfcs_funcdecl * node, FILE * out) {
     indent();
     /* TODO - args */
     yf_print_line(out, "function body");
-    yf_dump_bstmt(&node->body->as.bstmt, out);
+    yf_dump_cst(node->body, out);
     yf_print_line(out, "end function body");
     dedent();
     yf_print_line(out, "end funcdecl");

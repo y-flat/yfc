@@ -22,6 +22,7 @@ enum yf_token_type {
     YFT_OBRACE, /* { */
     YFT_CBRACE, /* } */
     YFT_OP    , /* =, etc. */
+    YFT_RETURN, /* return */
     YFT_TOO_LARGE, /* A token was too large */
 
 };

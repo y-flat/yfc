@@ -244,7 +244,8 @@ static int yf_cleanup(struct yf_project_compilation_data * data) {
 
     int iter; /* For all iterations needed */
 
-    yfh_destroy(data->ext_modules, 1);
+    if (data->ext_modules)
+        yfh_destroy(data->ext_modules, 1);
     
     for (iter = 0; iter < data->num_files; ++iter) {
         yf_free(data->files[iter]);

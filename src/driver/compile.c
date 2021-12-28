@@ -11,6 +11,7 @@
 #include <driver/find-files.h>
 #include <parser/parser.h>
 #include <semantics/symtab.h>
+#include <semantics/validate.h>
 #include <util/allocator.h>
 #include <util/yfc-out.h>
 
@@ -219,8 +220,7 @@ static int yf_validate_ast(
     struct yf_args * args
 ) {
 
-    /* TODO */
-    return 0;
+    return yfs_validate(data);
 
 }
 

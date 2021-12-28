@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <lexer/keywords.h>
 #include <util/yfc-out.h>
-
 
 /**
  * Get error message from parsing
@@ -132,6 +132,11 @@ static enum yfl_char_type yfl_end_types(enum yfl_char_type type) {
  * Get the token type from a charbuf.
  */
 static enum yf_token_type get_type(char * buf) {
+
+    enum yf_token_type type;
+    if ((type = yf_keyword_type(buf)) != YFT_INVALID) {
+        return type;
+    }
 
     if (isalpha(buf[0])) return YFT_IDENTIFIER;
     if (isdigit(buf[0])) return YFT_LITERAL;
@@ -373,7 +378,8 @@ const char * yf_get_toktype(enum yf_token_type type) {
         "opening brace",
         "closing brace",
         "operator"    ,
-        "[TOO LARGE]"
+        "<return>",
+        "[TOO LARGE]",
     };
     
     return types[type];

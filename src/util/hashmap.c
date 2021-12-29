@@ -28,6 +28,7 @@ struct yf_hashmap {
 struct yf_hashmap * yfh_new() {
     struct yf_hashmap * hm;
     hm = yf_malloc(sizeof (struct yf_hashmap));
+    memset(hm, 0, sizeof (struct yf_hashmap));
     return hm;
 }
 
@@ -55,9 +56,12 @@ int yfh_set(struct yf_hashmap * hm, char * key, void * value) {
 
     loc = hash(key);
 
+    char * pkey;
+
     /* Traverse forward until we find it. */
     for (i = 0; i < 10; ++loc, ++i) {
-        if (!strcmp(key, hm->buckets[loc + i].key)) {
+        pkey = hm->buckets[loc + i].key;
+        if (pkey && !strcmp(key, pkey)) {
             hm->buckets[loc + i].value = value;
             return 0;
         }

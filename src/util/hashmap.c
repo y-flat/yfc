@@ -83,9 +83,12 @@ void * yfh_get(struct yf_hashmap * hm, char * key) {
 
     loc = hash(key);
 
+    char * pkey;
+
     /* Traverse forward until we find it. */
     for (i = 0; i < 10; ++loc, ++i) {
-        if (!strcmp(key, hm->buckets[loc + i].key)) {
+        pkey = hm->buckets[loc + i].key;
+        if (key && !strcmp(key, key)) {
             return hm->buckets[loc + i].value;
         }
     }

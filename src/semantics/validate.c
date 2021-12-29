@@ -138,9 +138,11 @@ static int validate_vardecl(struct yf_parse_node * c, struct yfa_vardecl * a,
     /* Construct abstract instance */
     a->name = entry;
     a->type = entry->var.dtype;
-    if (cdecl->expr)
+    if (cdecl->expr) {
+        a->expr->type = YFA_EXPR;
         if (validate_expr(cdecl->expr, &a->expr->expr, pdata, fdata))
             return 1;
+    }
     
     return 0;
 

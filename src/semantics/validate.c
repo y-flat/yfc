@@ -11,7 +11,9 @@ static int validate_program(struct yfcs_program * c, struct yfa_program * a,
     struct yf_file_compilation_data * fdata);
 static int validate_vardecl(struct yf_parse_node * c, struct yfa_vardecl * a,
     struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata);
+    struct yf_file_compilation_data * fdata,
+    bool global
+);
 static int validate_expr(struct yf_parse_node * c, struct yfa_expr * a,
     struct yf_project_compilation_data * pdata,
     struct yf_file_compilation_data * fdata);
@@ -60,7 +62,7 @@ static int validate_program(
         switch (cnode->type) {
             case YFCS_VARDECL:
                 if (validate_vardecl(
-                    cnode, &anode->vardecl, pdata, fdata
+                    cnode, &anode->vardecl, pdata, fdata, true
                 )) {
                     free(anode);
                     return 1;
@@ -91,9 +93,12 @@ static int validate_program(
 
 }
 
+/**
+ * global - whether this is a global decl or not.
+ */
 static int validate_vardecl(struct yf_parse_node * c, struct yfa_vardecl * a,
     struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata) {
+    struct yf_file_compilation_data * fdata, bool global) {
 
     struct yf_sym * entry;
     struct yfcs_vardecl * cdecl = &c->as.vardecl;
@@ -104,20 +109,38 @@ static int validate_vardecl(struct yf_parse_node * c, struct yfa_vardecl * a,
             fdata->symtab.table, cdecl->name.name.databuf
         )
     ) != NULL) {
-        YF_PRINT_ERROR(
-            "Duplicate declaration of symbol '%s', lines %d and %d",
-            cdecl->name.name.databuf,
-            entry->line,
-            c->lineno
-        );
+        if (global) {
+            /* The less-than is so that each double is only reported once. */
+            /* This should never happen for global vars - these should have been
+            caught in the symtab-building phase. */
+            if (entry->line < c->lineno) {
+                YF_PRINT_ERROR(
+                    "Uncaught duplicate declaration of symbol '%s'"
+                    ", lines %d and %d",
+                    cdecl->name.name.databuf,
+                    entry->line,
+                    c->lineno
+                );
+            }
+        } else {
+            /* Just a warning. */
+            YF_PRINT_WARNING(
+                "Global symbol '%s' (line %d)"
+                "shadowed by local symbol (line %d)",
+                cdecl->name.name.databuf,
+                entry->line,
+                c->lineno
+            );
+        }
         return 1;
     }
 
     /* Construct abstract instance */
     a->name = entry;
     a->type = entry->var.dtype;
-    if (validate_expr(cdecl->expr, &a->expr->expr, pdata, fdata))
-        return 1;
+    if (cdecl->expr)
+        if (validate_expr(cdecl->expr, &a->expr->expr, pdata, fdata))
+            return 1;
     
     return 0;
 

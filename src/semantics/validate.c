@@ -6,20 +6,29 @@
 /**
  * Forwards
  */
-static int validate_program(struct yfcs_program * c, struct yfa_program * a);
-static int validate_vardecl(struct yfcs_vardecl * c, struct yfa_vardecl * a);
-static int validate_expr(struct yfcs_expr * c, struct yfa_expr * a);
-static int validate_funcdecl(struct yfcs_funcdecl * c, struct yfa_funcdecl * a);
-static int validate_bstmt(struct yfcs_bstmt * c, struct yfa_bstmt * a);
+static int validate_program(struct yfcs_program * c, struct yfa_program * a,
+    struct yf_project_compilation_data * pdata);
+static int validate_vardecl(struct yfcs_vardecl * c, struct yfa_vardecl * a,
+    struct yf_project_compilation_data * pdata);
+static int validate_expr(struct yfcs_expr * c, struct yfa_expr * a,
+    struct yf_project_compilation_data * pdata);
+static int validate_funcdecl(struct yfcs_funcdecl * c, struct yfa_funcdecl * a,
+    struct yf_project_compilation_data * pdata);
+static int validate_bstmt(struct yfcs_bstmt * c, struct yfa_bstmt * a,
+    struct yf_project_compilation_data * pdata);
 
-int yfs_validate(struct yf_file_compilation_data * data) {
+int yfs_validate(
+    struct yf_file_compilation_data * fdata,
+    struct yf_project_compilation_data * pdata
+) {
     return validate_program(
-        &data->parse_tree.as.program, &data->ast_tree.program
+        &fdata->parse_tree.as.program, &fdata->ast_tree.program, pdata
     );
 }
 
 static int validate_program(
-    struct yfcs_program * cprog, struct yfa_program * aprog
+    struct yfcs_program * cprog, struct yfa_program * aprog,
+    struct yf_project_compilation_data * pdata
 ) {
 
     struct yf_parse_node * cnode;
@@ -43,13 +52,17 @@ static int validate_program(
         /* Validate */
         switch (cnode->type) {
             case YFCS_VARDECL:
-                if (validate_vardecl(&cnode->as.vardecl, &anode->vardecl)) {
+                if (validate_vardecl(
+                    &cnode->as.vardecl, &anode->vardecl, pdata
+                )) {
                     free(anode);
                     return 1;
                 }
                 break;
             case YFCS_FUNCDECL:
-                if (validate_funcdecl(&cnode->as.funcdecl, &anode->funcdecl)) {
+                if (validate_funcdecl(
+                    &cnode->as.funcdecl, &anode->funcdecl, pdata
+                )) {
                     free(anode);
                     return 1;
                 }
@@ -71,24 +84,28 @@ static int validate_program(
 
 }
 
-static int validate_vardecl(struct yfcs_vardecl * c, struct yfa_vardecl * a) {
+static int validate_vardecl(struct yfcs_vardecl * c, struct yfa_vardecl * a,
+    struct yf_project_compilation_data * pdata) {
     /* TODO */
     return 0;
 }
 
-static int validate_expr(struct yfcs_expr * c, struct yfa_expr * a) {
+static int validate_expr(struct yfcs_expr * c, struct yfa_expr * a,
+    struct yf_project_compilation_data * pdata) {
     /* TODO */
     return 0;
 }
 
 static int validate_funcdecl(
-    struct yfcs_funcdecl * c, struct yfa_funcdecl * a
+    struct yfcs_funcdecl * c, struct yfa_funcdecl * a,
+    struct yf_project_compilation_data * pdata
 ) {
     /* TODO */
     return 0;
 }
 
-static int validate_bstmt(struct yfcs_bstmt * c, struct yfa_bstmt * a) {
+static int validate_bstmt(struct yfcs_bstmt * c, struct yfa_bstmt * a,
+    struct yf_project_compilation_data * pdata) {
     /* TODO */
     return 0;
 }

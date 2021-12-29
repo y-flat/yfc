@@ -174,7 +174,7 @@ int yfp_bstmt(struct yf_parse_node * node, struct yf_lexer * lexer) {
 
     /* '{' [ statements ] '}' */
 
-    yfl_lex(lexer, &tok);
+    P_LEX(lexer, &tok);
     if (tok.type != YFT_OBRACE) {
         YF_TOKERR(tok, "'{'");
     }

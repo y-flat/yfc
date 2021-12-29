@@ -24,6 +24,8 @@ static int validate_program(
 
     struct yf_parse_node * cnode;
     struct yf_ast_node * anode;
+
+    yf_list_init(&aprog->decls);
     
     /* Iterate through all decls, construct abstract instances of them, and move
     them into the abstract list. */
@@ -56,6 +58,9 @@ static int validate_program(
                 YF_PRINT_ERROR("Unknown node type in internal CST tree");
                 return 2;
         }
+
+        /* Move to abstract list */
+        yf_list_add(&aprog->decls, anode);
 
         /* Keep going */
         yf_list_next(&cprog->decls);

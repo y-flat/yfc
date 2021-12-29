@@ -42,12 +42,10 @@ int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer) {
          */
 
         /* Do end-of-file peek back here. */
-        P_LEX(lexer, &tok);
+        P_PEEK(lexer, &tok);
         if (tok.type == YFT_EOF) {
             free(decl);
             return 0;
-        } else {
-            yfl_unlex(lexer, &tok);
         }
         
         yfp_ident(&ident, lexer);
@@ -172,6 +170,7 @@ int yfp_bstmt(struct yf_parse_node * node, struct yf_lexer * lexer) {
 
     struct yf_token tok;
     struct yf_parse_node * stmt;
+    int lex_err;
 
     /* '{' [ statements ] '}' */
 
@@ -186,11 +185,10 @@ int yfp_bstmt(struct yf_parse_node * node, struct yf_lexer * lexer) {
     yf_list_init(&node->as.bstmt.stmts);
 
     for (;;) {
-        yfl_lex(lexer, &tok);
+        P_PEEK(lexer, &tok);
         if (tok.type == YFT_CBRACE) {
             return 0;
         }
-        yfl_unlex(lexer, &tok);
         stmt = yf_malloc(sizeof (struct yf_parse_node));
         if (yfp_stmt(stmt, lexer)) {
             free(stmt);

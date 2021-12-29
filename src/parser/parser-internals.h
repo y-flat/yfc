@@ -35,6 +35,11 @@
   } \
 } while (0)
 
+#define P_PEEK(lexer, tok) do { \
+  P_LEX(lexer, tok); \
+  yfl_unlex(lexer, tok); \
+} while (0)
+
 int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer);
 int yfp_vardecl(struct yf_parse_node * node, struct yf_lexer * lexer);
 int yfp_funcdecl(struct yf_parse_node * node, struct yf_lexer * lexer);

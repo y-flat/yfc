@@ -4,8 +4,8 @@
 #include <util/allocator.h>
 #include <util/yfc-out.h>
 
-static int yfs_add_var(struct yf_hashmap * symtab, struct yfcs_vardecl *);
-static int yfs_add_fn(struct yf_hashmap * symtab, struct yfcs_funcdecl *);
+static int yfs_add_var(struct yf_hashmap * symtab, struct yf_parse_node *);
+static int yfs_add_fn(struct yf_hashmap * symtab, struct yf_parse_node *);
 
 int yfs_build_symtab(struct yf_file_compilation_data * data) {
 
@@ -30,11 +30,11 @@ int yfs_build_symtab(struct yf_file_compilation_data * data) {
             return ret;
         switch (node->type) {
             case YFCS_VARDECL:
-                if (yfs_add_var(data->symtab.table, &node->as.vardecl))
+                if (yfs_add_var(data->symtab.table, node))
                     ret = 1;
                 break;
             case YFCS_FUNCDECL:
-                if (yfs_add_fn(data->symtab.table, &node->as.funcdecl))
+                if (yfs_add_fn(data->symtab.table, node))
                     ret = 1;
                 break;
             default:
@@ -48,26 +48,38 @@ int yfs_build_symtab(struct yf_file_compilation_data * data) {
 
 }
 
-static int yfs_add_var(struct yf_hashmap * symtab, struct yfcs_vardecl * v) {
+static int yfs_add_var(struct yf_hashmap * symtab, struct yf_parse_node * n) {
 
-    struct yf_sym * vsym;
+    struct yfcs_vardecl * v = &n->as.vardecl;
+    struct yf_sym * vsym, * dupl;
     vsym = yf_malloc(sizeof (struct yf_sym));
     if (!vsym) return 3;
 
     vsym->type = YFS_VAR;
     
+    vsym->line = n->lineno;
     /* TODO */
-    vsym->line = 0;
     vsym->file = "<unknown>";
     
     vsym->var.name = v->name.name.databuf;
     vsym->var.dtype.name = v->type.databuf;
 
+    if ( (dupl = yfh_get(symtab, vsym->var.name)) != NULL) {
+        YF_PRINT_ERROR(
+            "symtab: duplicate variable declaration '%s' (lines %d and %d)",
+            v->name.name.databuf, dupl->line, vsym->line
+        );
+        free(vsym);
+        return 1;
+    }
+
+    yfh_set(symtab, v->name.name.databuf, vsym);
+
     return 0;
 
 }
 
-static int yfs_add_fn(struct yf_hashmap * symtab, struct yfcs_funcdecl * f) {
+static int yfs_add_fn(struct yf_hashmap * symtab, struct yf_parse_node * f) {
     YF_PRINT_ERROR("function symbol creation not supported yet");
     return 1;
 }

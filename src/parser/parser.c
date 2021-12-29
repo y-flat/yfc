@@ -48,8 +48,8 @@ int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer) {
             return 0;
         }
         
-        yfp_ident(&ident, lexer);
-        decl->colno = ident.colno, decl->lineno = ident.lineno;
+        yfp_ident(&ident, lexer);   
+        P_GETCT(decl, ident);
 
         P_LEX(lexer, &tok);
         switch (tok.type) {
@@ -141,7 +141,7 @@ int yfp_ident(struct yfcs_identifier * node, struct yf_lexer * lexer) {
     int lex_err;
     struct yf_token tok;
     P_LEX(lexer, &tok);
-    node->lineno = tok.lineno, node->colno = tok.colno;
+    P_GETCT(node, tok);
     if (tok.type != YFT_IDENTIFIER) {
         YF_TOKERR(tok, "identifier");
     } else {
@@ -156,7 +156,7 @@ int yfp_type(struct yfcs_type * node, struct yf_lexer * lexer) {
     /* TODO - parse compound types */
     struct yf_token tok;
     P_LEX(lexer, &tok);
-    node->lineno = tok.lineno, node->colno = tok.colno;
+    P_GETCT(node, tok);
     if (tok.type != YFT_IDENTIFIER) {
         YF_TOKERR(tok, "identifier");
     } else {
@@ -179,7 +179,7 @@ int yfp_bstmt(struct yf_parse_node * node, struct yf_lexer * lexer) {
         YF_TOKERR(tok, "'{'");
     }
 
-    node->colno = tok.colno, node->lineno = tok.lineno;
+    P_GETCT(node, tok);
 
     node->type = YFCS_BSTMT;
     yf_list_init(&node->as.bstmt.stmts);

@@ -187,6 +187,8 @@ int yfp_bstmt(struct yf_parse_node * node, struct yf_lexer * lexer) {
     for (;;) {
         P_PEEK(lexer, &tok);
         if (tok.type == YFT_CBRACE) {
+            /* Consume */
+            P_LEX(lexer, &tok);
             return 0;
         }
         stmt = yf_malloc(sizeof (struct yf_parse_node));

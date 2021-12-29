@@ -51,7 +51,7 @@ int yfs_build_symtab(struct yf_file_compilation_data * data) {
 static int yfs_add_var(struct yf_hashmap * symtab, struct yf_parse_node * n) {
 
     struct yfcs_vardecl * v = &n->as.vardecl;
-    struct yf_sym * vsym;
+    struct yf_sym * vsym, * dupl;
     vsym = yf_malloc(sizeof (struct yf_sym));
     if (!vsym) return 3;
 
@@ -63,6 +63,15 @@ static int yfs_add_var(struct yf_hashmap * symtab, struct yf_parse_node * n) {
     
     vsym->var.name = v->name.name.databuf;
     vsym->var.dtype.name = v->type.databuf;
+
+    if ( (dupl = yfh_get(symtab, vsym->var.name)) != NULL) {
+        YF_PRINT_ERROR(
+            "symtab: duplicate variable declaration '%s' (lines %d and %d)",
+            v->name.name.databuf, dupl->line, vsym->line
+        );
+        free(vsym);
+        return 1;
+    }
 
     yfh_set(symtab, v->name.name.databuf, vsym);
 

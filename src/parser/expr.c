@@ -103,6 +103,8 @@ int yfp_expr(struct yf_parse_node * node, struct yf_lexer * lexer,
         atomics[0] = *first_node;
     }
 
+    node->colno = atomics[0].colno, node->lineno = atomics[0].lineno;
+
     for (i = 0; i < 64; i++) {
         P_LEX(lexer, &tok);
         if (tok.type == YFT_OP) {

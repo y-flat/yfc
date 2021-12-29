@@ -27,7 +27,7 @@ int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer) {
     node->lineno = node->colno = -1;
 
     node->type = YFCS_PROGRAM;
-    yf_list_init(&node->as.program.decls);
+    yf_list_init(&node->program.decls);
 
     for (;;) {
 
@@ -54,10 +54,10 @@ int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer) {
         P_LEX(lexer, &tok);
         switch (tok.type) {
             case YFT_COLON:
-                decl->as.vardecl.name.name.datalen = ident.name.datalen;
+                decl->vardecl.name.name.datalen = ident.name.datalen;
                 strncpy(
-                    decl->as.vardecl.name.name.databuf, ident.name.databuf,
-                    decl->as.vardecl.name.name.datalen
+                    decl->vardecl.name.name.databuf, ident.name.databuf,
+                    decl->vardecl.name.name.datalen
                 );
                 if (yfp_vardecl(decl, lexer)) {
                     free(decl);
@@ -70,10 +70,10 @@ int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer) {
                 }
                 break;
             case YFT_OPAREN:
-                decl->as.funcdecl.name.name.datalen = ident.name.datalen;
+                decl->funcdecl.name.name.datalen = ident.name.datalen;
                 strncpy(
-                    decl->as.funcdecl.name.name.databuf, ident.name.databuf,
-                    decl->as.funcdecl.name.name.datalen
+                    decl->funcdecl.name.name.databuf, ident.name.databuf,
+                    decl->funcdecl.name.name.datalen
                 );
                 if (yfp_funcdecl(decl, lexer)) {
                     free(decl);
@@ -86,7 +86,7 @@ int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer) {
         }
 
         /* Now, we have a node - add it to the list. */
-        yf_list_add(&node->as.program.decls, decl);
+        yf_list_add(&node->program.decls, decl);
 
     }
 
@@ -108,7 +108,7 @@ int yfp_vardecl(struct yf_parse_node * node, struct yf_lexer * lexer) {
     
     /* We've parsed all of this: [name] colon */
     /* So now, we expect a type. */
-    if (yfp_type(&node->as.vardecl.type, lexer)) {
+    if (yfp_type(&node->vardecl.type, lexer)) {
         return 1;
     }
 
@@ -120,9 +120,9 @@ int yfp_vardecl(struct yf_parse_node * node, struct yf_lexer * lexer) {
     P_LEX(lexer, &tok);
     switch (tok.type) {
         case YFT_OP: /* TODO - do an equals sign check */
-            node->as.vardecl.expr = yf_malloc(sizeof(struct yf_parse_node));
-            if (yfp_expr(node->as.vardecl.expr, lexer, 0, NULL)) {
-                free(node->as.vardecl.expr);
+            node->vardecl.expr = yf_malloc(sizeof(struct yf_parse_node));
+            if (yfp_expr(node->vardecl.expr, lexer, 0, NULL)) {
+                free(node->vardecl.expr);
                 return 1;
             }
             break;
@@ -182,7 +182,7 @@ int yfp_bstmt(struct yf_parse_node * node, struct yf_lexer * lexer) {
     P_GETCT(node, tok);
 
     node->type = YFCS_BSTMT;
-    yf_list_init(&node->as.bstmt.stmts);
+    yf_list_init(&node->bstmt.stmts);
 
     for (;;) {
         P_PEEK(lexer, &tok);
@@ -196,7 +196,7 @@ int yfp_bstmt(struct yf_parse_node * node, struct yf_lexer * lexer) {
             free(stmt);
             return 1;
         }
-        yf_list_add(&node->as.bstmt.stmts, stmt);
+        yf_list_add(&node->bstmt.stmts, stmt);
     }
 
 }

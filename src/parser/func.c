@@ -18,7 +18,7 @@ int yfp_funcdecl(struct yf_parse_node * node, struct yf_lexer * lexer) {
     /* Goes straight to function body */
 
     node->type = YFCS_FUNCDECL;
-    node->as.funcdecl.body = yf_malloc(sizeof (struct yf_parse_node));
-    return yfp_bstmt(node->as.funcdecl.body, lexer);
+    node->funcdecl.body = yf_malloc(sizeof (struct yf_parse_node));
+    return yfp_bstmt(node->funcdecl.body, lexer);
 
 }

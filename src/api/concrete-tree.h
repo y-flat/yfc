@@ -35,7 +35,7 @@ struct yfcs_value {
     union {
         struct yfcs_identifier identifier;
         struct yfcs_literal literal;
-    } as;
+    };
 
 };
 
@@ -59,7 +59,7 @@ struct yfcs_expr {
             struct yfcs_expr *right;
             enum yf_operator op;
         } binary;
-    } as;
+    };
 
     enum {
         YFCS_VALUE,
@@ -110,7 +110,7 @@ struct yf_parse_node {
         struct yfcs_funcdecl funcdecl;
         struct yfcs_program program;
         struct yfcs_bstmt bstmt;
-    } as;
+    };
 
     int lineno, colno;
 

@@ -29,17 +29,17 @@ int yfp_stmt(struct yf_parse_node * node, struct yf_lexer * lexer) {
             /* So here, it's either a vardecl or an expr. We don't know, and we
             can't unlex a whole identifier, so we check the next token and enter
             the appropriate parsing routine "in the middle". */
-            if (yfp_ident(&ident.as.expr.as.value.as.identifier, lexer))
+            if (yfp_ident(&ident.expr.value.identifier, lexer))
                 return 1;
             P_LEX(lexer, &tok);
             if (tok.type == YFT_COLON) {
                 /* TODO - reduce the copied code */
-                node->as.vardecl.name.name.datalen =
-                    ident.as.expr.as.value.as.identifier.name.datalen;
+                node->vardecl.name.name.datalen =
+                    ident.expr.value.identifier.name.datalen;
                 strncpy(
-                    node->as.vardecl.name.name.databuf,
-                    ident.as.expr.as.value.as.identifier.name.databuf,
-                    node->as.vardecl.name.name.datalen
+                    node->vardecl.name.name.databuf,
+                    ident.expr.value.identifier.name.databuf,
+                    node->vardecl.name.name.datalen
                 );
                 ret = yfp_vardecl(node, lexer);
                 goto out;

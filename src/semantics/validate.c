@@ -29,7 +29,7 @@ int yfs_validate(
     struct yf_project_compilation_data * pdata
 ) {
     return validate_program(
-        &fdata->parse_tree.as.program, &fdata->ast_tree.program, pdata, fdata
+        &fdata->parse_tree.program, &fdata->ast_tree.program, pdata, fdata
     );
 }
 
@@ -101,7 +101,7 @@ static int validate_vardecl(struct yf_parse_node * c, struct yfa_vardecl * a,
     struct yf_file_compilation_data * fdata, bool global) {
 
     struct yf_sym * entry;
-    struct yfcs_vardecl * cdecl = &c->as.vardecl;
+    struct yfcs_vardecl * cdecl = &c->vardecl;
 
     /* Make sure it isn't declared twice */
     if ( (

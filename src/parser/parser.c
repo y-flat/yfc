@@ -54,10 +54,8 @@ int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer) {
         P_LEX(lexer, &tok);
         switch (tok.type) {
             case YFT_COLON:
-                decl->vardecl.name.name.datalen = ident.name.datalen;
-                strncpy(
-                    decl->vardecl.name.name.databuf, ident.name.databuf,
-                    decl->vardecl.name.name.datalen
+                strcpy(
+                    decl->vardecl.name.name, ident.name
                 );
                 if (yfp_vardecl(decl, lexer)) {
                     free(decl);
@@ -70,10 +68,8 @@ int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer) {
                 }
                 break;
             case YFT_OPAREN:
-                decl->funcdecl.name.name.datalen = ident.name.datalen;
-                strncpy(
-                    decl->funcdecl.name.name.databuf, ident.name.databuf,
-                    decl->funcdecl.name.name.datalen
+                strcpy(
+                    decl->funcdecl.name.name, ident.name
                 );
                 if (yfp_funcdecl(decl, lexer)) {
                     free(decl);
@@ -145,8 +141,7 @@ int yfp_ident(struct yfcs_identifier * node, struct yf_lexer * lexer) {
     if (tok.type != YFT_IDENTIFIER) {
         YF_TOKERR(tok, "identifier");
     } else {
-        node->name.datalen = strlen(tok.data);
-        strcpy(node->name.databuf, tok.data);
+        strcpy(node->name, tok.data);
     }
     return 0;
 }
@@ -160,7 +155,6 @@ int yfp_type(struct yfcs_type * node, struct yf_lexer * lexer) {
     if (tok.type != YFT_IDENTIFIER) {
         YF_TOKERR(tok, "identifier");
     } else {
-        node->datalen = strlen(tok.data);
         strcpy(node->databuf, tok.data);
     }
     return 0;

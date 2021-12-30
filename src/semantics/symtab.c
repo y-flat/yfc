@@ -61,19 +61,19 @@ static int yfs_add_var(struct yf_hashmap * symtab, struct yf_parse_node * n) {
     /* TODO */
     vsym->file = "<unknown>";
     
-    vsym->var.name = v->name.name.databuf;
+    vsym->var.name = v->name.name;
     vsym->var.dtype.name = v->type.databuf;
 
     if ( (dupl = yfh_get(symtab, vsym->var.name)) != NULL) {
         YF_PRINT_ERROR(
             "symtab: duplicate variable declaration '%s' (lines %d and %d)",
-            v->name.name.databuf, dupl->line, vsym->line
+            v->name.name, dupl->line, vsym->line
         );
         free(vsym);
         return 1;
     }
 
-    yfh_set(symtab, v->name.name.databuf, vsym);
+    yfh_set(symtab, v->name.name, vsym);
 
     return 0;
 

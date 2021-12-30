@@ -34,12 +34,9 @@ int yfp_stmt(struct yf_parse_node * node, struct yf_lexer * lexer) {
             P_LEX(lexer, &tok);
             if (tok.type == YFT_COLON) {
                 /* TODO - reduce the copied code */
-                node->vardecl.name.name.datalen =
-                    ident.expr.value.identifier.name.datalen;
-                strncpy(
-                    node->vardecl.name.name.databuf,
-                    ident.expr.value.identifier.name.databuf,
-                    node->vardecl.name.name.datalen
+                strcpy(
+                    node->vardecl.name.name,
+                    ident.expr.value.identifier.name
                 );
                 ret = yfp_vardecl(node, lexer);
                 goto out;

@@ -37,7 +37,7 @@ int yfp_atomic_expr(struct yf_parse_node * node, struct yf_lexer * lexer) {
     case YFT_LITERAL:
     node->expr.type = YFCS_VALUE;
         strcpy(
-            node->expr.value.literal.value.databuf, tok.data
+            node->expr.value.literal.value, tok.data
         );
         node->expr.value.type = YFCS_LITERAL;
         break;

@@ -106,7 +106,7 @@ static int validate_vardecl(struct yf_parse_node * c, struct yfa_vardecl * a,
     /* Make sure it isn't declared twice */
     if ( (
         entry = yfh_get(
-            fdata->symtab.table, cdecl->name.name.databuf
+            fdata->symtab.table, cdecl->name.name
         )
     ) != NULL) {
         if (global) {
@@ -117,7 +117,7 @@ static int validate_vardecl(struct yf_parse_node * c, struct yfa_vardecl * a,
                 YF_PRINT_ERROR(
                     "Uncaught duplicate declaration of symbol '%s'"
                     ", lines %d and %d",
-                    cdecl->name.name.databuf,
+                    cdecl->name.name,
                     entry->line,
                     c->lineno
                 );
@@ -127,7 +127,7 @@ static int validate_vardecl(struct yf_parse_node * c, struct yfa_vardecl * a,
             YF_PRINT_WARNING(
                 "Global symbol '%s' (line %d)"
                 "shadowed by local symbol (line %d)",
-                cdecl->name.name.databuf,
+                cdecl->name.name,
                 entry->line,
                 c->lineno
             );

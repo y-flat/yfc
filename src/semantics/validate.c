@@ -22,6 +22,7 @@ VDECL(validate_program);
 VDECL(validate_funcdecl);
 VDECL(validate_expr);
 VDECL(validate_bstmt);
+VDECL(validate_vardecl);
 
 /**
  * Internal - the innermost scope we have open. TODO - un-static this.
@@ -46,14 +47,6 @@ static int find_symbol(
     }
     return -1;
 }
-
-/* Takes an extra arg */
-static int validate_vardecl(
-    struct yf_parse_node * cin,
-    struct yf_ast_node * ain,
-    struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata, bool global
-);
 
 int yfs_validate(
     struct yf_file_compilation_data * fdata,
@@ -101,7 +94,7 @@ static int validate_program(
         switch (cnode->type) {
             case YFCS_VARDECL:
                 if (validate_vardecl(
-                    cnode, anode, pdata, fdata, true
+                    cnode, anode, pdata, fdata
                 )) {
                     free(anode);
                     return 1;
@@ -139,23 +132,22 @@ static int validate_vardecl(
     struct yf_parse_node * cin,
     struct yf_ast_node * ain,
     struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata, bool global
+    struct yf_file_compilation_data * fdata
 ) {
 
     struct yf_sym * entry;
     struct yfcs_vardecl * c = &cin->vardecl;
     struct yfa_vardecl * a = &ain->vardecl;
 
+    int ssym;
+
     /* Make sure it isn't declared twice */
     if ( (
-        entry = yfh_get(
-            fdata->symtab.table, c->name.name
-        )
-    ) != NULL) {
-        if (global) {
+        ssym = find_symbol(&entry, current_scope, c->name.name)
+    ) != -1) {
+        /* A variable is redeclared in the current scope. Whoops! */
+        if (ssym == 0) {
             /* The less-than is so that each double is only reported once. */
-            /* This should never happen for global vars - these should have been
-            caught in the symtab-building phase. */
             if (entry->line < cin->lineno) {
                 YF_PRINT_ERROR(
                     "Uncaught duplicate declaration of symbol '%s'"
@@ -166,7 +158,7 @@ static int validate_vardecl(
                 );
             }
         } else {
-            /* Just a warning. */
+            /* Just a warning about shadowing. */
             YF_PRINT_WARNING(
                 "Global symbol '%s' (line %d)"
                 "shadowed by local symbol (line %d)",

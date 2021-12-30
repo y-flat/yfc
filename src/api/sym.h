@@ -44,6 +44,10 @@ struct yfs_symtab {
 
     struct yf_hashmap * table;
 
+    /* Also, a pointer to the "parent" symtab. For top-level decls, this is the
+     * file symtab, and for file symtabs this is NULL. */
+    struct yfs_symtab * parent;
+
 };
 
 #endif /* API_SYM_H */

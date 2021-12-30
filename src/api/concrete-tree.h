@@ -10,18 +10,15 @@
 
 struct yf_parse_node;
 
-struct yfcs_databuf {
-    char databuf[256];
-    int datalen;
-};
+typedef char yfcs_databuf[256];
 
 struct yfcs_identifier {
     int lineno, colno;
-    struct yfcs_databuf name;
+    yfcs_databuf name;
 };
 
 struct yfcs_literal {
-    struct yfcs_databuf value;
+    yfcs_databuf value;
 };
 
 /* Any single value, whether an identifier like "a.b" or a literal like 2. */
@@ -35,15 +32,14 @@ struct yfcs_value {
     union {
         struct yfcs_identifier identifier;
         struct yfcs_literal literal;
-    } as;
+    };
 
 };
 
 /* Types are stored as strings in the concrete syntax tree, even future complex
  * types like "class<type> follows constraint". */
 struct yfcs_type {
-    char databuf[256];
-    int datalen;
+    yfcs_databuf databuf;
     int lineno, colno;
 };
 
@@ -59,7 +55,7 @@ struct yfcs_expr {
             struct yfcs_expr *right;
             enum yf_operator op;
         } binary;
-    } as;
+    };
 
     enum {
         YFCS_VALUE,
@@ -110,7 +106,7 @@ struct yf_parse_node {
         struct yfcs_funcdecl funcdecl;
         struct yfcs_program program;
         struct yfcs_bstmt bstmt;
-    } as;
+    };
 
     int lineno, colno;
 

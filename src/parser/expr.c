@@ -31,15 +31,15 @@ int yfp_atomic_expr(struct yf_parse_node * node, struct yf_lexer * lexer) {
     switch (tok.type) {
     case YFT_IDENTIFIER:
         yfl_unlex(lexer, &tok);
-        if (yfp_ident(&node->as.expr.as.value.as.identifier, lexer))
+        if (yfp_ident(&node->expr.value.identifier, lexer))
             return 1;
         break;
     case YFT_LITERAL:
-    node->as.expr.type = YFCS_VALUE;
+    node->expr.type = YFCS_VALUE;
         strcpy(
-            node->as.expr.as.value.as.literal.value.databuf, tok.data
+            node->expr.value.literal.value, tok.data
         );
-        node->as.expr.as.value.type = YFCS_LITERAL;
+        node->expr.value.type = YFCS_LITERAL;
         break;
     case YFT_OPAREN:
         if (yfp_expr(node, lexer, 0, NULL))
@@ -103,7 +103,7 @@ int yfp_expr(struct yf_parse_node * node, struct yf_lexer * lexer,
         atomics[0] = *first_node;
     }
 
-    node->colno = atomics[0].colno, node->lineno = atomics[0].lineno;
+    P_GETCT(node, atomics[0]);
 
     for (i = 0; i < 64; i++) {
         P_LEX(lexer, &tok);
@@ -125,7 +125,7 @@ int yfp_expr(struct yf_parse_node * node, struct yf_lexer * lexer,
     }
 
     /* Now we have all operators and atomics. */
-    return yfp_sort_expr_tree(atomics, i + 1, operators, &node->as.expr);
+    return yfp_sort_expr_tree(atomics, i + 1, operators, &node->expr);
 
 }
 
@@ -144,19 +144,19 @@ static int yfp_sort_expr_tree(
 
     /* First, trivial cases. */
     if (num_nodes == 1) {
-        *node = nodes[0].as.expr;
+        *node = nodes[0].expr;
         return 0;
     }
     if (num_nodes == 2) {
         node->type = YFCS_BINARY;
-        node->as.binary.op = operators[0];
-        node->as.binary.left = malloc(sizeof(struct yf_parse_node));
-        node->as.binary.right = malloc(sizeof(struct yf_parse_node));
-        if (!node->as.binary.left || !node->as.binary.right) {
+        node->binary.op = operators[0];
+        node->binary.left = malloc(sizeof(struct yf_parse_node));
+        node->binary.right = malloc(sizeof(struct yf_parse_node));
+        if (!node->binary.left || !node->binary.right) {
             return 1;
         }
-        *node->as.binary.left = nodes[0].as.expr;
-        *node->as.binary.right = nodes[1].as.expr;
+        *node->binary.left = nodes[0].expr;
+        *node->binary.right = nodes[1].expr;
         return 0;
     }
 
@@ -180,23 +180,23 @@ static int yfp_sort_expr_tree(
 
     /* Now that we have our splitting location, we recurse. */
     node->type = YFCS_BINARY;
-    node->as.binary.left = malloc(sizeof(struct yf_parse_node));
-    node->as.binary.right = malloc(sizeof(struct yf_parse_node));
-    if (!node->as.binary.left || !node->as.binary.right) {
+    node->binary.left = malloc(sizeof(struct yf_parse_node));
+    node->binary.right = malloc(sizeof(struct yf_parse_node));
+    if (!node->binary.left || !node->binary.right) {
         return 1;
     }
-    node->as.binary.op = operators[index];
+    node->binary.op = operators[index];
     yfp_sort_expr_tree(
         nodes,
         index + 1,
         operators,
-        node->as.binary.left
+        node->binary.left
     );
     yfp_sort_expr_tree(
         nodes + index + 1,
         num_nodes - index - 1,
         operators + index + 1,
-        node->as.binary.right
+        node->binary.right
     );
     return 0;
 

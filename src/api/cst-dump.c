@@ -36,19 +36,19 @@ void yf_dump_cst(struct yf_parse_node * root, FILE *out) {
 
     switch (root->type) {
         case YFCS_PROGRAM:
-            yf_dump_program(&root->as.program, out);
+            yf_dump_program(&root->program, out);
             break;
         case YFCS_VARDECL:
-            yf_dump_vardecl(&root->as.vardecl, out);
+            yf_dump_vardecl(&root->vardecl, out);
             break;
         case YFCS_FUNCDECL:
-            yf_dump_funcdecl(&root->as.funcdecl, out);
+            yf_dump_funcdecl(&root->funcdecl, out);
             break;
         case YFCS_EXPR:
-            yf_dump_expr(&root->as.expr, out);
+            yf_dump_expr(&root->expr, out);
             break;
         case YFCS_BSTMT:
-            yf_dump_bstmt(&root->as.bstmt, out);
+            yf_dump_bstmt(&root->bstmt, out);
     }
 
 }
@@ -78,8 +78,8 @@ static void yf_dump_vardecl(struct yfcs_vardecl * node, FILE * out) {
     yf_print_line(out, "vardecl");
     indent();
 
-    yf_print_line(out, "name: %s", node->name.name.databuf);
-    yf_print_line(out, "type: %s", node->type.databuf);
+    yf_print_line(out, "name: %s", node->name.name);
+    yf_print_line(out, "type: %s", node->type);
 
     yf_print_line(out, "initialization value:");
     if (node->expr) {
@@ -111,17 +111,17 @@ static void yf_dump_expr(struct yfcs_expr * node, FILE * out) {
 
     if (node->type == YFCS_VALUE) {
         yf_print_line(out, "value: %s",
-            node->as.value.type == YFCS_IDENT ? node->as.value.as.identifier.name.databuf
-            : node->as.value.as.literal.value.databuf
+            node->value.type == YFCS_IDENT ? node->value.identifier.name
+            : node->value.literal.value
         );
     } else {
         yf_print_line(out,
-            "operator: %s", get_op_string(node->as.binary.op)
+            "operator: %s", get_op_string(node->binary.op)
         );
         yf_print_line(out, "left:");
-        yf_dump_expr(node->as.binary.left, out);
+        yf_dump_expr(node->binary.left, out);
         yf_print_line(out, "right:");
-        yf_dump_expr(node->as.binary.right, out);
+        yf_dump_expr(node->binary.right, out);
     }
 
     dedent();

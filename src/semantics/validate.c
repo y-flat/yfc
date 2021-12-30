@@ -6,41 +6,53 @@
 /**
  * Forwards
  */
-static int validate_program(struct yfcs_program * c, struct yfa_program * a,
+
+/* Any sort of "typical" transfer operation - takes a current file for local
+ * decls, the project for all decls, and the two nodes to edit. */
+
+/* I would use a typedef, but then the forwards would conflict. */
+#define VDECL(name) static int name( \
+    struct yf_parse_node *, \
+    struct yf_ast_node *, \
+    struct yf_project_compilation_data *, \
+    struct yf_file_compilation_data *\
+)
+
+VDECL(validate_program);
+VDECL(validate_funcdecl);
+VDECL(validate_expr);
+VDECL(validate_bstmt);
+
+/* Takes an extra arg */
+static int validate_vardecl(
+    struct yf_parse_node * cin,
+    struct yf_ast_node * ain,
     struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata);
-static int validate_vardecl(struct yf_parse_node * c, struct yfa_vardecl * a,
-    struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata,
-    bool global
+    struct yf_file_compilation_data * fdata, bool global
 );
-static int validate_expr(struct yf_parse_node * c, struct yfa_expr * a,
-    struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata);
-static int validate_funcdecl(struct yf_parse_node * c, struct yfa_funcdecl * a,
-    struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata);
-static int validate_bstmt(struct yf_parse_node * c, struct yfa_bstmt * a,
-    struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata);
 
 int yfs_validate(
     struct yf_file_compilation_data * fdata,
     struct yf_project_compilation_data * pdata
 ) {
     return validate_program(
-        &fdata->parse_tree.as.program, &fdata->ast_tree.program, pdata, fdata
+        &fdata->parse_tree, &fdata->ast_tree, pdata, fdata
     );
 }
 
 static int validate_program(
-    struct yfcs_program * cprog, struct yfa_program * aprog,
+    struct yf_parse_node * cin, struct yf_ast_node * ain,
     struct yf_project_compilation_data * pdata,
     struct yf_file_compilation_data * fdata
 ) {
 
     struct yf_parse_node * cnode;
     struct yf_ast_node * anode;
+    struct yfcs_program * cprog;
+    struct yfa_program * aprog;
+
+    cprog = &cin->program;
+    aprog = &ain->program;
 
     yf_list_init(&aprog->decls);
     yf_list_reset(&cprog->decls);
@@ -62,7 +74,7 @@ static int validate_program(
         switch (cnode->type) {
             case YFCS_VARDECL:
                 if (validate_vardecl(
-                    cnode, &anode->vardecl, pdata, fdata, true
+                    cnode, anode, pdata, fdata, true
                 )) {
                     free(anode);
                     return 1;
@@ -70,7 +82,7 @@ static int validate_program(
                 break;
             case YFCS_FUNCDECL:
                 if (validate_funcdecl(
-                    cnode, &anode->funcdecl, pdata, fdata
+                    cnode, anode, pdata, fdata
                 )) {
                     free(anode);
                     return 1;
@@ -96,30 +108,34 @@ static int validate_program(
 /**
  * global - whether this is a global decl or not.
  */
-static int validate_vardecl(struct yf_parse_node * c, struct yfa_vardecl * a,
+static int validate_vardecl(
+    struct yf_parse_node * cin,
+    struct yf_ast_node * ain,
     struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata, bool global) {
+    struct yf_file_compilation_data * fdata, bool global
+) {
 
     struct yf_sym * entry;
-    struct yfcs_vardecl * cdecl = &c->as.vardecl;
+    struct yfcs_vardecl * c = &cin->vardecl;
+    struct yfa_vardecl * a = &ain->vardecl;
 
     /* Make sure it isn't declared twice */
     if ( (
         entry = yfh_get(
-            fdata->symtab.table, cdecl->name.name.databuf
+            fdata->symtab.table, c->name.name
         )
     ) != NULL) {
         if (global) {
             /* The less-than is so that each double is only reported once. */
             /* This should never happen for global vars - these should have been
             caught in the symtab-building phase. */
-            if (entry->line < c->lineno) {
+            if (entry->line < cin->lineno) {
                 YF_PRINT_ERROR(
                     "Uncaught duplicate declaration of symbol '%s'"
                     ", lines %d and %d",
-                    cdecl->name.name.databuf,
+                    c->name.name,
                     entry->line,
-                    c->lineno
+                    cin->lineno
                 );
             }
         } else {
@@ -127,9 +143,9 @@ static int validate_vardecl(struct yf_parse_node * c, struct yfa_vardecl * a,
             YF_PRINT_WARNING(
                 "Global symbol '%s' (line %d)"
                 "shadowed by local symbol (line %d)",
-                cdecl->name.name.databuf,
+                c->name.name,
                 entry->line,
-                c->lineno
+                cin->lineno
             );
         }
         return 1;
@@ -138,9 +154,9 @@ static int validate_vardecl(struct yf_parse_node * c, struct yfa_vardecl * a,
     /* Construct abstract instance */
     a->name = entry;
     a->type = entry->var.dtype;
-    if (cdecl->expr) {
+    if (c->expr) {
         a->expr->type = YFA_EXPR;
-        if (validate_expr(cdecl->expr, &a->expr->expr, pdata, fdata))
+        if (validate_expr(c->expr, a->expr, pdata, fdata))
             return 1;
     }
     
@@ -148,7 +164,7 @@ static int validate_vardecl(struct yf_parse_node * c, struct yfa_vardecl * a,
 
 }
 
-static int validate_expr(struct yf_parse_node * c, struct yfa_expr * a,
+static int validate_expr(struct yf_parse_node * c, struct yf_ast_node * a,
     struct yf_project_compilation_data * pdata,
     struct yf_file_compilation_data * fdata) {
     /* TODO */
@@ -156,7 +172,7 @@ static int validate_expr(struct yf_parse_node * c, struct yfa_expr * a,
 }
 
 static int validate_funcdecl(
-    struct yf_parse_node * c, struct yfa_funcdecl * a,
+    struct yf_parse_node * c, struct yf_ast_node * a,
     struct yf_project_compilation_data * pdata,
     struct yf_file_compilation_data * fdata
 ) {
@@ -164,7 +180,7 @@ static int validate_funcdecl(
     return 0;
 }
 
-static int validate_bstmt(struct yf_parse_node * c, struct yfa_bstmt * a,
+static int validate_bstmt(struct yf_parse_node * c, struct yf_ast_node * a,
     struct yf_project_compilation_data * pdata,
     struct yf_file_compilation_data * fdata) {
     /* TODO */

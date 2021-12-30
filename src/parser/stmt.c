@@ -9,7 +9,7 @@ int yfp_stmt(struct yf_parse_node * node, struct yf_lexer * lexer) {
     int lex_err, ret;
     bool expect_semicolon;
 
-    P_LEX(lexer, &tok);
+    P_PEEK(lexer, &tok);
 
     /**
      * A statement can begin one of several ways:
@@ -21,7 +21,6 @@ int yfp_stmt(struct yf_parse_node * node, struct yf_lexer * lexer) {
     expect_semicolon = 1; /* Probably redundant */
     switch (tok.type) {
         case YFT_OBRACE:
-            yfl_unlex(lexer, &tok);
             ret = yfp_bstmt(node, lexer);
             expect_semicolon = false;
             goto out;
@@ -30,30 +29,24 @@ int yfp_stmt(struct yf_parse_node * node, struct yf_lexer * lexer) {
             /* So here, it's either a vardecl or an expr. We don't know, and we
             can't unlex a whole identifier, so we check the next token and enter
             the appropriate parsing routine "in the middle". */
-            yfl_unlex(lexer, &tok);
-            if (yfp_ident(&ident.as.expr.as.value.as.identifier, lexer))
+            if (yfp_ident(&ident.expr.value.identifier, lexer))
                 return 1;
-            yfl_lex(lexer, &tok);
+            P_LEX(lexer, &tok);
             if (tok.type == YFT_COLON) {
                 /* TODO - reduce the copied code */
-                node->as.vardecl.name.name.datalen =
-                    ident.as.expr.as.value.as.identifier.name.datalen;
-                strncpy(
-                    node->as.vardecl.name.name.databuf,
-                    ident.as.expr.as.value.as.identifier.name.databuf,
-                    node->as.vardecl.name.name.datalen
+                strcpy(
+                    node->vardecl.name.name,
+                    ident.expr.value.identifier.name
                 );
                 ret = yfp_vardecl(node, lexer);
                 goto out;
             } else if (tok.type == YFT_OP) {
-                yfl_unlex(lexer, &tok);
                 ret = yfp_expr(node, lexer, true, &ident);
                 goto out;
             } else {
                 YF_TOKERR(tok, "':' or operator");
             }
         case YFT_OPAREN:
-            yfl_unlex(lexer, &tok);
             ret = yfp_expr(node, lexer, 0, NULL);
             goto out;
         default:

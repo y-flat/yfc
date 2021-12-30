@@ -77,7 +77,14 @@ struct yfa_program {
 };
 
 struct yfa_bstmt {
+
     struct yf_list stmts;
+
+    /* Each block statement has a scope associated with it - or, its own symbol
+     * table. Searches for references start here.
+     */
+    struct yfs_symtab * symtab;
+
 };
 
 struct yf_ast_node {

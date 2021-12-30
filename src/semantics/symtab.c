@@ -13,6 +13,7 @@ int yfs_build_symtab(struct yf_file_compilation_data * data) {
     int ret;
 
     data->symtab.table = yfh_new();
+    data->symtab.parent = NULL;
     if (!data->symtab.table) {
         YF_PRINT_ERROR("symtab: failed to allocate table");
         return 3; /* Memory error */

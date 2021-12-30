@@ -23,6 +23,30 @@ VDECL(validate_funcdecl);
 VDECL(validate_expr);
 VDECL(validate_bstmt);
 
+/**
+ * Internal - the innermost scope we have open. TODO - un-static this.
+ */
+static struct yfs_symtab * current_scope;
+
+/**
+ * Search for a symbol with the given name. Return "depth" - innermost scope is
+ * 0, the next-enclosing is 1, etc. If not found, -1.
+ */
+static int find_symbol(
+    struct yf_sym ** sym, struct yfs_symtab * symtab,
+    char * name
+) {
+    int depth = 0;
+    while (symtab != NULL) {
+        if ( (*sym = yfh_get(symtab->table, name)) != NULL) {
+            return depth;
+        }
+        depth++;
+        symtab = symtab->parent;
+    }
+    return -1;
+}
+
 /* Takes an extra arg */
 static int validate_vardecl(
     struct yf_parse_node * cin,
@@ -56,6 +80,9 @@ static int validate_program(
 
     yf_list_init(&aprog->decls);
     yf_list_reset(&cprog->decls);
+
+    /* Initialize the scope */
+    current_scope = &fdata->symtab;
     
     /* Iterate through all decls, construct abstract instances of them, and move
     them into the abstract list. */

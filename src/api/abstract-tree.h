@@ -59,7 +59,6 @@ struct yfa_expr {
 
 struct yfa_vardecl {
     struct yf_sym * name;
-    struct yfs_type type;
     /* Can be NULL, and is always of type expr, is the right-hand side */
     struct yf_ast_node * expr;
 };

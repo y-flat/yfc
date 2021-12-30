@@ -255,18 +255,23 @@ static int validate_bstmt(struct yf_parse_node * cin, struct yf_ast_node * ain,
         case YFCS_EXPR:
             if (validate_expr(csub, asub, pdata, fdata))
                 return 1;
+            break;
         case YFCS_VARDECL:
             if (validate_vardecl(csub, asub, pdata, fdata))
                 return 1;
+            break;
         case YFCS_FUNCDECL:
             if (validate_funcdecl(csub, asub, pdata, fdata))
                 return 1;
+            break;
         case YFCS_PROGRAM:
             if (validate_program(csub, asub, pdata, fdata))
                 return 1;
+            break;
         case YFCS_BSTMT:
             if (validate_bstmt(csub, asub, pdata, fdata))
                 return 1;
+            break;
         }
 
         /* Move to abstract list */

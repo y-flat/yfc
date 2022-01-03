@@ -180,8 +180,7 @@ static int validate_vardecl(
         a->name = yf_malloc(sizeof (struct yf_sym));
         if (!a->name)
             return 2;
-        a->name->var.dtype =  /* c->type */
-            (struct yfs_type) { NULL }; /* TODO - get type lookup */
+        /* TODO - get type */
         a->name->line = cin->lineno;
     }
     if (c->expr) {

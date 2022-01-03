@@ -11,10 +11,11 @@
 
 #include <util/hashmap.h>
 
+/* Has no name - types are stored in a hashmap. NO nesting needed - all types
+are globally visible. */
 struct yfs_type {
 
-    /* Nothing much yet */
-    char * name;
+    
 
 };
 

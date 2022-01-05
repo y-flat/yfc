@@ -22,8 +22,8 @@ struct yf_ast_node;
 struct yfa_value {
 
     enum {
-        YFCS_IDENT,
-        YFCS_LITERAL,
+        YFA_IDENT,
+        YFA_LITERAL,
     } type;
 
     union {

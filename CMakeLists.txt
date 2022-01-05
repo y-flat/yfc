@@ -2,7 +2,10 @@ cmake_minimum_required(VERSION 3.10)
 set (CMAKE_CXX_STANDARD 11)
 project(yfc)
 
-add_compile_options(-O3 -Wall -Wpedantic -g -Wno-gnu-zero-variadic-macro-arguments)
+add_compile_options(-O3 -Wall -Wpedantic -g)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    add_compile_options(-Wno-gnu-zero-variadic-macro-arguments)
+endif()
 
 file(GLOB_RECURSE SOURCES_API src/api/*.c)
 add_library(api OBJECT ${SOURCES_API})

@@ -23,6 +23,7 @@ VDECL(validate_funcdecl);
 VDECL(validate_expr);
 VDECL(validate_bstmt);
 VDECL(validate_vardecl);
+VDECL(validate_node);
 
 /**
  * Internal - the innermost scope we have open. TODO - un-static this.
@@ -73,6 +74,28 @@ int yfs_validate(
     );
 }
 
+static int validate_node(
+    struct yf_parse_node * csub, struct yf_ast_node * asub,
+    struct yf_project_compilation_data * pdata,
+    struct yf_file_compilation_data * fdata
+) {
+    switch (csub->type) {
+    case YFCS_EXPR:
+        return validate_expr(csub, asub, pdata, fdata);
+    case YFCS_VARDECL:
+        return validate_vardecl(csub, asub, pdata, fdata);
+    case YFCS_FUNCDECL:
+        return validate_funcdecl(csub, asub, pdata, fdata);
+    case YFCS_PROGRAM:
+        return validate_program(csub, asub, pdata, fdata);
+    case YFCS_BSTMT:
+        return validate_bstmt(csub, asub, pdata, fdata);
+    default:
+        YF_PRINT_ERROR("internal error: unknown CST node type");
+        return 1;
+    } 
+}
+
 static int validate_program(
     struct yf_parse_node * cin, struct yf_ast_node * ain,
     struct yf_project_compilation_data * pdata,
@@ -107,26 +130,9 @@ static int validate_program(
             return 2;
 
         /* Validate */
-        switch (cnode->type) {
-            case YFCS_VARDECL:
-                if (validate_vardecl(
-                    cnode, anode, pdata, fdata
-                )) {
-                    free(anode);
-                    return 1;
-                }
-                break;
-            case YFCS_FUNCDECL:
-                if (validate_funcdecl(
-                    cnode, anode, pdata, fdata
-                )) {
-                    free(anode);
-                    return 1;
-                }
-                break;
-            default:
-                YF_PRINT_ERROR("Unknown node type in internal CST tree");
-                return 2;
+        if (validate_node(cnode, anode, pdata, fdata)) {
+            yf_free(anode);
+            return 1;
         }
 
         /* Move to abstract list */
@@ -280,27 +286,9 @@ static int validate_bstmt(struct yf_parse_node * cin, struct yf_ast_node * ain,
 
         /* Validate */
         /* TODO - this switch statement is a mess. Maybe factor it out. */
-        switch (csub->type) {
-        case YFCS_EXPR:
-            if (validate_expr(csub, asub, pdata, fdata))
-                return 1;
-            break;
-        case YFCS_VARDECL:
-            if (validate_vardecl(csub, asub, pdata, fdata))
-                return 1;
-            break;
-        case YFCS_FUNCDECL:
-            if (validate_funcdecl(csub, asub, pdata, fdata))
-                return 1;
-            break;
-        case YFCS_PROGRAM:
-            if (validate_program(csub, asub, pdata, fdata))
-                return 1;
-            break;
-        case YFCS_BSTMT:
-            if (validate_bstmt(csub, asub, pdata, fdata))
-                return 1;
-            break;
+        if (validate_node(csub, asub, pdata, fdata)) {
+            yf_free(asub);
+            return 1;
         }
 
         /* Move to abstract list */

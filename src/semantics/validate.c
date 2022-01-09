@@ -267,7 +267,7 @@ static int validate_bstmt(struct yf_parse_node * cin, struct yf_ast_node * ain,
     /* Validate each statement */
     yf_list_reset(&c->stmts);
 
-    for(;;) {
+    for (;;) {
 
         /* Get element */
         if (yf_list_get(&c->stmts, (void **) &csub) == -1) break;

@@ -22,6 +22,8 @@ struct yf_file_compilation_data {
 
     struct yfs_symtab symtab;
 
+    struct yfs_type_table types;
+
     struct yf_ast_node ast_tree;
 
     int error; /* If an error has occurred */

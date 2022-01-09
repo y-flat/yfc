@@ -48,10 +48,26 @@ static int find_symbol(
     return -1;
 }
 
+void add_type(struct yf_file_compilation_data * fdata, char * name, int size) {
+    struct yfs_type * type = yf_malloc(sizeof (struct yfs_type));
+    type->primitive.size = size;
+    type->kind = YFST_PRIMITIVE;
+    yfh_set(fdata->types.table, name, type);
+}
+
+void yfv_add_builtin_types(struct yf_file_compilation_data * fdata) {
+    add_type(fdata, "char",        8);
+    add_type(fdata, "short",      16);
+    add_type(fdata, "int",        32);
+    add_type(fdata, "long",       32);
+}
+
 int yfs_validate(
     struct yf_file_compilation_data * fdata,
     struct yf_project_compilation_data * pdata
 ) {
+    fdata->types.table = yfh_new();
+    yfv_add_builtin_types(fdata);
     return validate_program(
         &fdata->parse_tree, &fdata->ast_tree, pdata, fdata
     );
@@ -125,9 +141,6 @@ static int validate_program(
 
 }
 
-/**
- * global - whether this is a global decl or not.
- */
 static int validate_vardecl(
     struct yf_parse_node * cin,
     struct yf_ast_node * ain,
@@ -140,12 +153,15 @@ static int validate_vardecl(
     struct yfa_vardecl * a = &ain->vardecl;
 
     int ssym;
+    bool global = (current_scope == &fdata->symtab);
 
     /* Make sure it isn't declared twice */
+    /* A variable is redeclared in the current scope. Whoops! */
+    /* Only report this for non-global decls, those have been caught already
+    in symtab building. */
     if ( (
         ssym = find_symbol(&entry, current_scope, c->name.name)
-    ) != -1) {
-        /* A variable is redeclared in the current scope. Whoops! */
+    ) != -1 && !global) {
         if (ssym == 0) {
             /* The less-than is so that each double is only reported once. */
             if (entry->line < cin->lineno) {
@@ -170,20 +186,28 @@ static int validate_vardecl(
         return 1;
     }
 
-    /* Construct abstract instance */
+    /* Construct abstract instance, ONLY if non-global */
 
-    /* If lookup succeeded, point this to said symbol. */
-    /* Otherwise, create a new symbol! */
-    if (entry) {
-        a->name = entry;
-    } else {
-        a->name = yf_malloc(sizeof (struct yf_sym));
-        if (!a->name)
-            return 2;
-        a->name->var.dtype =  /* c->type */
-            (struct yfs_type) { NULL }; /* TODO - get type lookup */
-        a->name->line = cin->lineno;
+    a->name = yf_malloc(sizeof (struct yf_sym));
+    if (!a->name)
+        return 2;
+
+    a->name->type = YFS_VAR;
+
+    /* Verify type */
+    if ( (a->name->var.dtype = yfh_get(fdata->types.table, c->type.databuf)) == NULL) {
+        YF_PRINT_ERROR(
+            "Unknown type '%s' in declaration of '%s' (line %d)",
+            c->type.databuf,
+            c->name.name,
+            cin->lineno
+        );
+        free(a->name);
+        return 1;
     }
+    
+    a->name->line = cin->lineno;
+
     if (c->expr) {
         a->expr->type = YFA_EXPR;
         if (validate_expr(c->expr, a->expr, pdata, fdata))
@@ -191,9 +215,14 @@ static int validate_vardecl(
     }
 
     /* Add to symbol table UNLESS it is global scope. */
-    /* The global scope symtab is already sete up. */
-    if (current_scope != &fdata->symtab) {
+    /* The global scope symtab is already set up. */
+    if (!global) {
         yfh_set(current_scope->table, c->name.name, a->name);
+    } else {
+        /* Free the name, since it was only needed for type checking. */
+        free(a->name);
+        /* If it's global, set "name" to point to the global symbol. */
+        a->name = entry;
     }
     
     return 0;
@@ -238,7 +267,7 @@ static int validate_bstmt(struct yf_parse_node * cin, struct yf_ast_node * ain,
     /* Validate each statement */
     yf_list_reset(&c->stmts);
 
-    for(;;) {
+    for (;;) {
 
         /* Get element */
         if (yf_list_get(&c->stmts, (void **) &csub) == -1) break;

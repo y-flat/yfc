@@ -160,3 +160,20 @@ char * get_op_string(enum yf_operator op) {
     return op_strings[op];
 
 }
+
+bool yfo_is_assign(enum yf_operator op) {
+    switch (op) {
+    case YFO_AADD:
+    case YFO_ASUB:
+    case YFO_AMUL:
+    case YFO_ADIV:
+    case YFO_AMOD:
+    case YFO_AAND:
+    case YFO_AOR:
+    case YFO_AXOR:
+    case YFO_ASSIGN:
+        return true;
+    default:
+        return false;
+    }
+}

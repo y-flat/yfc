@@ -216,9 +216,14 @@ static int validate_vardecl(
     a->name->line = cin->lineno;
 
     if (c->expr) {
+        a->expr = yf_malloc(sizeof (struct yf_ast_node));
+        if (!a->expr)
+            return 2;
         a->expr->type = YFA_EXPR;
         if (validate_expr(c->expr, a->expr, pdata, fdata))
             return 1;
+    } else {
+        a->expr = NULL;
     }
 
     /* Add to symbol table UNLESS it is global scope. */

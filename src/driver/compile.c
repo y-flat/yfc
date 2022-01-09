@@ -66,6 +66,10 @@ static int yf_run_compiler_on_data(
         }
     }
 
+    if (args->cstdump) {
+        return 0; /* No progressing */
+    }
+
     /* TODO - set flags so we can efficiently avoid compiling the bad ones */
 
     /* Now validate everything. */

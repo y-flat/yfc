@@ -133,7 +133,8 @@ static int validate_program(
         /* Validate */
         if (validate_node(cnode, anode, pdata, fdata)) {
             yf_free(anode);
-            return 1;
+            /* return 1; */
+            /* No return, keep going to find more errors. */
         }
 
         /* Move to abstract list */

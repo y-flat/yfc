@@ -155,8 +155,8 @@ static int yfp_sort_expr_tree(
         if (!node->binary.left || !node->binary.right) {
             return 1;
         }
-        *node->binary.left = nodes[0].expr;
-        *node->binary.right = nodes[1].expr;
+        *node->binary.left = nodes[0];
+        *node->binary.right = nodes[1];
         return 0;
     }
 
@@ -190,13 +190,13 @@ static int yfp_sort_expr_tree(
         nodes,
         index + 1,
         operators,
-        node->binary.left
+        &node->binary.left->expr
     );
     yfp_sort_expr_tree(
         nodes + index + 1,
         num_nodes - index - 1,
         operators + index + 1,
-        node->binary.right
+        &node->binary.right->expr
     );
     return 0;
 

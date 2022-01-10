@@ -51,8 +51,8 @@ struct yfcs_expr {
     union {
         struct yfcs_value value;
         struct {
-            struct yfcs_expr *left;
-            struct yfcs_expr *right;
+            struct yf_parse_node *left;
+            struct yf_parse_node *right;
             enum yf_operator op;
         } binary;
     };

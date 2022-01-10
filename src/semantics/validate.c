@@ -282,7 +282,7 @@ static int validate_expr_e(struct yfcs_expr * c, struct yfa_expr * a,
                 );
                 return 1;
             }
-            if (c->binary.left->value.type != YFCS_IDENT) {
+            if (c->binary.left->expr.value.type != YFCS_IDENT) {
                 YF_PRINT_ERROR(
                     "Left side of assignment must be an identifier (line %d)",
                     lineno
@@ -297,7 +297,7 @@ static int validate_expr_e(struct yfcs_expr * c, struct yfa_expr * a,
         if (!a->as.binary.left)
             return 2;
         if (validate_expr_e(
-            c->binary.left, a->as.binary.left, pdata, fdata, lineno
+            &c->binary.left->expr, a->as.binary.left, pdata, fdata, lineno
         ))
             return 1;
 
@@ -305,7 +305,7 @@ static int validate_expr_e(struct yfcs_expr * c, struct yfa_expr * a,
         if (!a->as.binary.right)
             return 2;
         if (validate_expr_e(
-            c->binary.right, a->as.binary.right, pdata, fdata, lineno
+            &c->binary.right->expr, a->as.binary.right, pdata, fdata, lineno
         ))
             return 1;
 

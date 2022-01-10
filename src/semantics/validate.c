@@ -1,5 +1,6 @@
 #include "validate.h"
 
+#include <api/operator.h>
 #include <util/allocator.h>
 #include <util/yfc-out.h>
 
@@ -132,7 +133,8 @@ static int validate_program(
         /* Validate */
         if (validate_node(cnode, anode, pdata, fdata)) {
             yf_free(anode);
-            return 1;
+            /* return 1; */
+            /* No return, keep going to find more errors. */
         }
 
         /* Move to abstract list */
@@ -215,9 +217,14 @@ static int validate_vardecl(
     a->name->line = cin->lineno;
 
     if (c->expr) {
+        a->expr = yf_malloc(sizeof (struct yf_ast_node));
+        if (!a->expr)
+            return 2;
         a->expr->type = YFA_EXPR;
         if (validate_expr(c->expr, a->expr, pdata, fdata))
             return 1;
+    } else {
+        a->expr = NULL;
     }
 
     /* Add to symbol table UNLESS it is global scope. */
@@ -235,15 +242,88 @@ static int validate_vardecl(
 
 }
 
-static int validate_expr(struct yf_parse_node * c, struct yf_ast_node * a,
+/**
+ * Takes in parameters of expr, rather than node, types.
+ */
+static int validate_expr_e(struct yfcs_expr * c, struct yfa_expr * a,
     struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata) {
-    /* TODO */
+    struct yf_file_compilation_data * fdata, int lineno
+) {
+    
+    /* If this is unary - (just a value), ... */
+    if (c->type == YFCS_VALUE) {
+
+        a->type = YFA_VALUE;
+        
+        /* If an identifier, make sure it actually exists. */
+        if (c->value.type == YFCS_IDENT) {
+            if (find_symbol(&a->as.value.as.identifier, current_scope, c->value.identifier.name) == -1) {
+                YF_PRINT_ERROR(
+                    "Unknown identifier '%s' (line %d)",
+                    c->value.identifier.name,
+                    lineno
+                );
+                return 1;
+            }
+        } else {
+            /* TODO - parse literal */
+        }
+
+    } else {
+        /* It's a binary expression. */
+        a->type = YFA_BINARY;
+
+        /* First, if it's an assignment, the left side is a variable. */
+        if (yfo_is_assign(c->binary.op)) {
+            if (c->binary.left->type != YFCS_VALUE) {
+                YF_PRINT_ERROR(
+                    "Left side of assignment must not be compound (line %d)",
+                    lineno
+                );
+                return 1;
+            }
+            if (c->binary.left->expr.value.type != YFCS_IDENT) {
+                YF_PRINT_ERROR(
+                    "Left side of assignment must be an identifier (line %d)",
+                    lineno
+                );
+                return 1;
+            }
+        }
+
+        a->as.binary.op = c->binary.op;
+
+        a->as.binary.left = yf_malloc(sizeof (struct yf_ast_node));
+        if (!a->as.binary.left)
+            return 2;
+        if (validate_expr_e(
+            &c->binary.left->expr, a->as.binary.left, pdata, fdata, lineno
+        ))
+            return 1;
+
+        a->as.binary.right = yf_malloc(sizeof (struct yf_ast_node));
+        if (!a->as.binary.right)
+            return 2;
+        if (validate_expr_e(
+            &c->binary.right->expr, a->as.binary.right, pdata, fdata, lineno
+        ))
+            return 1;
+
+    }
+
     return 0;
+
+}
+
+static int validate_expr(struct yf_parse_node * cin, struct yf_ast_node * ain,
+    struct yf_project_compilation_data * pdata,
+    struct yf_file_compilation_data * fdata
+) {
+    return validate_expr_e(&cin->expr, &ain->expr, pdata, fdata, cin->lineno);
 }
 
 static int validate_funcdecl(
-    struct yf_parse_node * c, struct yf_ast_node * a,
+    struct yf_parse_node * cin, struct yf_ast_node * ain,
     struct yf_project_compilation_data * pdata,
     struct yf_file_compilation_data * fdata
 ) {

@@ -3,10 +3,6 @@
  * (except identifiers) being replaced with references. Any complete AST that
  * is in existence should have been fully validated.
  * 
- * As C is a fully explicit language, there will be nothing explicit about this
- * tree - all default parameters are filled in, all constructors are called
- * explicitly, and so forth.
- * 
  * This tree structure will look very similar to the CST ... because it is.
  */
 

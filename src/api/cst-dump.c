@@ -119,9 +119,9 @@ static void yf_dump_expr(struct yfcs_expr * node, FILE * out) {
             "operator: %s", get_op_string(node->binary.op)
         );
         yf_print_line(out, "left:");
-        yf_dump_expr(node->binary.left, out);
+        yf_dump_expr(&node->binary.left->expr,  out);
         yf_print_line(out, "right:");
-        yf_dump_expr(node->binary.right, out);
+        yf_dump_expr(&node->binary.right->expr, out);
     }
 
     dedent();

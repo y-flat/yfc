@@ -5,6 +5,8 @@
 #ifndef API_OPERATOR_H
 #define API_OPERATOR_H
 
+#include <stdbool.h>
+
 enum yf_operator {
     YFO_INVALID,
     YFO_ADD,            /* +  */
@@ -64,5 +66,7 @@ enum yfo_precedence {
 enum yfo_precedence yfo_prec(enum yf_operator op1, enum yf_operator op2);
 
 char * get_op_string(enum yf_operator op);
+
+bool yfo_is_assign(enum yf_operator op);
 
 #endif /* API_OPERATOR_H */

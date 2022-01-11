@@ -44,8 +44,8 @@
  * Set the node's position information to that of the tok.
  */
 #define P_GETCT(node, tok) do { \
-  node->colno = tok.colno; \
-  node->lineno = tok.lineno; \
+  (node)->colno =  (tok).colno; \
+  (node)->lineno = (tok).lineno; \
 } while (0)
 
 int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer);

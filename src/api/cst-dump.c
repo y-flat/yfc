@@ -79,7 +79,7 @@ static void yf_dump_vardecl(struct yfcs_vardecl * node, FILE * out) {
     indent();
 
     yf_print_line(out, "name: %s", node->name.name);
-    yf_print_line(out, "type: %s", node->type);
+    yf_print_line(out, "type: %s", node->type.databuf);
 
     yf_print_line(out, "initialization value:");
     if (node->expr) {
@@ -96,9 +96,22 @@ static void yf_dump_vardecl(struct yfcs_vardecl * node, FILE * out) {
 static void yf_dump_funcdecl(struct yfcs_funcdecl * node, FILE * out) {
     yf_print_line(out, "funcdecl");
     indent();
-    /* TODO - args */
+    yf_print_line(out, "params");
+    indent();
+    struct yf_parse_node * param;
+    for (;;) {
+        if (yf_list_get(&node->params, (void **) &param) == -1) break;
+        if (!param) break;
+        yf_dump_cst(param, out);
+        yf_list_next(&node->params);
+    }
+    dedent();
+    yf_print_line(out, "end params");
+    yf_print_line(out, "return type: %s", node->ret.databuf);
     yf_print_line(out, "function body");
+    indent();
     yf_dump_cst(node->body, out);
+    dedent();
     yf_print_line(out, "end function body");
     dedent();
     yf_print_line(out, "end funcdecl");

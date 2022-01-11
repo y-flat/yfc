@@ -169,7 +169,10 @@ static int yf_run_frontend(
     if (args->tdump) {
         return dump_tokens(&lexer);
     } else {
-        retval = yf_parse(&lexer, &file->parse_tree);
+        if ( (retval = yf_parse(&lexer, &file->parse_tree)) ) {
+            YF_PRINT_ERROR("Error parsing file %s", file->file_name);
+            return retval;
+        }
         if (args->cstdump) {
             retval = yf_do_cst_dump(&file->parse_tree);
         }

@@ -1,3 +1,11 @@
 my_fun() {
-    x: int = 4;
+    
+}
+
+my_fun2(x: int) {
+
+}
+
+my_fun3(x: int, y: int): int {
+    
 }

@@ -88,7 +88,7 @@ void * yfh_get(struct yf_hashmap * hm, char * key) {
     /* Traverse forward until we find it. */
     for (i = 0; i < 10; ++loc, ++i) {
         pkey = hm->buckets[loc + i].key;
-        if (key && !strcmp(key, key)) {
+        if (pkey && !strcmp(key, pkey)) {
             return hm->buckets[loc + i].value;
         }
     }
@@ -97,18 +97,15 @@ void * yfh_get(struct yf_hashmap * hm, char * key) {
 
 }
 
+/* Credit - djb2 */
 static int hash(char * key) {
 
-    int ret;
-    char * cp;
+    unsigned long hash = 5381;
+    int c;
 
-    ret = 75531;
-    for (cp = key; *cp; ++cp) {
-        ret <<= *cp;
-        ret *=  *cp;
-        ret |=  *cp;
-    }
+    while ((c = *key++))
+        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
 
-    return ret % BUCKETS;
-    
+    return hash;
+
 }

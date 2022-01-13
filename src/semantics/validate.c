@@ -50,6 +50,36 @@ static int find_symbol(
     return -1;
 }
 
+/**
+ * Create a new scope - return 0 on success, 1 on failure (memory error).
+ * The root of the created symtab is set to the current scope, and the current
+ * scope is also set to the new scope.
+ */
+static int enter_scope(struct yfs_symtab ** stuff) {
+
+    struct yfs_symtab * old_symtab, * new_symtab;
+    old_symtab = current_scope;
+
+    new_symtab = yf_malloc(sizeof (struct yfs_symtab));
+    if (!new_symtab) {
+        return 1;
+    }
+    new_symtab->table = yfh_new();
+    if (!new_symtab->table) {
+        free(new_symtab);
+        return 1;
+    }
+
+    new_symtab->parent = old_symtab;
+    current_scope = new_symtab;
+
+    if (stuff)
+        *stuff = new_symtab;
+    
+    return 0;
+
+}
+
 void add_type(struct yf_file_compilation_data * fdata, char * name, int size) {
     struct yfs_type * type = yf_malloc(sizeof (struct yfs_type));
     type->primitive.size = size;
@@ -351,8 +381,6 @@ static int validate_funcdecl(
     struct yf_parse_node  * cv;
     struct yf_ast_node    * av;
 
-    struct yfs_symtab * old_csp;
-
     int ssym;
 
     /* Functions are only global. */
@@ -366,12 +394,7 @@ static int validate_funcdecl(
 
     /* Now, validate the argument list. */
     /* Also, open a new scope for arguments. */
-    old_csp = current_scope;
-    current_scope = yf_malloc(sizeof (struct yfs_symtab));
-    if (!current_scope)
-        return 2;
-    current_scope->parent = old_csp;
-    current_scope->table = yfh_new();
+    enter_scope(NULL);
 
     /* Add the arguments to the scope. */
     yf_list_reset(&c->params);
@@ -426,12 +449,7 @@ static int validate_bstmt(struct yf_parse_node * cin, struct yf_ast_node * ain,
     struct yf_ast_node * asub;
     
     /* Create a symbol table for this scope */
-    a->symtab = yf_malloc(sizeof (struct yfs_symtab));
-    if (!a->symtab)
-        return 2;
-    a->symtab->table = yfh_new();
-    a->symtab->parent = current_scope;
-    current_scope = a->symtab;
+    enter_scope(&a->symtab);
 
     /* Validate each statement */
     yf_list_reset(&c->stmts);

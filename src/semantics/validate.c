@@ -178,7 +178,7 @@ static int validate_vardecl(
             /* The less-than is so that each double is only reported once. */
             if (entry->line < cin->lineno) {
                 YF_PRINT_ERROR(
-                    "Uncaught duplicate declaration of symbol '%s'"
+                    "Duplicate declaration of symbol '%s'"
                     ", lines %d and %d",
                     c->name.name,
                     entry->line,

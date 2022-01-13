@@ -1,8 +1,3 @@
-~~ Duplicate ~~
-x: int;
-
-x: int;
-
 ~~ Now a duplicate local decl ~~
 y() {
     z: int; z: int;

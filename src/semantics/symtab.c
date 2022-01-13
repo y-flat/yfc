@@ -124,9 +124,7 @@ static int yfs_add_fn(struct yf_hashmap * symtab, struct yf_parse_node * f) {
 
     }
 
-    YF_PRINT_ERROR("1");
     yfh_set(symtab, fsym->fn.name, fsym);
-    YF_PRINT_ERROR("2");
 
     return 0;
 

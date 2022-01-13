@@ -219,8 +219,8 @@ static int validate_vardecl(
                 "Global symbol '%s' (line %d) "
                 "shadowed by local symbol (line %d)",
                 c->name.name,
-                cin->lineno,
-                entry->line
+                entry->line,
+                cin->lineno
             );
         }
         return 1;

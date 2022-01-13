@@ -10,6 +10,7 @@ int yfp_stmt(struct yf_parse_node * node, struct yf_lexer * lexer) {
     bool expect_semicolon;
 
     P_PEEK(lexer, &tok);
+    P_GETCT(node, tok);
 
     /**
      * A statement can begin one of several ways:

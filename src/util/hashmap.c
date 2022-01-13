@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include <util/allocator.h>
+#include <util/yfc-out.h>
 
 /**
  * Perhaps larger in the future
@@ -21,7 +22,7 @@ struct yf_hashmap {
     struct yfh_bucket {
         char * key;
         void * value;
-    } buckets[BUCKETS];
+    } * buckets;
 
 };
 
@@ -29,6 +30,8 @@ struct yf_hashmap * yfh_new() {
     struct yf_hashmap * hm;
     hm = yf_malloc(sizeof (struct yf_hashmap));
     memset(hm, 0, sizeof (struct yf_hashmap));
+    hm->buckets = yf_malloc(sizeof (struct yfh_bucket) * BUCKETS);
+    memset(hm->buckets, 0, sizeof (struct yfh_bucket) * BUCKETS);
     return hm;
 }
 

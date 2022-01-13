@@ -149,6 +149,9 @@ static int validate_program(
 
 }
 
+/**
+ * Takes an input of a vardecl node.
+ */
 static int validate_vardecl(
     struct yf_parse_node * cin,
     struct yf_ast_node * ain,
@@ -157,8 +160,9 @@ static int validate_vardecl(
 ) {
 
     struct yf_sym * entry;
+
     struct yfcs_vardecl * c = &cin->vardecl;
-    struct yfa_vardecl * a = &ain->vardecl;
+    struct yfa_vardecl  * a = &ain->vardecl;
 
     int ssym;
     bool global = (current_scope == &fdata->symtab);
@@ -203,6 +207,8 @@ static int validate_vardecl(
     a->name->type = YFS_VAR;
 
     /* Verify type */
+    /* We have to check that the type is valid here, because the type table
+    doesn't exist during the symtab-building phase. */
     if ( (a->name->var.dtype = yfh_get(fdata->types.table, c->type.databuf)) == NULL) {
         YF_PRINT_ERROR(
             "Unknown type '%s' in declaration of '%s' (line %d)",
@@ -327,8 +333,73 @@ static int validate_funcdecl(
     struct yf_project_compilation_data * pdata,
     struct yf_file_compilation_data * fdata
 ) {
-    /* TODO */
+    
+    struct yfcs_funcdecl  * c = &cin->funcdecl;
+    struct yfa_funcdecl   * a = &ain->funcdecl;
+    struct yf_parse_node  * cv;
+    struct yf_ast_node    * av;
+
+    struct yfs_symtab * old_csp;
+
+    int ssym;
+
+    /* Functions are only global. */
+    if ( (
+        ssym = find_symbol(&a->name, current_scope, c->name.name)
+    ) == -1) {
+        /* Uh oh ... */
+        YF_PRINT_ERROR("internal error: symbol not found");
+        return 2;
+    }
+
+    /* Now, validate the argument list. */
+    /* Also, open a new scope for arguments. */
+    old_csp = current_scope;
+    current_scope = yf_malloc(sizeof (struct yfs_symtab));
+    if (!current_scope)
+        return 2;
+    current_scope->parent = old_csp;
+    current_scope->table = yfh_new();
+
+    /* Add the arguments to the scope. */
+    yf_list_reset(&c->params);
+    yf_list_init(&a->params);
+    for (;;) {
+        if (yf_list_get(&c->params, (void**) &cv) == -1)
+            break;
+        av = yf_malloc(sizeof (struct yfa_vardecl));
+        if (!av)
+            return 2;
+        if (validate_vardecl(cv, av, pdata, fdata))
+            return 1;
+        yf_list_add(&a->params, av);
+        yf_list_next(&c->params);
+    }
+
+    /* Validate the return type. */
+    if ((a->ret = yfh_get(fdata->types.table, c->ret.databuf)) == NULL) {
+        YF_PRINT_ERROR(
+            "Unknown return type '%s' of function '%s' (line %d)",
+            c->ret.databuf,
+            c->name.name,
+            cin->lineno
+        );
+        return 1;
+    }
+
+    a->body = yf_malloc(sizeof (struct yf_ast_node));
+    if (!a->body)
+        return 2;
+
+    /* Now, validate the body. */
+    if (validate_bstmt(c->body, a->body, pdata, fdata))
+        return 1;
+
+    /* Close the scope. */
+    current_scope = current_scope->parent;
+
     return 0;
+
 }
 
 static int validate_bstmt(struct yf_parse_node * cin, struct yf_ast_node * ain,

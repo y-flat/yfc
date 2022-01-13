@@ -1,3 +1,5 @@
+~~ A warning, but not an error, should be issued for the variable shadowing. ~~
+
 x: int;
 
 y() {

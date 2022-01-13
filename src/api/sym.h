@@ -9,6 +9,7 @@
 #ifndef API_SYM_H
 #define API_SYM_H
 
+#include <util/list.h>
 #include <util/hashmap.h>
 
 struct yfs_primitive_type {
@@ -36,14 +37,29 @@ struct yfs_var {
 
 };
 
+struct yfsn_param {
+    char * name, * type;
+};
+
+struct yfs_fn {
+
+    char * name;
+    struct yfs_type * rtype; /* "return type" */
+    struct yfs_type * dtype; /* "declared type" */
+    struct yf_list    params; /* list of param */
+
+};
+
 struct yf_sym {
 
     enum {
         YFS_VAR,
+        YFS_FN,
     } type;
 
     union {
         struct yfs_var var;
+        struct yfs_fn  fn;
     };
 
     char * file; /* Source file */

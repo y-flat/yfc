@@ -125,6 +125,8 @@ int yfp_vardecl(struct yf_parse_node * node, struct yf_lexer * lexer) {
         default:
             /* Unlex unimportant token. */
             yfl_unlex(lexer, &tok);
+            /* Also - expression is NULL. */
+            node->vardecl.expr = NULL;
             break;
     }
 

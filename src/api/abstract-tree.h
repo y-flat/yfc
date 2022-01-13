@@ -61,7 +61,7 @@ struct yfa_vardecl {
 
 struct yfa_funcdecl {
     struct yf_sym * name;
-    struct yfs_type ret; /* The return type */
+    struct yfs_type * ret; /* The return type */
     /* All parameters are stored as vardecls. expr WILL be null for these. */
     struct yf_list params;
     struct yf_ast_node * body; /* The function body */

@@ -21,7 +21,7 @@ struct yf_hashmap {
     struct yfh_bucket {
         char * key;
         void * value;
-    } buckets[BUCKETS];
+    } * buckets;
 
 };
 
@@ -29,6 +29,8 @@ struct yf_hashmap * yfh_new() {
     struct yf_hashmap * hm;
     hm = yf_malloc(sizeof (struct yf_hashmap));
     memset(hm, 0, sizeof (struct yf_hashmap));
+    hm->buckets = yf_malloc(sizeof (struct yfh_bucket) * BUCKETS);
+    memset(hm->buckets, 0, sizeof (struct yfh_bucket) * BUCKETS);
     return hm;
 }
 
@@ -51,23 +53,24 @@ static int hash(char * key);
 
 int yfh_set(struct yf_hashmap * hm, char * key, void * value) {
 
-    int loc;
+    int loc, newloc;
     int i;
 
-    loc = hash(key);
+    loc = hash(key) % BUCKETS;
 
     char * pkey;
 
     /* Traverse forward until we find it. */
     for (i = 0; i < 10; ++loc, ++i) {
-        pkey = hm->buckets[loc + i].key;
+        newloc = (loc + i) % BUCKETS;
+        pkey = hm->buckets[newloc].key;
         if (pkey && !strcmp(key, pkey)) {
-            hm->buckets[loc + i].value = value;
+            hm->buckets[newloc].value = value;
             return 0;
         }
-        if (hm->buckets[loc + i].key == NULL) {
-            hm->buckets[loc + i].value = value;
-            hm->buckets[loc + i].key   = key;
+        if (hm->buckets[newloc].key == NULL) {
+            hm->buckets[newloc].value = value;
+            hm->buckets[newloc].key   = key;
             return 0;
         }
     }
@@ -78,18 +81,19 @@ int yfh_set(struct yf_hashmap * hm, char * key, void * value) {
 
 void * yfh_get(struct yf_hashmap * hm, char * key) {
     
-    int loc;
+    int loc, newloc;
     int i;
 
-    loc = hash(key);
+    loc = hash(key) % BUCKETS;
 
     char * pkey;
 
     /* Traverse forward until we find it. */
     for (i = 0; i < 10; ++loc, ++i) {
-        pkey = hm->buckets[loc + i].key;
-        if (key && !strcmp(key, key)) {
-            return hm->buckets[loc + i].value;
+        newloc = (loc + i) % BUCKETS;
+        pkey = hm->buckets[newloc].key;
+        if (pkey && !strcmp(key, pkey)) {
+            return hm->buckets[newloc].value;
         }
     }
 
@@ -97,18 +101,15 @@ void * yfh_get(struct yf_hashmap * hm, char * key) {
 
 }
 
+/* Credit - djb2 */
 static int hash(char * key) {
 
-    int ret;
-    char * cp;
+    unsigned long hash = 5381;
+    int c;
 
-    ret = 75531;
-    for (cp = key; *cp; ++cp) {
-        ret <<= *cp;
-        ret *=  *cp;
-        ret |=  *cp;
-    }
+    while ((c = *key++))
+        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
 
-    return ret % BUCKETS;
-    
+    return hash;
+
 }

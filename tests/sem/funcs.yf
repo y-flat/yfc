@@ -12,3 +12,8 @@ x2(): foo {
 x3(a: int): int {
 
 }
+
+~~ Bad: two arguments with the same name ~~
+x4(a: int, a: int): int {
+
+}

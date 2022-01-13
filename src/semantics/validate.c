@@ -216,11 +216,11 @@ static int validate_vardecl(
         } else {
             /* Just a warning about shadowing. */
             YF_PRINT_WARNING(
-                "Global symbol '%s' (line %d)"
+                "Global symbol '%s' (line %d) "
                 "shadowed by local symbol (line %d)",
                 c->name.name,
-                entry->line,
-                cin->lineno
+                cin->lineno,
+                entry->line
             );
         }
         return 1;

@@ -1,0 +1,14 @@
+~~ Good ~~
+x1(): int {
+
+}
+
+~~ Should error: 'foo' not a valid type ~~
+x2(): foo {
+
+}
+
+~~ Good ~~
+x3(a: int): int {
+
+}

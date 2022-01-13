@@ -61,13 +61,12 @@ static int yf_run_compiler_on_data(
         if (yf_run_frontend(data->files[i], args)) {
             data->files[i]->error = 1;
         }
+        if (args->cstdump) {
+            return 0; /* No progressing */
+        }
         if (!data->files[i]->error && yf_build_symtab(data->files[i])) {
             data->files[i]->error = 1;
         }
-    }
-
-    if (args->cstdump) {
-        return 0; /* No progressing */
     }
 
     /* TODO - set flags so we can efficiently avoid compiling the bad ones */
@@ -84,8 +83,10 @@ static int yf_run_compiler_on_data(
     }
 
     /* Finally, generate code. */
-    if (!data->files[i]->error && yf_run_backend(data, args)) {
-        data->files[i]->error = 1;
+    for (i = 0; i < data->num_files; ++i) {
+        if (!data->files[i]->error && yf_run_backend(data, args)) {
+            data->files[i]->error = 1;
+        }
     }
 
     return 0;

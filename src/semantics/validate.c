@@ -175,16 +175,13 @@ static int validate_vardecl(
         ssym = find_symbol(&entry, current_scope, c->name.name)
     ) != -1 && !global) {
         if (ssym == 0) {
-            /* The less-than is so that each double is only reported once. */
-            if (entry->line < cin->lineno) {
-                YF_PRINT_ERROR(
-                    "Duplicate declaration of symbol '%s'"
-                    ", lines %d and %d",
-                    c->name.name,
-                    entry->line,
-                    cin->lineno
-                );
-            }
+            YF_PRINT_ERROR(
+                "Duplicate declaration of symbol '%s'"
+                ", lines %d and %d",
+                c->name.name,
+                entry->line,
+                cin->lineno
+            );
         } else {
             /* Just a warning about shadowing. */
             YF_PRINT_WARNING(

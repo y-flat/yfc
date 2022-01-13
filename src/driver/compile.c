@@ -129,6 +129,7 @@ static int yf_compile_files(struct yf_args * args) {
     for (i = 0; i < args->num_files; ++i) {
         data.files[i] = malloc(sizeof (struct yf_file_compilation_data));
         data.files[i]->file_name = args->files[i];
+        data.ext_modules = NULL;
         /* TODO - more data */
     }
 

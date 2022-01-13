@@ -466,10 +466,9 @@ static int validate_bstmt(struct yf_parse_node * cin, struct yf_ast_node * ain,
             return 2;
 
         /* Validate */
-        /* TODO - this switch statement is a mess. Maybe factor it out. */
         if (validate_node(csub, asub, pdata, fdata)) {
             yf_free(asub);
-            return 1;
+            /* return 1; */ /* Keep going */
         }
 
         /* Move to abstract list */

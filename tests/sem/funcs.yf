@@ -17,3 +17,8 @@ x3(a: int): int {
 x4(a: int, a: int): int {
 
 }
+
+~~ Good ~~
+x5() {
+    
+}

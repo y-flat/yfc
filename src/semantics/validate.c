@@ -62,6 +62,7 @@ void yfv_add_builtin_types(struct yf_file_compilation_data * fdata) {
     add_type(fdata, "short",      16);
     add_type(fdata, "int",        32);
     add_type(fdata, "long",       32);
+    add_type(fdata, "void",        0);
 }
 
 int yfs_validate(
@@ -210,6 +211,20 @@ static int validate_vardecl(
         YF_PRINT_ERROR(
             "Unknown type '%s' in declaration of '%s' (line %d)",
             c->type.databuf,
+            c->name.name,
+            cin->lineno
+        );
+        free(a->name);
+        return 1;
+    }
+
+    /* Variables can't have type "void" */
+    if (
+        a->name->var.dtype->kind == YFST_PRIMITIVE
+        && a->name->var.dtype->primitive.size == 0
+    ) {
+        YF_PRINT_ERROR(
+            "Variable '%s' has type 'void' (line %d)",
             c->name.name,
             cin->lineno
         );

@@ -40,14 +40,14 @@ int yfp_funcdecl(struct yf_parse_node * node, struct yf_lexer * lexer) {
         if (yfp_ident(&ident, lexer)) {
             return 1;
         }
+        argp = yf_malloc(sizeof(struct yf_parse_node));
+        if (!argp) {
+            return 1;
+        }
         P_GETCT(argp, ident);
         P_LEX(lexer, &tok);
         if (tok.type != YFT_COLON) {
             YF_TOKERR(tok, "':' following argument name");
-        }
-        argp = yf_malloc(sizeof(struct yf_parse_node));
-        if (!argp) {
-            return 1;
         }
         strcpy(
             argp->vardecl.name.name, ident.name

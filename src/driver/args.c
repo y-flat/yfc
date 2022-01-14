@@ -159,23 +159,23 @@ bool yf_should_compile(struct yf_args * args) {
     return args->wanted_output == YF_NONE;
 }
 
-void yf_output_info(struct yf_args * args) {
+int yf_output_info(struct yf_args * args) {
 
     switch (args->wanted_output) {
         case YF_NONE:
-            break;
+            return 0;
         case YF_VERSION:
             printf("%s", VERSION_MSG);
-            break;
+            return 0;
         case YF_HELP:
             printf("%s", USAGE_MSG);
-            break;
+            return 0;
         case YF_ERROR:
             printf("%s", HELP_HINT_MSG);
-            break;
+            return 1;
         case YF_ERROR_NO_ARGS:
             printf("%s", NO_ARGS_MSG);
-            break;
+            return 1;
     }
 
 }

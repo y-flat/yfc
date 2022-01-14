@@ -9,9 +9,9 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     steps:
     - uses: actions/checkout@v2
     - name: make
-      run: ./scripts/build.sh
+      run: ./scripts/build.sh && python3 scripts/run-tests.py

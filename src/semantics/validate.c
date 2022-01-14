@@ -375,7 +375,7 @@ static int validate_funcdecl(
         return 1;
 
     /* Close the scope. */
-    current_scope = current_scope->parent;
+    exit_scope();
 
     return 0;
 
@@ -424,8 +424,7 @@ static int validate_bstmt(struct yf_parse_node * cin, struct yf_ast_node * ain,
         
     }
 
-    /* Now, pop this scope off the stack. */
-    current_scope = current_scope->parent;
+    exit_scope();
 
     return 0;
 

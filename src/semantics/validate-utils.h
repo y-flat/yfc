@@ -32,4 +32,9 @@ int find_symbol(
  */
 int enter_scope(struct yfs_symtab ** stuff);
 
+/**
+ * Exit a scope.
+ */
+void exit_scope(void);
+
 #endif /* SEMANTICS_VALIDATE_UTILS_H */

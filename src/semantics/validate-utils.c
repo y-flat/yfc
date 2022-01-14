@@ -41,3 +41,8 @@ int enter_scope(struct yfs_symtab ** stuff) {
     return 0;
 
 }
+
+void exit_scope(void) {
+    /* Don't free scope - used later during codegen */
+    current_scope = current_scope->parent;
+}

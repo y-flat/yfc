@@ -14,6 +14,11 @@
 
 struct yfs_primitive_type {
     int size; /* In bits */
+    enum yfpt_format {
+        YFS_INT, /* NOT just "int", but a whole number. */
+        YFS_FLOAT, /* ANY number with a decimal part. */
+        YFS_NONE,
+    } type;
 };
 
 /* Has no name - types are stored in a hashmap. NO nesting needed - all types

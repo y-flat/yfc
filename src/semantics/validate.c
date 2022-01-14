@@ -24,19 +24,37 @@ VDECL(validate_bstmt);
 VDECL(validate_vardecl);
 VDECL(validate_node);
 
-void add_type(struct yf_file_compilation_data * fdata, char * name, int size) {
+void add_type(
+    struct yf_file_compilation_data * fdata,
+    char * name, int size, enum yfpt_format fmt) {
     struct yfs_type * type = yf_malloc(sizeof (struct yfs_type));
     type->primitive.size = size;
     type->kind = YFST_PRIMITIVE;
+    type->primitive.type = fmt;
     yfh_set(fdata->types.table, name, type);
 }
 
 void yfv_add_builtin_types(struct yf_file_compilation_data * fdata) {
-    add_type(fdata, "char",        8);
-    add_type(fdata, "short",      16);
-    add_type(fdata, "int",        32);
-    add_type(fdata, "long",       32);
-    add_type(fdata, "void",        0);
+
+    /* All types are signed for now - unsigned types are not yet supported. */
+
+    /* "standard" types. */
+    add_type(fdata, "char",        8, YFS_INT  );
+    add_type(fdata, "short",      16, YFS_INT  );
+    add_type(fdata, "int",        32, YFS_INT  );
+    add_type(fdata, "long",       64, YFS_INT  );
+    add_type(fdata, "void",        0, YFS_NONE );
+    add_type(fdata, "float",      32, YFS_FLOAT);
+    add_type(fdata, "double",     64, YFS_FLOAT);
+
+    /* Convenience types. */
+    add_type(fdata, "i16",        16, YFS_INT  );
+    add_type(fdata, "i32",        32, YFS_INT  );
+    add_type(fdata, "i64",        64, YFS_INT  );
+    add_type(fdata, "f16",        16, YFS_FLOAT);
+    add_type(fdata, "f32",        32, YFS_FLOAT);
+    add_type(fdata, "f64",        64, YFS_FLOAT);
+
 }
 
 int yfs_validate(

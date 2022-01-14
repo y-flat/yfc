@@ -2,7 +2,7 @@
 
 struct yfs_symtab * current_scope;
 
-static int find_symbol(
+int find_symbol(
     struct yf_sym ** sym, struct yfs_symtab * symtab,
     char * name
 ) {

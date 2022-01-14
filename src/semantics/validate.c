@@ -25,25 +25,6 @@ VDECL(validate_vardecl);
 VDECL(validate_node);
 
 /**
- * Search for a symbol with the given name. Return "depth" - innermost scope is
- * 0, the next-enclosing is 1, etc. If not found, -1.
- */
-static int find_symbol(
-    struct yf_sym ** sym, struct yfs_symtab * symtab,
-    char * name
-) {
-    int depth = 0;
-    while (symtab != NULL) {
-        if ( (*sym = yfh_get(symtab->table, name)) != NULL) {
-            return depth;
-        }
-        depth++;
-        symtab = symtab->parent;
-    }
-    return -1;
-}
-
-/**
  * Create a new scope - return 0 on success, 1 on failure (memory error).
  * The root of the created symtab is set to the current scope, and the current
  * scope is also set to the new scope.

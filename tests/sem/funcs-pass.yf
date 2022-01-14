@@ -1,0 +1,14 @@
+~~ Good ~~
+x1(): int {
+
+}
+
+~~ Good ~~
+x3(a: int): int {
+
+}
+
+~~ Good ~~
+x5() {
+    
+}

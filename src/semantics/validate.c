@@ -1,8 +1,6 @@
 #include "validate.h"
 
-#include <api/operator.h>
-#include <util/allocator.h>
-#include <util/yfc-out.h>
+#include <semantics/validate-utils.h>
 
 /**
  * Forwards
@@ -25,11 +23,6 @@ VDECL(validate_expr);
 VDECL(validate_bstmt);
 VDECL(validate_vardecl);
 VDECL(validate_node);
-
-/**
- * Internal - the innermost scope we have open. TODO - un-static this.
- */
-static struct yfs_symtab * current_scope;
 
 /**
  * Search for a symbol with the given name. Return "depth" - innermost scope is

@@ -60,7 +60,7 @@ def main():
     add_semantic_test("tests/sem/shadow.yf",                 True )
     add_semantic_test("tests/sem/unknown-type.yf",           False)
 
-    run_tests()
+    return run_tests()
 
 if __name__ == "__main__":
     sys.exit(main())

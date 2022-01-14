@@ -1,8 +1,6 @@
 #include "validate.h"
 
-#include <api/operator.h>
-#include <util/allocator.h>
-#include <util/yfc-out.h>
+#include <semantics/validate-utils.h>
 
 /**
  * Forwards
@@ -25,30 +23,6 @@ VDECL(validate_expr);
 VDECL(validate_bstmt);
 VDECL(validate_vardecl);
 VDECL(validate_node);
-
-/**
- * Internal - the innermost scope we have open. TODO - un-static this.
- */
-static struct yfs_symtab * current_scope;
-
-/**
- * Search for a symbol with the given name. Return "depth" - innermost scope is
- * 0, the next-enclosing is 1, etc. If not found, -1.
- */
-static int find_symbol(
-    struct yf_sym ** sym, struct yfs_symtab * symtab,
-    char * name
-) {
-    int depth = 0;
-    while (symtab != NULL) {
-        if ( (*sym = yfh_get(symtab->table, name)) != NULL) {
-            return depth;
-        }
-        depth++;
-        symtab = symtab->parent;
-    }
-    return -1;
-}
 
 void add_type(struct yf_file_compilation_data * fdata, char * name, int size) {
     struct yfs_type * type = yf_malloc(sizeof (struct yfs_type));
@@ -186,7 +160,7 @@ static int validate_vardecl(
         } else {
             /* Just a warning about shadowing. */
             YF_PRINT_WARNING(
-                "Global symbol '%s' (line %d)"
+                "Global symbol '%s' (line %d) "
                 "shadowed by local symbol (line %d)",
                 c->name.name,
                 entry->line,
@@ -351,8 +325,6 @@ static int validate_funcdecl(
     struct yf_parse_node  * cv;
     struct yf_ast_node    * av;
 
-    struct yfs_symtab * old_csp;
-
     int ssym;
 
     /* Functions are only global. */
@@ -366,12 +338,7 @@ static int validate_funcdecl(
 
     /* Now, validate the argument list. */
     /* Also, open a new scope for arguments. */
-    old_csp = current_scope;
-    current_scope = yf_malloc(sizeof (struct yfs_symtab));
-    if (!current_scope)
-        return 2;
-    current_scope->parent = old_csp;
-    current_scope->table = yfh_new();
+    enter_scope(NULL);
 
     /* Add the arguments to the scope. */
     yf_list_reset(&c->params);
@@ -408,7 +375,7 @@ static int validate_funcdecl(
         return 1;
 
     /* Close the scope. */
-    current_scope = current_scope->parent;
+    exit_scope();
 
     return 0;
 
@@ -426,15 +393,11 @@ static int validate_bstmt(struct yf_parse_node * cin, struct yf_ast_node * ain,
     struct yf_ast_node * asub;
     
     /* Create a symbol table for this scope */
-    a->symtab = yf_malloc(sizeof (struct yfs_symtab));
-    if (!a->symtab)
-        return 2;
-    a->symtab->table = yfh_new();
-    a->symtab->parent = current_scope;
-    current_scope = a->symtab;
+    enter_scope(&a->symtab);
 
     /* Validate each statement */
     yf_list_reset(&c->stmts);
+    yf_list_init(&a->stmts);
 
     for (;;) {
 
@@ -448,22 +411,20 @@ static int validate_bstmt(struct yf_parse_node * cin, struct yf_ast_node * ain,
             return 2;
 
         /* Validate */
-        /* TODO - this switch statement is a mess. Maybe factor it out. */
         if (validate_node(csub, asub, pdata, fdata)) {
             yf_free(asub);
-            return 1;
+            /* return 1; */ /* Keep going */
+        } else {
+            /* Move to abstract list */
+            yf_list_add(&a->stmts, asub);
         }
-
-        /* Move to abstract list */
-        yf_list_add(&a->stmts, asub);
 
         /* Keep going */
         yf_list_next(&c->stmts);
         
     }
 
-    /* Now, pop this scope off the stack. */
-    current_scope = current_scope->parent;
+    exit_scope();
 
     return 0;
 

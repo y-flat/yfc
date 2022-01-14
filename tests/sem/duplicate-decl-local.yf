@@ -1,0 +1,4 @@
+~~ Now a duplicate local decl ~~
+y() {
+    z: int; z: int;
+}

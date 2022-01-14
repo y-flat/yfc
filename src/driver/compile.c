@@ -204,8 +204,12 @@ static int yf_find_project_files(struct yf_project_compilation_data * data) {
 static int dump_tokens(struct yf_lexer * lexer) {
 
     struct yf_token token;
+    int r;
     for (;;) {
-        yfl_lex(lexer, &token);
+        if ( (r = yfl_lex(lexer, &token)) ) {
+            YF_PRINT_ERROR("lexer error: %s", get_error_message(r));
+            break;
+        }
         if (token.type == YFT_EOF) {
             break;
         }

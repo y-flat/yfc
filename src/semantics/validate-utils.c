@@ -16,3 +16,28 @@ int find_symbol(
     }
     return -1;
 }
+
+int enter_scope(struct yfs_symtab ** stuff) {
+
+    struct yfs_symtab * old_symtab, * new_symtab;
+    old_symtab = current_scope;
+
+    new_symtab = yf_malloc(sizeof (struct yfs_symtab));
+    if (!new_symtab) {
+        return 1;
+    }
+    new_symtab->table = yfh_new();
+    if (!new_symtab->table) {
+        free(new_symtab);
+        return 1;
+    }
+
+    new_symtab->parent = old_symtab;
+    current_scope = new_symtab;
+
+    if (stuff)
+        *stuff = new_symtab;
+    
+    return 0;
+
+}

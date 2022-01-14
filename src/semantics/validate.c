@@ -24,36 +24,6 @@ VDECL(validate_bstmt);
 VDECL(validate_vardecl);
 VDECL(validate_node);
 
-/**
- * Create a new scope - return 0 on success, 1 on failure (memory error).
- * The root of the created symtab is set to the current scope, and the current
- * scope is also set to the new scope.
- */
-static int enter_scope(struct yfs_symtab ** stuff) {
-
-    struct yfs_symtab * old_symtab, * new_symtab;
-    old_symtab = current_scope;
-
-    new_symtab = yf_malloc(sizeof (struct yfs_symtab));
-    if (!new_symtab) {
-        return 1;
-    }
-    new_symtab->table = yfh_new();
-    if (!new_symtab->table) {
-        free(new_symtab);
-        return 1;
-    }
-
-    new_symtab->parent = old_symtab;
-    current_scope = new_symtab;
-
-    if (stuff)
-        *stuff = new_symtab;
-    
-    return 0;
-
-}
-
 void add_type(struct yf_file_compilation_data * fdata, char * name, int size) {
     struct yfs_type * type = yf_malloc(sizeof (struct yfs_type));
     type->primitive.size = size;

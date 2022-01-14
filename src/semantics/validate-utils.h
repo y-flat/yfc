@@ -25,4 +25,11 @@ int find_symbol(
     char * name
 );
 
+/**
+ * Create a new scope - return 0 on success, 1 on failure (memory error).
+ * The root of the created symtab is set to the current scope, and the current
+ * scope is also set to the new scope.
+ */
+int enter_scope(struct yfs_symtab ** stuff);
+
 #endif /* SEMANTICS_VALIDATE_UTILS_H */

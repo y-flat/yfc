@@ -21,9 +21,11 @@ def add_semantic_test(test, pass_):
 def run_tests():
     total = passed = failed = 0
     failed_files = []
+    # Cursed. TODO: get system success value in a better way
+    success = os.system("echo a > /dev/null")
     for test, pass_ in tests:
         ret = os.system(f"./cmake/yfc {test} &>/dev/null")
-        ret = (ret == 0) # ret = True is a pass of the file, False is a fail
+        ret = (ret == success) # ret = True is a pass of the file, False is a fail
         if (ret != pass_):
             print(f"\033[91mFAIL: {test.split()[0]}\033[0m")
             failed += 1

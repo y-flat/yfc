@@ -2,6 +2,7 @@
 whether it should pass or not."""
 
 import os
+import sys
 
 tests = []
 
@@ -32,9 +33,12 @@ def run_tests():
             passed += 1
         total += 1
     print(f"{passed}/{total} passed")
-    print(f"Failed tests:")
-    for file in failed_files:
-        print(f"\t{file.split()[0]}")
+    if failed > 0:
+        print(f"Failed tests:")
+        for file in failed_files:
+            print(f"\t{file.split()[0]}")
+        return 1
+    return 0
 
 # TODO - more detailed result checking than just "pass/fail"
 def main():
@@ -59,4 +63,4 @@ def main():
     run_tests()
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

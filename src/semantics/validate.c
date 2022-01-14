@@ -453,6 +453,7 @@ static int validate_bstmt(struct yf_parse_node * cin, struct yf_ast_node * ain,
 
     /* Validate each statement */
     yf_list_reset(&c->stmts);
+    yf_list_init(&a->stmts);
 
     for (;;) {
 
@@ -469,10 +470,10 @@ static int validate_bstmt(struct yf_parse_node * cin, struct yf_ast_node * ain,
         if (validate_node(csub, asub, pdata, fdata)) {
             yf_free(asub);
             /* return 1; */ /* Keep going */
+        } else {
+            /* Move to abstract list */
+            yf_list_add(&a->stmts, asub);
         }
-
-        /* Move to abstract list */
-        yf_list_add(&a->stmts, asub);
 
         /* Keep going */
         yf_list_next(&c->stmts);

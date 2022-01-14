@@ -159,6 +159,7 @@ static int validate_vardecl(
                 entry->line,
                 cin->lineno
             );
+            return 1;
         } else {
             /* Just a warning about shadowing. */
             YF_PRINT_WARNING(
@@ -169,7 +170,6 @@ static int validate_vardecl(
                 cin->lineno
             );
         }
-        return 1;
     }
 
     /* Construct abstract instance, ONLY if non-global */

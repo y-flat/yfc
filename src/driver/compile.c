@@ -89,6 +89,13 @@ static int yf_run_compiler_on_data(
         }
     }
 
+    /* Check error values */
+    for (i = 0; i < data->num_files; ++i) {
+        if (data->files[i]->error) {
+            return 1;
+        }
+    }
+
     return 0;
 
 }

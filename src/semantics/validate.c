@@ -82,6 +82,7 @@ static int validate_program(
     struct yf_ast_node * anode;
     struct yfcs_program * cprog;
     struct yfa_program * aprog;
+    int err = 0;
 
     cprog = &cin->program;
     aprog = &ain->program;
@@ -108,7 +109,8 @@ static int validate_program(
         /* Validate */
         if (validate_node(cnode, anode, pdata, fdata)) {
             yf_free(anode);
-            /* return 1; */
+            fdata->error = 1;
+            err = 1;
             /* No return, keep going to find more errors. */
         }
 
@@ -120,7 +122,7 @@ static int validate_program(
 
     }
 
-    return 0;
+    return err;
 
 }
 
@@ -413,7 +415,7 @@ static int validate_bstmt(struct yf_parse_node * cin, struct yf_ast_node * ain,
         /* Validate */
         if (validate_node(csub, asub, pdata, fdata)) {
             yf_free(asub);
-            /* return 1; */ /* Keep going */
+            fdata->error = 1;
         } else {
             /* Move to abstract list */
             yf_list_add(&a->stmts, asub);

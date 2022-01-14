@@ -82,6 +82,6 @@ bool yf_should_compile(struct yf_args * args);
  * arguments, this will output the diagnostic. This function exits the program
  * (with a 0 value if no error and 1 otherwise).
  */
-void yf_output_info(struct yf_args * args);
+int yf_output_info(struct yf_args * args);
 
 #endif /* DRIVER_ARGS_H */

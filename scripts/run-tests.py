@@ -50,7 +50,8 @@ def main():
 
     add_semantic_test("tests/sem/duplicate-decl-global.yf",  False)
     add_semantic_test("tests/sem/duplicate-decl-local.yf",   False)
-    add_semantic_test("tests/sem/funcs.yf",                  True )
+    add_semantic_test("tests/sem/funcs-fail.yf",             False)
+    add_semantic_test("tests/sem/funcs-pass.yf",             True )
     add_semantic_test("tests/sem/no-value-assign.yf",        False)
     add_semantic_test("tests/sem/shadow.yf",                 True )
     add_semantic_test("tests/sem/unknown-type.yf",           True )

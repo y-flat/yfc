@@ -51,6 +51,7 @@ def main():
 
     add_parser_test("tests/parser/funcdecl-parsing.yf",      True )
     add_parser_test("tests/parser/op-parsing.yf",            True )
+    add_parser_test("tests/parser/vardecl-neq.yf",           False)
     add_parser_test("tests/parser/vardecl-test.yf",          True )
 
     add_semantic_test("tests/sem/duplicate-decl-global.yf",  False)

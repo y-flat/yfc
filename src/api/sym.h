@@ -12,12 +12,19 @@
 #include <util/list.h>
 #include <util/hashmap.h>
 
-struct yfs_primitive_type {
-    int size; /* In bits */
+enum yfpt_format {
+    YFS_INT, /* NOT just "int", but a whole number. */
+    YFS_FLOAT, /* ANY number with a decimal part. */
+    YFS_NONE,
 };
 
-/* Has no name - types are stored in a hashmap. NO nesting needed - all types
-are globally visible. */
+struct yfs_primitive_type {
+    int size; /* In bits */
+    enum yfpt_format type;
+};
+
+/* Has names even though types are stored in a hashmap, in case errors are to be
+reported. NO nesting needed - all types are globally visible. */
 struct yfs_type {
 
     union {
@@ -27,6 +34,8 @@ struct yfs_type {
     enum {
         YFST_PRIMITIVE,
     } kind;
+
+    char * name; /* Name of the type */
 
 };
 

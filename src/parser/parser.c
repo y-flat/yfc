@@ -115,7 +115,10 @@ int yfp_vardecl(struct yf_parse_node * node, struct yf_lexer * lexer) {
      */
     P_LEX(lexer, &tok);
     switch (tok.type) {
-        case YFT_OP: /* TODO - do an equals sign check */
+        case YFT_OP:
+        if (strcmp(tok.data, "=")) {
+            YF_TOKERR(tok, "equal sign");
+        }
             node->vardecl.expr = yf_malloc(sizeof(struct yf_parse_node));
             if (yfp_expr(node->vardecl.expr, lexer, 0, NULL)) {
                 free(node->vardecl.expr);

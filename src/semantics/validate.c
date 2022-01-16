@@ -281,7 +281,9 @@ static int validate_expr_e(struct yfcs_expr * c, struct yfa_expr * a,
 
     struct yf_parse_node * carg;
     struct yf_ast_node   * aarg;
-    struct yfs_type      * argtype;
+    struct yfsn_param    * param;
+    struct yfs_type      * paramtype;
+    int lgres;
     
     /* If this is unary - (just a value), ... */
     switch (c->type) {
@@ -406,6 +408,7 @@ static int validate_expr_e(struct yfcs_expr * c, struct yfa_expr * a,
          * matches.
          */
         yf_list_init(&a->as.call.args);
+        yf_list_reset(&a->as.call.name->fn.params);
         yf_list_reset(&c->call.args);
         for (;;) {
 
@@ -414,13 +417,13 @@ static int validate_expr_e(struct yfcs_expr * c, struct yfa_expr * a,
                 return 2;
 
             if (
-                yf_list_get(&a->as.call.name->fn.params, (void **) &argtype) !=
-                yf_list_get(&c->call.args, (void **) &carg)
+                yf_list_get(&a->as.call.name->fn.params, (void **) &param) !=
+                (lgres = yf_list_get(&c->call.args, (void **) &carg))
             ) {
                 YF_PRINT_ERROR(
-                    "line %d: Number of arguments in function call "
-                    "did not match the number in the definition",
-                    lineno
+                    "line %d: too %s arguments in function call",
+                    lineno,
+                    lgres ? "few" : "many"
                 );
                 return 1;
             }
@@ -431,9 +434,18 @@ static int validate_expr_e(struct yfcs_expr * c, struct yfa_expr * a,
                 return 1;
             }
 
+            if ( (paramtype = yfh_get(fdata->types.table, param->type)) == NULL) {
+                YF_PRINT_ERROR(
+                    "line %d: Uncaught type error: unknown type '%s'",
+                    lineno,
+                    param->type
+                );
+                return 1;
+            }
+
             if (yfs_output_diagnostics(
                 yfse_get_expr_type(&aarg->expr, fdata),
-                argtype,
+                paramtype,
                 fdata,
                 lineno
             )) {

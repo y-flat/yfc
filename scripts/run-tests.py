@@ -60,6 +60,7 @@ def main():
     add_semantic_test("tests/sem/funcs-pass.yf",             True )
     add_semantic_test("tests/sem/no-value-assign.yf",        False)
     add_semantic_test("tests/sem/shadow.yf",                 True )
+    add_semantic_test("tests/sem/type-val-pass.yf",          True )
     add_semantic_test("tests/sem/unknown-type.yf",           False)
 
     return run_tests()

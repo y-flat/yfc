@@ -102,8 +102,8 @@ int yfs_output_diagnostics(
                 from->name,
                 to->name
             );
+            return 1;
         }
-        return 1;
     }
     return 0;
 }

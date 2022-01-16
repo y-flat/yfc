@@ -31,4 +31,13 @@ struct yfs_type * yfse_get_expr_type(
     struct yfa_expr * expr, struct yf_file_compilation_data * fdata
 );
 
+/**
+ * Output any warnings and errors about whether conversion is OK.
+ * Return: 0 if OK / warning, 1 if error.
+ */
+int yfs_output_diagnostics(
+    struct yfs_type *, struct yfs_type *, struct yf_file_compilation_data *,
+    int lineno
+);
+
 #endif /* SEMANTICS_TYPES_H */

@@ -73,3 +73,26 @@ struct yfs_type * yfse_get_expr_type(
     }
 
 }
+
+int yfs_output_diagnostics(
+    struct yfs_type * from,
+    struct yfs_type * to,
+    struct yf_file_compilation_data * fdata,
+    int lineno
+) {
+
+    enum yfs_conversion_allowedness al;
+
+    if ( (al = yfs_is_safe_conversion(
+            from, to
+        )) != YFS_CONVERSION_OK) {
+            if (al == YFS_CONVERSION_LOSSY) {
+                YF_PRINT_WARNING("line %d: %s when converting from %s to %s",
+                    lineno,
+                    yfse_get_error_message(al),
+                    from->name,
+                    to->name
+                );
+            }
+        }
+}

@@ -27,6 +27,8 @@ enum yfs_conversion_allowedness yfs_is_safe_conversion(
 
 const char * yfse_get_error_message(enum yfs_conversion_allowedness err);
 
-struct yfs_type * yfse_get_expr_type(struct yfa_expr * expr);
+struct yfs_type * yfse_get_expr_type(
+    struct yfa_expr * expr, struct yf_file_compilation_data * fdata
+);
 
 #endif /* SEMANTICS_TYPES_H */

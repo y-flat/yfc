@@ -245,13 +245,13 @@ static int validate_vardecl(
     /* Check that the types are compatible. */
     if (a->expr) {
         if ( (al = yfs_is_safe_conversion(
-            yfse_get_expr_type(&a->expr->expr), a->name->var.dtype
+            yfse_get_expr_type(&a->expr->expr, fdata), a->name->var.dtype
         )) != YFS_CONVERSION_OK) {
             if (al == YFS_CONVERSION_LOSSY) {
                 YF_PRINT_WARNING("line %d: %s when converting from %s to %s",
                     cin->lineno,
                     yfse_get_error_message(al),
-                    yfse_get_expr_type(&a->expr->expr)->name,
+                    yfse_get_expr_type(&a->expr->expr, fdata)->name,
                     a->name->var.dtype->name
                 );
             }

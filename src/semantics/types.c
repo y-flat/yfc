@@ -41,6 +41,35 @@ const char * yfse_get_error_message(enum yfs_conversion_allowedness err) {
     return errs[err];
 }
 
-struct yfs_type * yfse_get_expr_type(struct yfa_expr * expr) {
+struct yfs_type * yfse_get_expr_type(
+    struct yfa_expr * expr, struct yf_file_compilation_data * fdata
+) {
+
+    /* This function is super hacky and whatnot. */
+
+    int lsize, rsize;
+    struct yfs_type * ltype, * rtype;
+    struct yfa_value * v;
+
+    if (expr->type == YFA_BINARY) {
+        ltype = yfse_get_expr_type(expr->as.binary.left, fdata);
+        rtype = yfse_get_expr_type(expr->as.binary.right, fdata);
+        lsize = ltype->primitive.size;
+        rsize = rtype->primitive.size;
+        /* Return the larger size. TODO - make this better. */
+        if (lsize > rsize) {
+            return ltype;
+        } else {
+            return rtype;
+        }
+    } else {
+        v = &expr->as.value;
+        if (v->type == YFA_IDENT) {
+            return v->as.identifier->var.dtype;
+        } else {
+            /* TODO once strings and floats are implemented */
+            return yfh_get(fdata->types.table, "int");
+        }
+    }
 
 }

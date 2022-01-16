@@ -291,7 +291,9 @@ static int validate_expr_e(struct yfcs_expr * c, struct yfa_expr * a,
                 );
                 return 1;
             }
+            a->as.value.type = YFA_IDENT;
         } else {
+            a->as.value.type = YFA_LITERAL;
             /* TODO - parse literal */
         }
 

@@ -414,7 +414,7 @@ static int validate_expr_e(struct yfcs_expr * c, struct yfa_expr * a,
                 return 2;
 
             if (
-                yf_list_get(&a->as.call.args, (void **) &argtype) !=
+                yf_list_get(&a->as.call.name->fn.params, (void **) &argtype) !=
                 yf_list_get(&c->call.args, (void **) &carg)
             ) {
                 YF_PRINT_ERROR(

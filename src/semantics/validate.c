@@ -275,6 +275,9 @@ static int validate_expr_e(struct yfcs_expr * c, struct yfa_expr * a,
     struct yf_project_compilation_data * pdata,
     struct yf_file_compilation_data * fdata, int lineno
 ) {
+
+    char * intparse;
+    int dig;
     
     /* If this is unary - (just a value), ... */
     if (c->type == YFCS_VALUE) {
@@ -293,8 +296,27 @@ static int validate_expr_e(struct yfcs_expr * c, struct yfa_expr * a,
             }
             a->as.value.type = YFA_IDENT;
         } else {
+
             a->as.value.type = YFA_LITERAL;
-            /* TODO - parse literal */
+
+            /* Parse literal */
+            a->as.value.as.literal.type = YFCS_NUM;
+            a->as.value.as.literal.val = 0;
+
+            for (intparse = c->value.literal.value; *intparse; ++intparse) {
+                dig = *intparse - '0';
+                if (dig < 0 || dig > 9) {
+                    YF_PRINT_ERROR(
+                        "Invalid literal '%s' (line %d), "
+                        "found invalid character '%c' in int literal",
+                        c->value.literal.value, lineno, *intparse
+                    );
+                    return 1;
+                }
+                a->as.value.as.literal.val *= 10;
+                a->as.value.as.literal.val += dig;
+            }
+
         }
 
     } else {

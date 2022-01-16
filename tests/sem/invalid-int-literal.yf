@@ -1,0 +1,2 @@
+~~ Invalid characters ~~
+y: int = 123abc;

@@ -32,6 +32,7 @@ void add_type(
     type->primitive.size = size;
     type->kind = YFST_PRIMITIVE;
     type->primitive.type = fmt;
+    type->name = name;
     yfh_set(fdata->types.table, name, type);
 }
 

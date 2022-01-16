@@ -60,5 +60,6 @@ int yfp_ident(struct yfcs_identifier * node, struct yf_lexer * lexer);
 int yfp_type(struct yfcs_type * node, struct yf_lexer * lexer);
 int yfp_bstmt(struct yf_parse_node * node, struct yf_lexer * lexer);
 int yfp_stmt(struct yf_parse_node * node, struct yf_lexer * lexer);
+int yfp_funccall(struct yf_parse_node * node, struct yf_lexer * lexer);
 
 #endif /* PARSER_PARSER_INTERNALS_H */

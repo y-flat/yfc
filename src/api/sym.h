@@ -12,13 +12,15 @@
 #include <util/list.h>
 #include <util/hashmap.h>
 
+enum yfpt_format {
+    YFS_INT, /* NOT just "int", but a whole number. */
+    YFS_FLOAT, /* ANY number with a decimal part. */
+    YFS_NONE,
+};
+
 struct yfs_primitive_type {
     int size; /* In bits */
-    enum yfpt_format {
-        YFS_INT, /* NOT just "int", but a whole number. */
-        YFS_FLOAT, /* ANY number with a decimal part. */
-        YFS_NONE,
-    } type;
+    enum yfpt_format type;
 };
 
 /* Has names even though types are stored in a hashmap, in case errors are to be

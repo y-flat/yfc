@@ -21,8 +21,8 @@ struct yfs_primitive_type {
     } type;
 };
 
-/* Has no name - types are stored in a hashmap. NO nesting needed - all types
-are globally visible. */
+/* Has names even though types are stored in a hashmap, in case errors are to be
+reported. NO nesting needed - all types are globally visible. */
 struct yfs_type {
 
     union {
@@ -32,6 +32,8 @@ struct yfs_type {
     enum {
         YFST_PRIMITIVE,
     } kind;
+
+    char * name; /* Name of the type */
 
 };
 

@@ -30,3 +30,17 @@ enum yfs_conversion_allowedness yfs_is_safe_conversion(
     return YFS_CONVERSION_OK;
 
 }
+
+const char * yfse_get_error_message(enum yfs_conversion_allowedness err) {
+    static const char * errs[] = {
+        "No error",
+        "Potential loss of data",
+        "Invalid conversion",
+        "Conversion to or from void",
+    };
+    return errs[err];
+}
+
+struct yfs_type * yfse_get_expr_type(struct yfa_expr * expr) {
+
+}

@@ -7,6 +7,7 @@
 
 #include <stdbool.h>
 
+#include <api/abstract-tree.h>
 #include <semantics/validate-utils.h>
 
 enum yfs_conversion_allowedness {
@@ -23,5 +24,9 @@ enum yfs_conversion_allowedness {
 enum yfs_conversion_allowedness yfs_is_safe_conversion(
     struct yfs_type * from, struct yfs_type * to
 );
+
+const char * yfse_get_error_message(enum yfs_conversion_allowedness err);
+
+struct yfs_type * yfse_get_expr_type(struct yfa_expr * expr);
 
 #endif /* SEMANTICS_TYPES_H */

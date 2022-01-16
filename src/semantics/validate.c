@@ -1,5 +1,6 @@
 #include "validate.h"
 
+#include <semantics/types.h>
 #include <semantics/validate-utils.h>
 
 /**
@@ -161,6 +162,7 @@ static int validate_vardecl(
 
     int ssym;
     bool global = (current_scope == &fdata->symtab);
+    enum yfs_conversion_allowedness al;
 
     /* Make sure it isn't declared twice */
     /* A variable is redeclared in the current scope. Whoops! */
@@ -237,6 +239,22 @@ static int validate_vardecl(
             return 1;
     } else {
         a->expr = NULL;
+    }
+
+    /* Check that the types are compatible. */
+    if (a->expr) {
+        if ( (al = yfs_is_safe_conversion(
+            yfse_get_expr_type(&a->expr->expr), a->name->var.dtype
+        )) != YFS_CONVERSION_OK) {
+            if (al == YFS_CONVERSION_LOSSY) {
+                YF_PRINT_WARNING("line %d: %s when converting from %s to %s",
+                    cin->lineno,
+                    yfse_get_error_message(al),
+                    yfse_get_expr_type(&a->expr->expr)->name,
+                    a->name->var.dtype->name
+                );
+            }
+        }
     }
 
     /* Add to symbol table UNLESS it is global scope. */

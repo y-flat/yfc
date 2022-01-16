@@ -49,6 +49,7 @@ def main():
     add_lexer_test("tests/lexer/large-token.yf",             False)
     add_lexer_test("tests/lexer/lexer-test.yf",              True )
 
+    add_parser_test("tests/parser/funccall-parsing.yf",      True )
     add_parser_test("tests/parser/funcdecl-parsing.yf",      True )
     add_parser_test("tests/parser/op-parsing.yf",            True )
     add_parser_test("tests/parser/vardecl-neq.yf",           False)

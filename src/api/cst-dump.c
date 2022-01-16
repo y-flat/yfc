@@ -119,15 +119,19 @@ static void yf_dump_funcdecl(struct yfcs_funcdecl * node, FILE * out) {
 
 static void yf_dump_expr(struct yfcs_expr * node, FILE * out) {
 
+    struct yf_parse_node * arg;
+
     yf_print_line(out, "expr");
     indent();
 
-    if (node->type == YFCS_VALUE) {
+    switch (node->type) {
+    case YFCS_VALUE:
         yf_print_line(out, "value: %s",
             node->value.type == YFCS_IDENT ? node->value.identifier.name
             : node->value.literal.value
         );
-    } else {
+        break;
+    case YFCS_BINARY:
         yf_print_line(out,
             "operator: %s", get_op_string(node->binary.op)
         );
@@ -135,6 +139,20 @@ static void yf_dump_expr(struct yfcs_expr * node, FILE * out) {
         yf_dump_expr(&node->binary.left->expr,  out);
         yf_print_line(out, "right:");
         yf_dump_expr(&node->binary.right->expr, out);
+        break;
+    case YFCS_FUNCCALL:
+        yf_print_line(out, "function name: %s", node->call.name.name);
+        yf_print_line(out, "arguments:");
+        indent();
+        for (;;) {
+            if (yf_list_get(&node->call.args, (void **) &arg) == -1) break;
+            if (!arg) break;
+            yf_dump_cst(arg, out);
+            yf_list_next(&node->call.args);
+        }
+        dedent();
+        yf_print_line(out, "end arguments");
+        break;
     }
 
     dedent();

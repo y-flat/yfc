@@ -85,14 +85,25 @@ int yfs_output_diagnostics(
 
     if ( (al = yfs_is_safe_conversion(
             from, to
-        )) != YFS_CONVERSION_OK) {
-            if (al == YFS_CONVERSION_LOSSY) {
-                YF_PRINT_WARNING("line %d: %s when converting from %s to %s",
-                    lineno,
-                    yfse_get_error_message(al),
-                    from->name,
-                    to->name
-                );
-            }
+        )) != YFS_CONVERSION_OK
+    ) {
+        /* TODO - reduce repetition */
+        if (al == YFS_CONVERSION_LOSSY) {
+            YF_PRINT_WARNING("line %d: %s when converting from %s to %s",
+                lineno,
+                yfse_get_error_message(al),
+                from->name,
+                to->name
+            );
+        } else {
+            YF_PRINT_ERROR("line %d: %s when converting from %s to %s",
+                lineno,
+                yfse_get_error_message(al),
+                from->name,
+                to->name
+            );
         }
+        return 1;
+    }
+    return 0;
 }

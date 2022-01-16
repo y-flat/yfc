@@ -36,6 +36,11 @@ struct yfa_value {
 
 };
 
+struct yfa_funccall {
+    struct yf_sym * name;
+    struct yf_list args; /* A list of yf_ast_node */
+};
+
 struct yfa_expr {
     union {
         struct yfa_value value;
@@ -44,11 +49,13 @@ struct yfa_expr {
             struct yfa_expr *right;
             enum yf_operator op;
         } binary;
+        struct yfa_funccall call;
     } as;
 
     enum {
         YFA_VALUE,
         YFA_BINARY,
+        YFA_FUNCCALL,
     } type;
     
 };

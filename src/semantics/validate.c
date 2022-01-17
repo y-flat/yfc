@@ -562,6 +562,7 @@ static int validate_bstmt(struct yf_parse_node * cin, struct yf_ast_node * ain,
 
     struct yf_parse_node * csub;
     struct yf_ast_node * asub;
+    int err = 0;
     
     /* Create a symbol table for this scope */
     enter_scope(&a->symtab);
@@ -585,6 +586,7 @@ static int validate_bstmt(struct yf_parse_node * cin, struct yf_ast_node * ain,
         if (validate_node(csub, asub, pdata, fdata)) {
             yf_free(asub);
             fdata->error = 1;
+            err = 1;
         } else {
             /* Move to abstract list */
             yf_list_add(&a->stmts, asub);
@@ -597,6 +599,6 @@ static int validate_bstmt(struct yf_parse_node * cin, struct yf_ast_node * ain,
 
     exit_scope();
 
-    return 0;
+    return err;
 
 }

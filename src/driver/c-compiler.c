@@ -27,7 +27,7 @@ int compiler_exists(const char * compiler) {
     sprintf(command, "which %s 2>/dev/null 1>&2", compiler);
 
     /* "which" returns an error if the command doesn't exist */
-    ret = system(command) != 0;
+    ret = system(command) == 0;
 
     free(command);
     return ret;

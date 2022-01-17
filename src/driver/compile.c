@@ -59,8 +59,8 @@ static int yf_run_compiler_on_data(
         if (yf_run_frontend(data->files[i], args)) {
             data->files[i]->error = 1;
         }
-        if (args->cstdump) {
-            return 0; /* No progressing */
+        if (args->cstdump || args->tdump) {
+            return data->files[i]->error;
         }
         if (!data->files[i]->error && yf_build_symtab(data->files[i])) {
             data->files[i]->error = 1;
@@ -196,7 +196,10 @@ static int dump_tokens(struct yf_lexer * lexer) {
 
     struct yf_token token;
     for (;;) {
-        yfl_lex(lexer, &token);
+        if (yfl_lex(lexer, &token)) {
+            YF_PRINT_ERROR("Invalid token");
+            return 1;
+        }
         if (token.type == YFT_EOF) {
             break;
         }
@@ -206,7 +209,7 @@ static int dump_tokens(struct yf_lexer * lexer) {
         );
     }
 
-    return -1; /* Indicates that nothing should else should be done (meaning no
+    return 0; /* Indicates that nothing should else should be done (meaning no
     semantic analysis, etc. */
 
 }

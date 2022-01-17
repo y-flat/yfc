@@ -62,9 +62,13 @@ static int yf_run_compiler_on_data(
         if (args->cstdump || args->tdump) {
             return data->files[i]->error;
         }
-        if (!data->files[i]->error && yf_build_symtab(data->files[i])) {
-            data->files[i]->error = 1;
-            err = 1;
+        if (!data->files[i]->error) {
+            if (yf_build_symtab(data->files[i])) {
+                data->files[i]->error = 1;
+                err = 1;
+            } else {
+                data->files[i]->error = 0;
+            }
         }
     }
 
@@ -77,6 +81,7 @@ static int yf_run_compiler_on_data(
                 data, data->files[i], args
             )
         ) {
+            YF_PRINT_DEBUG("Here");
             data->files[i]->error = 1;
             err = 1;
         }

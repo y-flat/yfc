@@ -2,6 +2,7 @@
 
 #include <string.h>
 
+#include <driver/c-compiler.h>
 #include <util/allocator.h>
 #include <util/yfc-out.h>
 
@@ -57,6 +58,68 @@ int create_output_file_name(
 }
 
 /**
+ * Generate C code
+ */
+int yf_gen_c(struct yf_file_compilation_data * fdata) {
+    return 0; /* TODO */
+}
+
+/**
+ * Run the C compiler and link the binary.
+ */
+int yf_run_c_backend(
+    struct yf_project_compilation_data * data, struct yf_args * args
+) {
+
+    int i;
+    struct yf_file_compilation_data * file;
+    
+    /* Where gcc -c foo.c -o foo.o is stored */
+    char * compile_buf = yf_malloc(256 * sizeof (char));
+    /* Where gcc foo1.o foo2.o -o foo is stored */
+    char * link_buf = yf_malloc(16384 * sizeof (char));
+    if (!compile_buf || !link_buf)
+        return 1;
+
+    if (yf_determine_c_compiler(args) != YF_COMPILER_OK) {
+        YF_PRINT_ERROR("could not determine C compiler");
+        return 1;
+    }
+
+    strcpy(link_buf, YF_C_COMPILER);
+    strcat(link_buf, " ");
+
+    for (i = 0; i < data->num_files; ++i) {
+        file = data->files[i];
+        /* Run compiler */
+        sprintf(
+            compile_buf,
+            "%s -c %s -o %s",
+            YF_C_COMPILER, file->output_file, file->output_file
+        );
+        /* Now, rewrite gcc -c x.c -o x.c  to have x.o */
+        strcpy(file->output_file + strlen(file->output_file) - 2, "o");
+        system(compile_buf);
+        /* Also append name to linker command */
+        strcat(link_buf, file->output_file);
+        strcat(link_buf, " ");
+    }
+
+    /* Finally, add -o output_file */
+    if (args->project) {
+        strcat(link_buf, "-o ");
+        strcat(link_buf, data->project_name);
+    } else {
+        strcat(link_buf, "-o a.out");
+    }
+
+    system(link_buf);
+
+    return 0;
+
+}
+
+/**
  * Generate C code, run the C compiler, and link the resulting binary.
  */
 int yf_run_backend(
@@ -71,6 +134,7 @@ int yf_run_backend(
         if (file->error)
             continue;
         create_output_file_name(file, args);
+        yf_gen_c(file);
     }
 
     return 0;

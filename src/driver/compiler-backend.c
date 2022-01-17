@@ -100,7 +100,6 @@ int yf_run_c_backend(
         /* Now, rewrite gcc -c x.c -o x.c  to have x.o */
         strcpy(compile_buf + strlen(compile_buf) - 2, ".o");
         //system(compile_buf);
-        YF_PRINT_ERROR("compiler command: %s", compile_buf);
         /* Also append name to linker command */
         strcat(link_buf, file->output_file);
         strcpy(link_buf + strlen(link_buf) - 2, ".o");
@@ -116,7 +115,6 @@ int yf_run_c_backend(
     }
 
     //system(link_buf);
-    YF_PRINT_ERROR("linker command: %s", link_buf);
 
     free(compile_buf);
     free(link_buf);

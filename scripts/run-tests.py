@@ -57,6 +57,8 @@ def main():
 
     add_semantic_test("tests/sem/duplicate-decl-global.yf",  False)
     add_semantic_test("tests/sem/duplicate-decl-local.yf",   False)
+    add_semantic_test("tests/sem/funccall-bad.yf",           False)
+    add_semantic_test("tests/sem/funccall-good.yf",          True )
     add_semantic_test("tests/sem/funcs-fail.yf",             False)
     add_semantic_test("tests/sem/funcs-pass.yf",             True )
     add_semantic_test("tests/sem/invalid-int-literal.yf",    False)

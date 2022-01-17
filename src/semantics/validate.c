@@ -427,6 +427,9 @@ static int validate_expr_e(struct yfcs_expr * c, struct yfa_expr * a,
                 );
                 return 1;
             }
+            if (lgres == -1) {
+                break;
+            }
 
             if (validate_expr(
                 carg, aarg, pdata, fdata
@@ -454,6 +457,7 @@ static int validate_expr_e(struct yfcs_expr * c, struct yfa_expr * a,
 
             yf_list_add(&a->as.call.args, aarg);
             yf_list_next(&c->call.args);
+            yf_list_next(&a->as.call.name->fn.params);
 
         }
 

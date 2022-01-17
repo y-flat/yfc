@@ -9,7 +9,7 @@ int create_output_file_name(
     struct yf_file_compilation_data * data, struct yf_args * args
 ) {
 
-    char * namebuf_copyloc;
+    const char * namebuf_copyloc;
 
     data->output_file = yf_malloc(sizeof (char) * 256);
     if (!data->output_file)
@@ -19,12 +19,12 @@ int create_output_file_name(
     /* with --project: src/foo/bar/baz.yf -> bin/c/foo/bar/baz.c */
     if (args->project) {
         strcpy(data->output_file, "bin/c/");
-        namebuf_copyloc = data->output_file + strlen("src/");
+        namebuf_copyloc = data->file_name + strlen("src/");
         strcat(data->output_file, namebuf_copyloc);
         /* Change .yf to .c */
         /* FIRST, check for .yf ending */
-        if (strlen(namebuf_copyloc) > 3 &&
-            strcmp(namebuf_copyloc + strlen(namebuf_copyloc) - 3, ".yf") == 0) {
+        if (strlen(data->output_file) > 3 &&
+            strcmp(data->output_file + strlen(data->output_file) - 3, ".yf") == 0) {
             /* Simply tack on .c */
             /* But no .yf is bad */
             strcat(data->output_file, ".c");
@@ -32,23 +32,23 @@ int create_output_file_name(
                 "file %s does not end with .yf", data->output_file
             );
         } else {
-            strcpy(namebuf_copyloc + strlen(namebuf_copyloc) - 2, "c");
+            strcpy(data->output_file + strlen(namebuf_copyloc) - 2, "c");
         }
     } else {
         /* Replace .yf with .c */
         /* TODO - reduce code copying from above */
-        namebuf_copyloc = data->output_file;
+        namebuf_copyloc = data->file_name;
         strcat(data->output_file, namebuf_copyloc);
-        if (strlen(namebuf_copyloc) > 3 &&
-            strcmp(namebuf_copyloc + strlen(namebuf_copyloc) - 3, ".yf") == 0) {
+        if (strlen(data->output_file) > 3 &&
+            strcmp(data->output_file + strlen(data->output_file) - 3, ".yf")) {
             /* Simply tack on .c */
             /* But no .yf is bad */
-            strcat(data->output_file, ".c");
             YF_PRINT_WARNING(
                 "file %s does not end with .yf", data->output_file
             );
+            strcat(data->output_file, ".c");
         } else {
-            strcpy(namebuf_copyloc + strlen(namebuf_copyloc) - 2, "c");
+            strcpy(data->output_file + strlen(namebuf_copyloc) - 2, "c");
         }
     }
 
@@ -71,7 +71,6 @@ int yf_run_backend(
         if (file->error)
             continue;
         create_output_file_name(file, args);
-        YF_PRINT_WARNING("%s", file->output_file);
     }
 
     return 0;

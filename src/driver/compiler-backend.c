@@ -56,5 +56,17 @@ int create_output_file_name(
 int yf_run_backend(
     struct yf_project_compilation_data * data, struct yf_args * args
 ) {
+    
+    int i;
+    struct yf_file_compilation_data * file;
+
+    for (i = 0; i < data->num_files; ++i) {
+        file = data->files[i];
+        if (file->error)
+            continue;
+        create_output_file_name(file, args);
+    }
+
     return 0;
+
 }

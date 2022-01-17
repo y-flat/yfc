@@ -2,6 +2,7 @@
 
 #include <string.h>
 
+#include <util/allocator.h>
 #include <util/yfc-out.h>
 
 int create_output_file_name(
@@ -9,6 +10,10 @@ int create_output_file_name(
 ) {
 
     char * namebuf_copyloc;
+
+    data->output_file = yf_malloc(sizeof (char) * 256);
+    if (!data->output_file)
+        return 1;
 
     /* Normal: foo/bar/baz.yf -> foo/bar/baz.c */
     /* with --project: src/foo/bar/baz.yf -> bin/c/foo/bar/baz.c */
@@ -33,6 +38,7 @@ int create_output_file_name(
         /* Replace .yf with .c */
         /* TODO - reduce code copying from above */
         namebuf_copyloc = data->output_file;
+        strcat(data->output_file, namebuf_copyloc);
         if (strlen(namebuf_copyloc) > 3 &&
             strcmp(namebuf_copyloc + strlen(namebuf_copyloc) - 3, ".yf") == 0) {
             /* Simply tack on .c */
@@ -65,6 +71,7 @@ int yf_run_backend(
         if (file->error)
             continue;
         create_output_file_name(file, args);
+        YF_PRINT_WARNING("%s", file->output_file);
     }
 
     return 0;

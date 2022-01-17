@@ -17,6 +17,7 @@ struct yf_file_compilation_data {
 
     /* To start - for error messages */
     const char * file_name;
+    char output_file[256];
 
     struct yf_parse_node parse_tree;
 

@@ -122,7 +122,7 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
         }
 
         if (STREQ(arg, "--dump-tokens")) {
-            if (args->cstdump) {
+            if (args->cstdump || args->just_semantics) {
                 yf_set_error(args);
                 return;
             }
@@ -131,11 +131,20 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
         }
 
         if (STREQ(arg, "--dump-cst")) {
-            if (args->tdump) {
+            if (args->tdump || args->just_semantics) {
                 yf_set_error(args);
                 return;
             }
             args->cstdump = 1;
+            continue;
+        }
+
+        if (STREQ(arg, "--just-semantics")) {
+            if (args->tdump || args->cstdump) {
+                yf_set_error(args);
+                return;
+            }
+            args->just_semantics = 1;
             continue;
         }
 

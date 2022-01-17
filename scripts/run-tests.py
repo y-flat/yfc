@@ -16,7 +16,7 @@ def add_parser_test(test, pass_):
     add_test(f"{test}", "--dump-cst", pass_)
 
 def add_semantic_test(test, pass_):
-    add_test(f"{test}", "", pass_)
+    add_test(f"{test}", "--just-semantics", pass_)
 
 def run_tests():
     total = passed = failed = 0

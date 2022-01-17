@@ -51,7 +51,7 @@ static int yf_run_compiler_on_data(
     struct yf_args * args
 ) {
 
-    int i;
+    int i, err = 0;
 
     /* Parse the frontend for all and create symtabs */
     for (i = 0; i < data->num_files; ++i) {
@@ -77,11 +77,15 @@ static int yf_run_compiler_on_data(
             )
         ) {
             data->files[i]->error = 1;
+            err = 1;
         }
     }
 
     /* Finally, generate code. */
-    yf_run_backend(data, args);
+    if (!args->just_semantics)
+        yf_run_backend(data, args);
+    else
+        return err;
 
     return 0;
 

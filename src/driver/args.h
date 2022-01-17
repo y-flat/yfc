@@ -60,6 +60,11 @@ struct yf_args {
      */
     bool cstdump;
 
+    /**
+     * What about ... not trying to generate any code?
+     */
+    bool just_semantics;
+
 };
 
 /**

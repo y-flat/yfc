@@ -8,6 +8,7 @@
 #include <api/compilation-data.h>
 #include <api/cst-dump.h>
 #include <api/lexer-input.h>
+#include <driver/compiler-backend.h>
 #include <driver/find-files.h>
 #include <parser/parser.h>
 #include <semantics/symtab.h>
@@ -26,9 +27,6 @@ static int yf_validate_ast(
     struct yf_project_compilation_data * pdata,
     struct yf_file_compilation_data * fdata,
     struct yf_args * args
-);
-static int yf_run_backend(
-    struct yf_project_compilation_data *, struct yf_args *
 );
 static int yf_do_cst_dump(struct yf_parse_node * tree);
 static int yf_cleanup(struct yf_project_compilation_data *);
@@ -54,17 +52,15 @@ static int yf_run_compiler_on_data(
 ) {
 
     int i;
-    int err = 0;
 
     /* Parse the frontend for all and create symtabs */
     for (i = 0; i < data->num_files; ++i) {
         data->files[i]->error = 0; /* Starting off clean */
         if (yf_run_frontend(data->files[i], args)) {
             data->files[i]->error = 1;
-            err = 1;
         }
-        if (args->cstdump || args->tdump) {
-            return err; /* No progressing */
+        if (args->cstdump) {
+            return 0; /* No progressing */
         }
         if (!data->files[i]->error && yf_build_symtab(data->files[i])) {
             data->files[i]->error = 1;
@@ -88,13 +84,6 @@ static int yf_run_compiler_on_data(
     for (i = 0; i < data->num_files; ++i) {
         if (!data->files[i]->error && yf_run_backend(data, args)) {
             data->files[i]->error = 1;
-        }
-    }
-
-    /* Check error values */
-    for (i = 0; i < data->num_files; ++i) {
-        if (data->files[i]->error) {
-            return 1;
         }
     }
 
@@ -206,12 +195,8 @@ static int yf_find_project_files(struct yf_project_compilation_data * data) {
 static int dump_tokens(struct yf_lexer * lexer) {
 
     struct yf_token token;
-    int r;
     for (;;) {
-        if ( (r = yfl_lex(lexer, &token)) ) {
-            YF_PRINT_ERROR("lexer error: %s", get_error_message(r));
-            return 1;
-        }
+        yfl_lex(lexer, &token);
         if (token.type == YFT_EOF) {
             break;
         }
@@ -221,7 +206,8 @@ static int dump_tokens(struct yf_lexer * lexer) {
         );
     }
 
-    return 0;
+    return -1; /* Indicates that nothing should else should be done (meaning no
+    semantic analysis, etc. */
 
 }
 
@@ -251,19 +237,6 @@ static int yf_validate_ast(
 ) {
 
     return yfs_validate(fdata, pdata);
-
-}
-
-/**
- * Generate C code, run the C compiler, and link the resulting binary.
- */
-static int yf_run_backend(
-    struct yf_project_compilation_data * data,
-    struct yf_args * args
-) {
-
-    /* TODO */
-    return 0;
 
 }
 

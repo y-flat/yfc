@@ -64,6 +64,7 @@ static int yf_run_compiler_on_data(
         }
         if (!data->files[i]->error && yf_build_symtab(data->files[i])) {
             data->files[i]->error = 1;
+            err = 1;
         }
     }
 

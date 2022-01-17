@@ -393,6 +393,8 @@ static int validate_expr_e(struct yfcs_expr * c, struct yfa_expr * a,
             return 1;
         }
 
+        a->type = YFA_FUNCCALL;
+
         /* Make sure the function is actually a function. */
         if (a->as.call.name->type != YFS_FN) {
             YF_PRINT_ERROR(
@@ -495,6 +497,13 @@ static int validate_funcdecl(
     ) == -1) {
         /* Uh oh ... */
         YF_PRINT_ERROR("internal error: symbol not found");
+        return 2;
+    }
+
+    if ((a->name->fn.rtype = yfh_get(
+        fdata->types.table, c->ret.databuf
+    )) == NULL) {
+        YF_PRINT_ERROR("error: %d: return type not found", cin->lineno);
         return 2;
     }
 

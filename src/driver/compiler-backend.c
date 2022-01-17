@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include <driver/c-compiler.h>
+#include <gen/gen.h>
 #include <util/allocator.h>
 #include <util/yfc-out.h>
 
@@ -61,7 +62,7 @@ int create_output_file_name(
  * Generate C code
  */
 int yf_gen_c(struct yf_file_compilation_data * fdata) {
-    return 0; /* TODO */
+    return yfg_gen(fdata);
 }
 
 /**

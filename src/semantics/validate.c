@@ -597,6 +597,6 @@ static int validate_bstmt(struct yf_parse_node * cin, struct yf_ast_node * ain,
 
     exit_scope();
 
-    return 0;
+    return fdata->error;
 
 }

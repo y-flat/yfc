@@ -278,9 +278,16 @@ static int validate_expr_e(struct yfcs_expr * c, struct yfa_expr * a,
 
     char * intparse;
     int dig;
+
+    struct yf_parse_node * carg;
+    struct yf_ast_node   * aarg;
+    struct yfsn_param    * param;
+    struct yfs_type      * paramtype;
+    int lgres;
     
     /* If this is unary - (just a value), ... */
-    if (c->type == YFCS_VALUE) {
+    switch (c->type) {
+    case YFCS_VALUE:
 
         a->type = YFA_VALUE;
         
@@ -319,7 +326,9 @@ static int validate_expr_e(struct yfcs_expr * c, struct yfa_expr * a,
 
         }
 
-    } else {
+        break;
+
+    case YFCS_BINARY:
         /* It's a binary expression. */
         a->type = YFA_BINARY;
 
@@ -369,6 +378,93 @@ static int validate_expr_e(struct yfcs_expr * c, struct yfa_expr * a,
             return 1;
         }
 
+        break;
+
+    case YFCS_FUNCCALL:
+        /* Make sure the function exists. */
+        if (find_symbol(
+            &a->as.call.name, current_scope, c->call.name.name
+        ) == -1) {
+            YF_PRINT_ERROR(
+                "Unknown function '%s' (line %d)",
+                c->call.name.name,
+                c->call.name.lineno
+            );
+            return 1;
+        }
+
+        a->type = YFA_FUNCCALL;
+
+        /* Make sure the function is actually a function. */
+        if (a->as.call.name->type != YFS_FN) {
+            YF_PRINT_ERROR(
+                "Identifier '%s' is not a function (line %d)",
+                c->call.name.name,
+                c->call.name.lineno
+            );
+            return 1;
+        }
+
+        /* Go through the arguments and add them to the list, while making sure
+         * the types are compatible for each one and the number of arguments
+         * matches.
+         */
+        yf_list_init(&a->as.call.args);
+        yf_list_reset(&a->as.call.name->fn.params);
+        yf_list_reset(&c->call.args);
+        for (;;) {
+
+            aarg = yf_malloc(sizeof (struct yf_ast_node));
+            if (!aarg)
+                return 2;
+
+            if (
+                yf_list_get(&a->as.call.name->fn.params, (void **) &param) !=
+                (lgres = yf_list_get(&c->call.args, (void **) &carg))
+            ) {
+                YF_PRINT_ERROR(
+                    "line %d: too %s arguments in function call",
+                    lineno,
+                    lgres ? "few" : "many"
+                );
+                return 1;
+            }
+            if (lgres == -1) {
+                break;
+            }
+
+            if (validate_expr(
+                carg, aarg, pdata, fdata
+            )) {
+                return 1;
+            }
+
+            if ( (paramtype = yfh_get(fdata->types.table, param->type)) == NULL) {
+                YF_PRINT_ERROR(
+                    "line %d: Uncaught type error: unknown type '%s'",
+                    lineno,
+                    param->type
+                );
+                return 1;
+            }
+
+            if (yfs_output_diagnostics(
+                yfse_get_expr_type(&aarg->expr, fdata),
+                paramtype,
+                fdata,
+                lineno
+            )) {
+                return 1;
+            }
+
+            yf_list_add(&a->as.call.args, aarg);
+            yf_list_next(&c->call.args);
+            yf_list_next(&a->as.call.name->fn.params);
+
+        }
+
+        break;
+
     }
 
     return 0;
@@ -401,6 +497,13 @@ static int validate_funcdecl(
     ) == -1) {
         /* Uh oh ... */
         YF_PRINT_ERROR("internal error: symbol not found");
+        return 2;
+    }
+
+    if ((a->name->fn.rtype = yfh_get(
+        fdata->types.table, c->ret.databuf
+    )) == NULL) {
+        YF_PRINT_ERROR("error: %d: return type not found", cin->lineno);
         return 2;
     }
 

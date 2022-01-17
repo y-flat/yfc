@@ -44,6 +44,14 @@ struct yfcs_type {
 };
 
 /**
+ * Any call to a function. This is a type of expr!
+ */
+struct yfcs_funccall {
+    struct yfcs_identifier name;
+    struct yf_list args; /* A list of yf_parse_node */
+};
+
+/**
  * TODO - funccalls, etc.
  */
 struct yfcs_expr {
@@ -55,11 +63,13 @@ struct yfcs_expr {
             struct yf_parse_node *right;
             enum yf_operator op;
         } binary;
+        struct yfcs_funccall call;
     };
 
     enum {
         YFCS_VALUE,
         YFCS_BINARY,
+        YFCS_FUNCCALL,
     } type;
     
 };

@@ -41,7 +41,8 @@ int yfp_stmt(struct yf_parse_node * node, struct yf_lexer * lexer) {
                 );
                 ret = yfp_vardecl(node, lexer);
                 goto out;
-            } else if (tok.type == YFT_OP) {
+            /* Expression or funccall */
+            } else if (tok.type == YFT_OP || tok.type == YFT_OPAREN) {
                 ret = yfp_expr(node, lexer, true, &ident);
                 goto out;
             } else {
@@ -63,5 +64,64 @@ out:
     }
 
     return ret;
+
+}
+
+/**
+ * Assumes the opening identifier has already been lexed.
+ */
+int yfp_funccall(struct yf_parse_node * node, struct yf_lexer * lexer) {
+
+    int lex_err, argct;
+    struct yf_token tok;
+    struct yf_parse_node * argp;
+
+    P_LEX(lexer, &tok);
+    if (tok.type != YFT_OPAREN) {
+        YF_TOKERR(tok, "'('");
+    }
+
+    /**
+     * THIS CODE IS VERY SIMILAR TO THE STUFF FOR PARSING FUNCDECLS.
+     */
+
+    /* Start arg list for writing */
+    yf_list_init(&node->expr.call.args);
+    argct = 0;
+
+    for (;;) {
+
+        P_LEX(lexer, &tok);
+
+        /* Close paren check */
+        if (tok.type == YFT_CPAREN) {
+            break; /* Done arg parsing */
+        }
+
+        if (argct > 0) {
+            if (tok.type != YFT_COMMA) {
+                YF_TOKERR(tok, "',' following argument");
+            }
+        } else {
+            yfl_unlex(lexer, &tok);
+        }
+
+        argp = yf_malloc(sizeof(struct yf_parse_node));
+        if (!argp) {
+            return 1;
+        }
+
+        if (yfp_expr(argp, lexer, 0, NULL)) {
+            return 1;
+        }
+
+        ++argct;
+
+        /* Add to arg list */
+        yf_list_add(&node->expr.call.args, argp);
+
+    }
+
+    return 0;
 
 }

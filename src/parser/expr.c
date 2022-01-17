@@ -24,6 +24,7 @@ int yfp_atomic_expr(struct yf_parse_node * node, struct yf_lexer * lexer) {
     int lex_err;
     
     struct yf_token tok;
+    struct yfcs_identifier ident;
 
     node->type = YFCS_EXPR;
     
@@ -32,8 +33,27 @@ int yfp_atomic_expr(struct yf_parse_node * node, struct yf_lexer * lexer) {
     switch (tok.type) {
     case YFT_IDENTIFIER:
         yfl_unlex(lexer, &tok);
-        if (yfp_ident(&node->expr.value.identifier, lexer))
+        if (yfp_ident(&ident, lexer))
             return 1;
+        P_PEEK(lexer, &tok);
+        /* If it's an opening paren, we have a funccall: [identifier] "(" [...
+         * ... */
+        if (tok.type == YFT_OPAREN) {
+            node->expr.type = YFCS_FUNCCALL;
+            memcpy(
+                &node->expr.call.name,
+                &ident,
+                sizeof(struct yfcs_identifier)
+            );
+            return yfp_funccall(node, lexer);
+        } else {
+            /* No we don't. */
+            memcpy(
+                &node->expr.value.identifier,
+                &ident,
+                sizeof(struct yfcs_identifier)
+            );
+        }
         break;
     case YFT_LITERAL:
     node->expr.type = YFCS_VALUE;

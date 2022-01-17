@@ -1,0 +1,5 @@
+y(a1: int, a2: int): int {
+
+}
+
+x: int = y(1, 2);

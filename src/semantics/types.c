@@ -51,7 +51,8 @@ struct yfs_type * yfse_get_expr_type(
     struct yfs_type * ltype, * rtype;
     struct yfa_value * v;
 
-    if (expr->type == YFA_BINARY) {
+    switch (expr->type) {
+    case YFA_BINARY:
         ltype = yfse_get_expr_type(expr->as.binary.left, fdata);
         rtype = yfse_get_expr_type(expr->as.binary.right, fdata);
         lsize = ltype->primitive.size;
@@ -62,7 +63,8 @@ struct yfs_type * yfse_get_expr_type(
         } else {
             return rtype;
         }
-    } else {
+        break;
+    case YFA_VALUE:
         v = &expr->as.value;
         if (v->type == YFA_IDENT) {
             return v->as.identifier->var.dtype;
@@ -70,6 +72,9 @@ struct yfs_type * yfse_get_expr_type(
             /* TODO once strings and floats are implemented */
             return yfh_get(fdata->types.table, "int");
         }
+        break;
+    case YFA_FUNCCALL:
+        return expr->as.call.name->fn.rtype;
     }
 
 }

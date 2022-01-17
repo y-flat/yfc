@@ -84,10 +84,8 @@ static int yf_run_compiler_on_data(
     /* Finally, generate code. */
     if (!args->just_semantics)
         yf_run_backend(data, args);
-    else
-        return err;
 
-    return 0;
+    return err;
 
 }
 

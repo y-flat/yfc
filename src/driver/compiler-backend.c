@@ -130,18 +130,21 @@ int yf_run_backend(
     struct yf_project_compilation_data * data, struct yf_args * args
 ) {
     
-    int i;
+    int i, err = 0;
     struct yf_file_compilation_data * file;
 
     for (i = 0; i < data->num_files; ++i) {
         file = data->files[i];
-        if (file->error)
+        if (file->error) {
+            err = 1;
             continue;
+        }
         create_output_file_name(file, args);
         yf_gen_c(file);
     }
 
-    yf_run_c_backend(data, args);
+    if (!err)
+        yf_run_c_backend(data, args);
 
     return 0;
 

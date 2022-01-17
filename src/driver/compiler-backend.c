@@ -118,6 +118,9 @@ int yf_run_c_backend(
     //system(link_buf);
     YF_PRINT_ERROR("linker command: %s", link_buf);
 
+    free(compile_buf);
+    free(link_buf);
+
     return 0;
 
 }

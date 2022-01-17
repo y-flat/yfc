@@ -81,11 +81,7 @@ static int yf_run_compiler_on_data(
     }
 
     /* Finally, generate code. */
-    for (i = 0; i < data->num_files; ++i) {
-        if (!data->files[i]->error && yf_run_backend(data, args)) {
-            data->files[i]->error = 1;
-        }
-    }
+    yf_run_backend(data, args);
 
     return 0;
 

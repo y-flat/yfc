@@ -99,7 +99,8 @@ int yf_run_c_backend(
         );
         /* Now, rewrite gcc -c x.c -o x.c  to have x.o */
         strcpy(file->output_file + strlen(file->output_file) - 2, "o");
-        system(compile_buf);
+        //system(compile_buf);
+        YF_PRINT_ERROR("compiler command: %s", compile_buf);
         /* Also append name to linker command */
         strcat(link_buf, file->output_file);
         strcat(link_buf, " ");
@@ -113,7 +114,8 @@ int yf_run_c_backend(
         strcat(link_buf, "-o a.out");
     }
 
-    system(link_buf);
+    //system(link_buf);
+    YF_PRINT_ERROR("linker command: %s", link_buf);
 
     return 0;
 

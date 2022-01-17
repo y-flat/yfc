@@ -98,11 +98,12 @@ int yf_run_c_backend(
             YF_C_COMPILER, file->output_file, file->output_file
         );
         /* Now, rewrite gcc -c x.c -o x.c  to have x.o */
-        strcpy(file->output_file + strlen(file->output_file) - 2, "o");
+        strcpy(compile_buf + strlen(compile_buf) - 2, ".o");
         //system(compile_buf);
         YF_PRINT_ERROR("compiler command: %s", compile_buf);
         /* Also append name to linker command */
         strcat(link_buf, file->output_file);
+        strcpy(link_buf + strlen(link_buf) - 2, ".o");
         strcat(link_buf, " ");
     }
 
@@ -138,6 +139,8 @@ int yf_run_backend(
         create_output_file_name(file, args);
         yf_gen_c(file);
     }
+
+    yf_run_c_backend(data, args);
 
     return 0;
 

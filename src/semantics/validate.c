@@ -202,6 +202,17 @@ static int validate_vardecl(
 
     a->name->type = YFS_VAR;
 
+    /* Add to symbol table UNLESS it is global scope. */
+    /* The global scope symtab is already set up. */
+    if (!global) {
+        yfh_set(current_scope->table, c->name.name, a->name);
+    } else {
+        /* Free the name, since it was only needed for type checking. */
+        free(a->name);
+        /* If it's global, set "name" to point to the global symbol. */
+        a->name = entry;
+    }
+
     /* Verify type */
     /* We have to check that the type is valid here, because the type table
     doesn't exist during the symtab-building phase. */
@@ -253,17 +264,6 @@ static int validate_vardecl(
         )) {
             return 1;
         }
-    }
-
-    /* Add to symbol table UNLESS it is global scope. */
-    /* The global scope symtab is already set up. */
-    if (!global) {
-        yfh_set(current_scope->table, c->name.name, a->name);
-    } else {
-        /* Free the name, since it was only needed for type checking. */
-        free(a->name);
-        /* If it's global, set "name" to point to the global symbol. */
-        a->name = entry;
     }
     
     return 0;

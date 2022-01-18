@@ -1,4 +1,4 @@
-#include "validate-utils.h"
+#include <semantics/validate/validate-internal.h>
 
 struct yfs_symtab * current_scope;
 

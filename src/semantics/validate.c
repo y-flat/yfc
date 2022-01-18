@@ -106,6 +106,7 @@ static int validate_program(
 
     cprog = &cin->program;
     aprog = &ain->program;
+    ain->type = YFA_PROGRAM;
 
     yf_list_init(&aprog->decls);
     yf_list_reset(&cprog->decls);
@@ -160,6 +161,7 @@ static int validate_vardecl(
 
     struct yfcs_vardecl * c = &cin->vardecl;
     struct yfa_vardecl  * a = &ain->vardecl;
+    ain->type = YFA_VARDECL;
 
     int ssym;
     bool global = (current_scope == &fdata->symtab);
@@ -199,6 +201,18 @@ static int validate_vardecl(
         return 2;
 
     a->name->type = YFS_VAR;
+
+    /* Add to symbol table UNLESS it is global scope. */
+    /* The global scope symtab is already set up. */
+    if (!global) {
+        a->name->var.name = c->name.name;
+        yfh_set(current_scope->table, c->name.name, a->name);
+    } else {
+        /* Free the name, since it was only needed for type checking. */
+        free(a->name);
+        /* If it's global, set "name" to point to the global symbol. */
+        a->name = entry;
+    }
 
     /* Verify type */
     /* We have to check that the type is valid here, because the type table
@@ -251,17 +265,6 @@ static int validate_vardecl(
         )) {
             return 1;
         }
-    }
-
-    /* Add to symbol table UNLESS it is global scope. */
-    /* The global scope symtab is already set up. */
-    if (!global) {
-        yfh_set(current_scope->table, c->name.name, a->name);
-    } else {
-        /* Free the name, since it was only needed for type checking. */
-        free(a->name);
-        /* If it's global, set "name" to point to the global symbol. */
-        a->name = entry;
     }
     
     return 0;
@@ -475,6 +478,7 @@ static int validate_expr(struct yf_parse_node * cin, struct yf_ast_node * ain,
     struct yf_project_compilation_data * pdata,
     struct yf_file_compilation_data * fdata
 ) {
+    ain->type = YFA_EXPR;
     return validate_expr_e(&cin->expr, &ain->expr, pdata, fdata, cin->lineno);
 }
 
@@ -490,6 +494,8 @@ static int validate_funcdecl(
     struct yf_ast_node    * av;
 
     int ssym;
+
+    ain->type = YFA_FUNCDECL;
 
     /* Functions are only global. */
     if ( (
@@ -563,6 +569,7 @@ static int validate_bstmt(struct yf_parse_node * cin, struct yf_ast_node * ain,
     struct yf_parse_node * csub;
     struct yf_ast_node * asub;
     int err = 0;
+    ain->type = YFA_BSTMT;
     
     /* Create a symbol table for this scope */
     enter_scope(&a->symtab);

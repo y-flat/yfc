@@ -15,6 +15,10 @@ file(GLOB_RECURSE SOURCES_DRIVER src/driver/*.c)
 add_library(driver OBJECT ${SOURCES_DRIVER})
 target_include_directories(driver PRIVATE src)
 
+file(GLOB_RECURSE SOURCES_GEN src/gen/*.c)
+add_library(gen OBJECT ${SOURCES_GEN})
+target_include_directories(gen PRIVATE src)
+
 file(GLOB_RECURSE SOURCES_LEXER src/lexer/*.c)
 add_library(lexer OBJECT ${SOURCES_LEXER})
 target_include_directories(lexer PRIVATE src)
@@ -34,6 +38,7 @@ target_include_directories(util PRIVATE src)
 add_executable(yfc
     $<TARGET_OBJECTS:api>
     $<TARGET_OBJECTS:driver>
+    $<TARGET_OBJECTS:gen>
     $<TARGET_OBJECTS:lexer>
     $<TARGET_OBJECTS:parser>
     $<TARGET_OBJECTS:semantics>

@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include <driver/c-compiler.h>
+#include <gen/gen.h>
 #include <util/allocator.h>
 #include <util/yfc-out.h>
 
@@ -15,6 +16,7 @@ int create_output_file_name(
     data->output_file = yf_malloc(sizeof (char) * 256);
     if (!data->output_file)
         return 1;
+    memset(data->output_file, 0, sizeof (char) * 256);
 
     /* Normal: foo/bar/baz.yf -> foo/bar/baz.c */
     /* with --project: src/foo/bar/baz.yf -> bin/c/foo/bar/baz.c */
@@ -61,7 +63,7 @@ int create_output_file_name(
  * Generate C code
  */
 int yf_gen_c(struct yf_file_compilation_data * fdata) {
-    return 0; /* TODO */
+    return yfg_gen(fdata);
 }
 
 /**

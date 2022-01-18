@@ -16,6 +16,7 @@ int create_output_file_name(
     data->output_file = yf_malloc(sizeof (char) * 256);
     if (!data->output_file)
         return 1;
+    memset(data->output_file, 0, sizeof (char) * 256);
 
     /* Normal: foo/bar/baz.yf -> foo/bar/baz.c */
     /* with --project: src/foo/bar/baz.yf -> bin/c/foo/bar/baz.c */

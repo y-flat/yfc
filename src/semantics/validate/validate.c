@@ -3,28 +3,6 @@
 #include <semantics/types.h>
 #include <semantics/validate/validate-internal.h>
 
-/**
- * Forwards
- */
-
-/* Any sort of "typical" transfer operation - takes a current file for local
- * decls, the project for all decls, and the two nodes to edit. */
-
-/* I would use a typedef, but then the forwards would conflict. */
-#define VDECL(name) static int name( \
-    struct yf_parse_node *, \
-    struct yf_ast_node *, \
-    struct yf_project_compilation_data *, \
-    struct yf_file_compilation_data *\
-)
-
-VDECL(validate_program);
-VDECL(validate_funcdecl);
-VDECL(validate_expr);
-VDECL(validate_bstmt);
-VDECL(validate_vardecl);
-VDECL(validate_node);
-
 void add_type(
     struct yf_file_compilation_data * fdata,
     char * name, int size, enum yfpt_format fmt) {
@@ -70,7 +48,7 @@ int yfs_validate(
     );
 }
 
-static int validate_node(
+int validate_node(
     struct yf_parse_node * csub, struct yf_ast_node * asub,
     struct yf_project_compilation_data * pdata,
     struct yf_file_compilation_data * fdata
@@ -92,7 +70,7 @@ static int validate_node(
     } 
 }
 
-static int validate_program(
+int validate_program(
     struct yf_parse_node * cin, struct yf_ast_node * ain,
     struct yf_project_compilation_data * pdata,
     struct yf_file_compilation_data * fdata
@@ -150,7 +128,7 @@ static int validate_program(
 /**
  * Takes an input of a vardecl node.
  */
-static int validate_vardecl(
+int validate_vardecl(
     struct yf_parse_node * cin,
     struct yf_ast_node * ain,
     struct yf_project_compilation_data * pdata,
@@ -274,7 +252,7 @@ static int validate_vardecl(
 /**
  * Takes in parameters of expr, rather than node, types.
  */
-static int validate_expr_e(struct yfcs_expr * c, struct yfa_expr * a,
+int validate_expr_e(struct yfcs_expr * c, struct yfa_expr * a,
     struct yf_project_compilation_data * pdata,
     struct yf_file_compilation_data * fdata, int lineno
 ) {
@@ -474,7 +452,7 @@ static int validate_expr_e(struct yfcs_expr * c, struct yfa_expr * a,
 
 }
 
-static int validate_expr(struct yf_parse_node * cin, struct yf_ast_node * ain,
+int validate_expr(struct yf_parse_node * cin, struct yf_ast_node * ain,
     struct yf_project_compilation_data * pdata,
     struct yf_file_compilation_data * fdata
 ) {
@@ -482,7 +460,7 @@ static int validate_expr(struct yf_parse_node * cin, struct yf_ast_node * ain,
     return validate_expr_e(&cin->expr, &ain->expr, pdata, fdata, cin->lineno);
 }
 
-static int validate_funcdecl(
+int validate_funcdecl(
     struct yf_parse_node * cin, struct yf_ast_node * ain,
     struct yf_project_compilation_data * pdata,
     struct yf_file_compilation_data * fdata
@@ -558,7 +536,7 @@ static int validate_funcdecl(
 
 }
 
-static int validate_bstmt(struct yf_parse_node * cin, struct yf_ast_node * ain,
+int validate_bstmt(struct yf_parse_node * cin, struct yf_ast_node * ain,
     struct yf_project_compilation_data * pdata,
     struct yf_file_compilation_data * fdata
 ) {

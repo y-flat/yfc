@@ -92,9 +92,9 @@ static void yf_gen_funcdecl(struct yfa_funcdecl * node, FILE * out) {
     yf_list_reset(&node->params);
 
     for (;;) {
+        if (yf_list_get(&node->params, (void **) &child) == -1) break;
         if (argct)
             fprintf(out, ", ");
-        if (yf_list_get(&node->params, (void **) &child) == -1) break;
         if (!child) break;
         yf_gen_node(child, out);
         yf_list_next(&node->params);
@@ -138,11 +138,11 @@ static void yf_gen_expr(struct yfa_expr * node, FILE * out) {
             argct = 0;
             for (;;) {
                 if (yf_list_get(&node->as.call.args, (void **) &call_arg) == -1) break;
+                if (argct)
+                    fprintf(out, ", ");
                 if (!call_arg) break;
                 yf_gen_node(call_arg, out);
                 yf_list_next(&node->as.call.args);
-                if (argct)
-                    fprintf(out, ", ");
                 ++argct;
             }
             fprintf(out, ")");

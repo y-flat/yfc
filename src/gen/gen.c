@@ -62,6 +62,8 @@ static void yf_gen_program(struct yfa_program * node, FILE *out) {
         yf_gen_node(child, out);
         if (child->type == YFA_VARDECL)
             yfg_print_line(out, ";");
+        else
+            yfg_print_line(out, "");
         yf_list_next(&node->decls);
     }
 

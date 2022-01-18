@@ -1,7 +1,7 @@
 #include "validate.h"
 
 #include <semantics/types.h>
-#include <semantics/validate-utils.h>
+#include <semantics/validate/validate-utils.h>
 
 /**
  * Forwards

@@ -12,7 +12,7 @@
 #include <driver/find-files.h>
 #include <parser/parser.h>
 #include <semantics/symtab.h>
-#include <semantics/validate.h>
+#include <semantics/validate/validate.h>
 #include <util/allocator.h>
 #include <util/yfc-out.h>
 

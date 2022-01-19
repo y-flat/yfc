@@ -8,7 +8,7 @@
 #include <stdbool.h>
 
 #include <api/abstract-tree.h>
-#include <semantics/validate-utils.h>
+#include <semantics/validate/validate-internal.h>
 
 enum yfs_conversion_allowedness {
     YFS_CONVERSION_OK,

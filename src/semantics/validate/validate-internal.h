@@ -37,4 +37,46 @@ int enter_scope(struct yfs_symtab ** stuff);
  */
 void exit_scope(void);
 
+/* Any sort of "typical" transfer operation - takes a current file for local
+ * decls, the project for all decls, and the two nodes to edit. */
+
+/* I would use a typedef, but then the forwards would conflict. */
+#define VDECL(name) int name( \
+    struct yf_parse_node *, \
+    struct yf_ast_node *, \
+    struct yf_project_compilation_data *, \
+    struct yf_file_compilation_data *\
+)
+
+VDECL(validate_program);
+VDECL(validate_funcdecl);
+VDECL(validate_expr);
+VDECL(validate_bstmt);
+VDECL(validate_vardecl);
+VDECL(validate_node);
+
+/**
+ * Add a type to a file's type table.
+ */
+int yfv_add_type(
+    struct yf_file_compilation_data * fdata,
+    struct yfs_type * type
+);
+
+/**
+ * Get a type from a file's type table, given a concrete type.
+ */
+struct yfs_type * yfv_get_type_t(
+    struct yf_file_compilation_data * fdata,
+    struct yfcs_type type
+);
+
+/**
+ * Get a type from a file's type table, given a string.
+ */
+struct yfs_type * yfv_get_type_s(
+    struct yf_file_compilation_data * fdata,
+    char * typestr
+);
+
 #endif /* SEMANTICS_VALIDATE_UTILS_H */

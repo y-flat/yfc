@@ -153,14 +153,15 @@ int validate_return(
         a->expr = NULL;
     }
 
-    if (yfs_output_diagnostics(
-        a->expr
-            ? yfse_get_expr_type(&a->expr->expr, fdata)
-            : yfv_get_type_s(fdata, "void"),
-        type,
-        fdata,
-        cin->lineno
-    )) {
+    if ( (type->primitive.size != 0) ?
+            yfs_output_diagnostics(
+                yfse_get_expr_type(&a->expr->expr, fdata),
+                type,
+                fdata,
+                cin->lineno
+            )
+        :   (a->expr != NULL)
+    ) {
         fdata->error = 1;
         return 1;
     }

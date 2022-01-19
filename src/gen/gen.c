@@ -177,7 +177,8 @@ static void yf_gen_bstmt(struct yfa_bstmt * node, FILE * out) {
 
 static void yf_gen_return(struct yfa_return * node, FILE * out) {
     fprintf(out, "return ");
-    yf_gen_node(node->expr, out);
+    if (node->expr)
+        yf_gen_node(node->expr, out);
 }
 
 int yfg_gen(struct yf_file_compilation_data * data) {

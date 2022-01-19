@@ -58,7 +58,6 @@ int yfp_stmt(struct yf_parse_node * node, struct yf_lexer * lexer) {
             /* But a semicolon alone is okay. */
             P_PEEK(lexer, &tok);
             if (tok.type == YFT_SEMICOLON) {
-                YF_PRINT_DEBUG("Here");
                 ret = 0;
                 node->ret.expr = NULL;
             } else {

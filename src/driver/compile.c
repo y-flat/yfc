@@ -81,7 +81,6 @@ static int yf_run_compiler_on_data(
                 data, data->files[i], args
             )
         ) {
-            YF_PRINT_DEBUG("Here");
             data->files[i]->error = 1;
             err = 1;
         }

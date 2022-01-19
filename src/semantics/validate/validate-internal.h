@@ -56,6 +56,16 @@ VDECL(validate_vardecl);
 VDECL(validate_node);
 
 /**
+ * Different - a type is passed in, so the expr can be checked.
+ */
+int validate_return(
+    struct yf_parse_node * cin, struct yf_ast_node * ain,
+    struct yf_project_compilation_data * pdata,
+    struct yf_file_compilation_data * fdata,
+    struct yfs_type * type
+);
+
+/**
  * Add a type to a file's type table.
  */
 int yfv_add_type(

@@ -1,5 +1,6 @@
 #include "validate.h"
 
+#include <semantics/types.h>
 #include <semantics/validate/validate-internal.h>
 
 void add_type(
@@ -121,5 +122,45 @@ int validate_program(
     }
 
     return err;
+
+}
+
+int validate_return(
+    struct yf_parse_node * cin, struct yf_ast_node * ain,
+    struct yf_project_compilation_data * pdata,
+    struct yf_file_compilation_data * fdata,
+    struct yfs_type * type
+) {
+
+    struct yfcs_return * c = &cin->ret;
+    struct yfa_return  * a = &ain->ret;
+
+    ain->type = YFA_RETURN;
+    a->expr = yf_malloc(sizeof (struct yf_ast_node));
+    if (!a->expr)
+        return 2;
+
+    if (c->expr) {
+        if (validate_expr(c->expr, a->expr, pdata, fdata)) {
+            fdata->error = 1;
+            return 1;
+        }
+    } else {
+        a->expr = NULL;
+    }
+
+    if (yfs_output_diagnostics(
+        a->expr
+            ? yfse_get_expr_type(&a->expr->expr, fdata)
+            : yfv_get_type_s(fdata, "void"),
+        type,
+        fdata,
+        cin->lineno
+    )) {
+        fdata->error = 1;
+        return 1;
+    }
+
+    return 0;
 
 }

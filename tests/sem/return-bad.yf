@@ -1,0 +1,14 @@
+~~ Error - invalid return types ~~
+
+x() {
+    return 1;
+}
+
+y(): int {
+    return;
+}
+
+~~ Error: no return ~~
+z(): int {
+    
+}

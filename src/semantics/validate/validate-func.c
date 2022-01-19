@@ -24,7 +24,7 @@ int validate_funcdecl(
         return 2;
     }
 
-    if ((a->name->fn.rtype = yfv_get_type(
+    if ((a->name->fn.rtype = yfv_get_type_t(
         fdata, c->ret
     )) == NULL) {
         YF_PRINT_ERROR("error: %d: return type not found", cin->lineno);
@@ -51,7 +51,7 @@ int validate_funcdecl(
     }
 
     /* Validate the return type. */
-    if ((a->ret = yfv_get_type(fdata, c->ret)) == NULL) {
+    if ((a->ret = yfv_get_type_t(fdata, c->ret)) == NULL) {
         YF_PRINT_ERROR(
             "Unknown return type '%s' of function '%s' (line %d)",
             c->ret.databuf,

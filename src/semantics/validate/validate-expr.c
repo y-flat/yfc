@@ -173,7 +173,7 @@ static int validate_expr_e(struct yfcs_expr * c, struct yfa_expr * a,
                 return 1;
             }
 
-            if ( (paramtype = yfh_get(fdata->types.table, param->type)) == NULL) {
+            if ( (paramtype = yfv_get_type_s(fdata, param->type)) == NULL) {
                 YF_PRINT_ERROR(
                     "line %d: Uncaught type error: unknown type '%s'",
                     lineno,

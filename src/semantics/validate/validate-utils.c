@@ -57,12 +57,22 @@ int yfv_add_type(
     return yfh_set(fdata->types.table, type->name, type);
 }
 
-struct yfs_type * yfv_get_type(
+struct yfs_type * yfv_get_type_t(
     struct yf_file_compilation_data * fdata,
     struct yfcs_type type
 ) {
     /**
      * Get a value from the hashmap.
      */
-    return yfh_get(fdata->types.table, type.databuf);
+    return yfv_get_type_s(fdata, type.databuf);
+}
+
+struct yfs_type * yfv_get_type_s(
+    struct yf_file_compilation_data * fdata,
+    char * typestr
+) {
+    /**
+     * Get a value from the hashmap.
+     */
+    return yfh_get(fdata->types.table, typestr);
 }

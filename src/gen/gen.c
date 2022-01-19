@@ -106,7 +106,7 @@ static void yf_gen_funcdecl(struct yfa_funcdecl * node, FILE * out) {
         ++argct;
     }
 
-    fprintf(out, ")");
+    fprintf(out, ") ");
 
     yf_gen_node(node->body, out);
 

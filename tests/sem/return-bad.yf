@@ -12,3 +12,9 @@ y(): int {
 z(): int {
     
 }
+
+~~ Warning: code after return is never executed ~~
+w(): int {
+    return 1;
+    return 2;
+}

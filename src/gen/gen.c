@@ -24,11 +24,11 @@ static void yfg_print_line(FILE * out, char * data, ...) {
     int i;
     va_list args;
     va_start(args, data);
+    vfprintf(out, data, args);
+    fprintf(out, "\n");
     for (i = 0; i < yf_dump_indent; i++) {
         fprintf(out, "\t");
     }
-    vfprintf(out, data, args);
-    fprintf(out, "\n");
     va_end(args);
 }
 
@@ -165,11 +165,13 @@ static void yf_gen_bstmt(struct yfa_bstmt * node, FILE * out) {
     for (;;) {
         if (yf_list_get(&node->stmts, (void **) &child) == -1) break;
         if (!child) break;
+        yfg_print_line(out, "");
         yf_gen_node(child, out);
-        yfg_print_line(out, ";");
+        fprintf(out, ";");
         yf_list_next(&node->stmts);
     }
     dedent();
+    yfg_print_line(out, "");
     fprintf(out, "}");
 }
 

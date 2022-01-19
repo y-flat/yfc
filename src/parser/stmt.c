@@ -51,6 +51,23 @@ int yfp_stmt(struct yf_parse_node * node, struct yf_lexer * lexer) {
         case YFT_OPAREN:
             ret = yfp_expr(node, lexer, 0, NULL);
             goto out;
+        case YFT_RETURN:
+            P_LEX(lexer, &tok);
+            node->type = YFCS_RET;
+            /* Just parse an expression. */
+            /* But a semicolon alone is okay. */
+            P_PEEK(lexer, &tok);
+            if (tok.type == YFT_SEMICOLON) {
+                YF_PRINT_DEBUG("Here");
+                ret = 0;
+                node->ret.expr = NULL;
+            } else {
+                node->ret.expr = yf_malloc(sizeof(struct yf_parse_node));
+                if (!node->ret.expr)
+                    return 1;
+                ret = yfp_expr(node->ret.expr, lexer, false, NULL);
+            }
+            goto out;
         default:
             YF_TOKERR(tok, "identifier, '{', or '('");
     }

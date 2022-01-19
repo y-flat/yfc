@@ -74,6 +74,13 @@ struct yfcs_expr {
     
 };
 
+/**
+ * A return statement. Expr may be null if the statement is "return;"
+ */
+struct yfcs_return {
+    struct yf_parse_node * expr;
+};
+
 struct yfcs_vardecl {
     struct yfcs_identifier name;
     struct yfcs_type type;
@@ -108,6 +115,7 @@ struct yf_parse_node {
         YFCS_FUNCDECL,
         YFCS_PROGRAM,
         YFCS_BSTMT,
+        YFCS_RET,
     } type;
 
     union {
@@ -116,6 +124,7 @@ struct yf_parse_node {
         struct yfcs_funcdecl funcdecl;
         struct yfcs_program program;
         struct yfcs_bstmt bstmt;
+        struct yfcs_return ret;
     };
 
     int lineno, colno;

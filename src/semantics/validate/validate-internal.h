@@ -51,9 +51,35 @@ void exit_scope(void);
 VDECL(validate_program);
 VDECL(validate_funcdecl);
 VDECL(validate_expr);
-VDECL(validate_bstmt);
 VDECL(validate_vardecl);
-VDECL(validate_node);
+
+int validate_node(
+    struct yf_parse_node * cin, struct yf_ast_node * ain,
+    struct yf_project_compilation_data * pdata,
+    struct yf_file_compilation_data * fdata,
+    struct yfs_type * type, int * returns
+);
+
+/**
+ * Different - a type is passed in, so the expr can be checked.
+ */
+int validate_return(
+    struct yf_parse_node * cin, struct yf_ast_node * ain,
+    struct yf_project_compilation_data * pdata,
+    struct yf_file_compilation_data * fdata,
+    struct yfs_type * type
+);
+/**
+ * For block statements, we need to reason about what they return.
+ * "returns" is stuffed with 1 if it *always* returns, and 0 otherwise.
+ */
+int validate_bstmt(
+    struct yf_parse_node * cin, struct yf_ast_node * ain,
+    struct yf_project_compilation_data * pdata,
+    struct yf_file_compilation_data * fdata,
+    struct yfs_type * type,
+    int * returns
+);
 
 /**
  * Add a type to a file's type table.

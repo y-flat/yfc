@@ -1,0 +1,6 @@
+~~ Warning - code after return ~~
+
+foo(): int {
+    return 5;
+    x: int = 7;
+}

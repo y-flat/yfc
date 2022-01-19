@@ -1,11 +1,11 @@
 ~~ Good ~~
 x1(): int {
-
+    return 0;
 }
 
 ~~ Good ~~
 x3(a: int): int {
-
+    return a;
 }
 
 ~~ Good ~~

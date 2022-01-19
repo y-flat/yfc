@@ -1,0 +1,4 @@
+x(): int {
+    return;
+    return 2;
+}

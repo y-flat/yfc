@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 set (CMAKE_CXX_STANDARD 11)
 project(yfc)
 
-add_compile_options(-O3 -Wall -Wpedantic -g)
+add_compile_options(-Wall -Wpedantic -g)
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     add_compile_options(-Wno-gnu-zero-variadic-macro-arguments)
 endif()

@@ -1,5 +1,6 @@
 #include "validate.h"
 
+#include <semantics/types.h>
 #include <semantics/validate/validate-internal.h>
 
 void add_type(
@@ -50,7 +51,9 @@ int yfs_validate(
 int validate_node(
     struct yf_parse_node * csub, struct yf_ast_node * asub,
     struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata
+    struct yf_file_compilation_data * fdata,
+    struct yfs_type * for_bstmt1,
+    int * for_bstmt2
 ) {
     switch (csub->type) {
     case YFCS_EXPR:
@@ -62,7 +65,9 @@ int validate_node(
     case YFCS_PROGRAM:
         return validate_program(csub, asub, pdata, fdata);
     case YFCS_BSTMT:
-        return validate_bstmt(csub, asub, pdata, fdata);
+        return validate_bstmt(csub, asub, pdata, fdata, for_bstmt1, for_bstmt2);
+    case YFCS_RET:
+        return validate_return(csub, asub, pdata, fdata, for_bstmt1);
     default:
         YF_PRINT_ERROR("internal error: unknown CST node type");
         return 1;
@@ -105,7 +110,7 @@ int validate_program(
             return 2;
 
         /* Validate */
-        if (validate_node(cnode, anode, pdata, fdata)) {
+        if (validate_node(cnode, anode, pdata, fdata, NULL, NULL)) {
             yf_free(anode);
             fdata->error = 1;
             err = 1;
@@ -121,5 +126,48 @@ int validate_program(
     }
 
     return err;
+
+}
+
+int validate_return(
+    struct yf_parse_node * cin, struct yf_ast_node * ain,
+    struct yf_project_compilation_data * pdata,
+    struct yf_file_compilation_data * fdata,
+    struct yfs_type * type
+) {
+
+    struct yfcs_return * c = &cin->ret;
+    struct yfa_return  * a = &ain->ret;
+
+    ain->type = YFA_RETURN;
+    a->expr = yf_malloc(sizeof (struct yf_ast_node));
+    if (!a->expr)
+        return 2;
+
+    if (c->expr) {
+        if (validate_expr(c->expr, a->expr, pdata, fdata)) {
+            fdata->error = 1;
+            return 1;
+        }
+    } else {
+        a->expr = NULL;
+    }
+
+    if ( (type->primitive.size != 0) ?
+            yfs_output_diagnostics(
+                (a->expr != NULL)
+                    ? yfse_get_expr_type(&a->expr->expr, fdata)
+                    : yfv_get_type_s(fdata, "void"),
+                type,
+                fdata,
+                cin->lineno
+            )
+        :   (a->expr != NULL)
+    ) {
+        fdata->error = 1;
+        return 1;
+    }
+
+    return 0;
 
 }

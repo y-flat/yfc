@@ -12,6 +12,7 @@ static void yf_gen_vardecl(struct yfa_vardecl * node, FILE * out);
 static void yf_gen_funcdecl(struct yfa_funcdecl * node, FILE * out);
 static void yf_gen_expr(struct yfa_expr * node, FILE * out);
 static void yf_gen_bstmt(struct yfa_bstmt * node, FILE * out);
+static void yf_gen_return(struct yfa_return * node, FILE * out);
 
 /* TODO - non-static this, maybe by putting in a struct or something. */
 static int yf_dump_indent = 0;
@@ -23,11 +24,11 @@ static void yfg_print_line(FILE * out, char * data, ...) {
     int i;
     va_list args;
     va_start(args, data);
+    vfprintf(out, data, args);
+    fprintf(out, "\n");
     for (i = 0; i < yf_dump_indent; i++) {
         fprintf(out, "\t");
     }
-    vfprintf(out, data, args);
-    fprintf(out, "\n");
     va_end(args);
 }
 
@@ -48,6 +49,10 @@ void yf_gen_node(struct yf_ast_node * root, FILE *out) {
             break;
         case YFA_BSTMT:
             yf_gen_bstmt(&root->bstmt, out);
+            break;
+        case YFA_RETURN:
+            yf_gen_return(&root->ret, out);
+            break;
     }
 
 }
@@ -101,7 +106,7 @@ static void yf_gen_funcdecl(struct yfa_funcdecl * node, FILE * out) {
         ++argct;
     }
 
-    fprintf(out, ")");
+    fprintf(out, ") ");
 
     yf_gen_node(node->body, out);
 
@@ -160,12 +165,20 @@ static void yf_gen_bstmt(struct yfa_bstmt * node, FILE * out) {
     for (;;) {
         if (yf_list_get(&node->stmts, (void **) &child) == -1) break;
         if (!child) break;
+        yfg_print_line(out, "");
         yf_gen_node(child, out);
-        yfg_print_line(out, ";");
+        fprintf(out, ";");
         yf_list_next(&node->stmts);
     }
     dedent();
+    yfg_print_line(out, "");
     fprintf(out, "}");
+}
+
+static void yf_gen_return(struct yfa_return * node, FILE * out) {
+    fprintf(out, "return ");
+    if (node->expr)
+        yf_gen_node(node->expr, out);
 }
 
 int yfg_gen(struct yf_file_compilation_data * data) {

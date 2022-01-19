@@ -52,6 +52,7 @@ def main():
     add_parser_test("tests/parser/funccall-parsing.yf",      True )
     add_parser_test("tests/parser/funcdecl-parsing.yf",      True )
     add_parser_test("tests/parser/op-parsing.yf",            True )
+    add_parser_test("tests/parser/return-stmt.yf",           True )
     add_parser_test("tests/parser/vardecl-neq.yf",           False)
     add_parser_test("tests/parser/vardecl-test.yf",          True )
 
@@ -64,6 +65,10 @@ def main():
     add_semantic_test("tests/sem/funcs-pass.yf",             True )
     add_semantic_test("tests/sem/invalid-int-literal.yf",    False)
     add_semantic_test("tests/sem/no-value-assign.yf",        False)
+    add_semantic_test("tests/sem/return-bad.yf",             False)
+    add_semantic_test("tests/sem/return-block.yf",           True )
+    add_semantic_test("tests/sem/return-good.yf",            True )
+    add_semantic_test("tests/sem/return-warn.yf",            True )
     add_semantic_test("tests/sem/shadow.yf",                 True )
     add_semantic_test("tests/sem/type-val-pass.yf",          True )
     add_semantic_test("tests/sem/unknown-type.yf",           False)

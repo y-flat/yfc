@@ -9,6 +9,7 @@ static void yf_dump_vardecl(struct yfcs_vardecl * node, FILE * out);
 static void yf_dump_funcdecl(struct yfcs_funcdecl * node, FILE * out);
 static void yf_dump_expr(struct yfcs_expr * node, FILE * out);
 static void yf_dump_bstmt(struct yfcs_bstmt * node, FILE * out);
+static void yf_dump_ret(struct yfcs_return * node, FILE * out);
 
 /* TODO - non-static this, maybe by putting in a struct or something. */
 static int yf_dump_indent = 0;
@@ -49,6 +50,10 @@ void yf_dump_cst(struct yf_parse_node * root, FILE *out) {
             break;
         case YFCS_BSTMT:
             yf_dump_bstmt(&root->bstmt, out);
+            break;
+        case YFCS_RET:
+            yf_dump_ret(&root->ret, out);
+            break;
     }
 
 }
@@ -172,4 +177,13 @@ static void yf_dump_bstmt(struct yfcs_bstmt * node, FILE * out) {
     }
     dedent();
     yf_print_line(out, "end block statement");
+}
+
+static void yf_dump_ret(struct yfcs_return * node, FILE * out) {
+    yf_print_line(out, "return");
+    indent();
+    if (node->expr)
+        yf_dump_expr(&node->expr->expr, out);
+    dedent();
+    yf_print_line(out, "end return");
 }

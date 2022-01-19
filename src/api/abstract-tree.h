@@ -60,6 +60,10 @@ struct yfa_expr {
     
 };
 
+struct yfa_return {
+    struct yf_ast_node * expr;
+};
+
 struct yfa_vardecl {
     struct yf_sym * name;
     /* Can be NULL, and is always of type expr, is the right-hand side */
@@ -97,6 +101,7 @@ struct yf_ast_node {
         YFA_FUNCDECL,
         YFA_PROGRAM,
         YFA_BSTMT,
+        YFA_RETURN,
     } type;
 
     union {
@@ -105,6 +110,7 @@ struct yf_ast_node {
         struct yfa_funcdecl funcdecl;
         struct yfa_program program;
         struct yfa_bstmt bstmt;
+        struct yfa_return ret;
     };
 
 };

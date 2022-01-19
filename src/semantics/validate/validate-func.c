@@ -12,6 +12,7 @@ int validate_funcdecl(
     struct yf_ast_node    * av;
 
     int ssym;
+    int returns;
 
     ain->type = YFA_FUNCDECL;
 
@@ -66,11 +67,20 @@ int validate_funcdecl(
         return 2;
 
     /* Now, validate the body. */
-    if (validate_bstmt(c->body, a->body, pdata, fdata))
+    if (validate_bstmt(c->body, a->body, pdata, fdata, a->ret, &returns))
         return 1;
 
     /* Close the scope. */
     exit_scope();
+
+    if (returns == 0 && a->ret->primitive.size != 0) {
+        YF_PRINT_ERROR(
+            "Function '%s' does not always return a value (line %d)",
+            c->name.name,
+            cin->lineno
+        );
+        return 1;
+    }
 
     return 0;
 
@@ -78,7 +88,9 @@ int validate_funcdecl(
 
 int validate_bstmt(struct yf_parse_node * cin, struct yf_ast_node * ain,
     struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata
+    struct yf_file_compilation_data * fdata,
+    struct yfs_type * type,
+    int * returns
 ) {
 
     struct yfcs_bstmt * c = &cin->bstmt;
@@ -87,6 +99,8 @@ int validate_bstmt(struct yf_parse_node * cin, struct yf_ast_node * ain,
     struct yf_parse_node * csub;
     struct yf_ast_node * asub;
     int err = 0;
+    int ret_warning_reported = 0;
+
     ain->type = YFA_BSTMT;
     
     /* Create a symbol table for this scope */
@@ -96,11 +110,23 @@ int validate_bstmt(struct yf_parse_node * cin, struct yf_ast_node * ain,
     yf_list_reset(&c->stmts);
     yf_list_init(&a->stmts);
 
+    *returns = 0;
+
     for (;;) {
 
         /* Get element */
         if (yf_list_get(&c->stmts, (void **) &csub) == -1) break;
         if (!csub) break;
+
+        /* If this comes after a return, none of it will be executed. */
+        if (*returns && !ret_warning_reported) {
+            ret_warning_reported = 1;
+            YF_PRINT_WARNING(
+                "Code on line %d until the end of the current "
+                "block will never execute",
+                csub->lineno
+            );
+        }
         
         /* Construct abstract instance */
         asub = yf_malloc(sizeof (struct yf_ast_node));
@@ -108,13 +134,17 @@ int validate_bstmt(struct yf_parse_node * cin, struct yf_ast_node * ain,
             return 2;
 
         /* Validate */
-        if (validate_node(csub, asub, pdata, fdata)) {
+        if (validate_node(csub, asub, pdata, fdata, type, returns)) {
             yf_free(asub);
             fdata->error = 1;
             err = 1;
         } else {
             /* Move to abstract list */
             yf_list_add(&a->stmts, asub);
+        }
+
+        if (asub->type == YFA_RETURN) {
+            *returns = 1;
         }
 
         /* Keep going */

@@ -51,7 +51,9 @@ int yfs_validate(
 int validate_node(
     struct yf_parse_node * csub, struct yf_ast_node * asub,
     struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata
+    struct yf_file_compilation_data * fdata,
+    struct yfs_type * for_bstmt1,
+    int * for_bstmt2
 ) {
     switch (csub->type) {
     case YFCS_EXPR:
@@ -63,7 +65,9 @@ int validate_node(
     case YFCS_PROGRAM:
         return validate_program(csub, asub, pdata, fdata);
     case YFCS_BSTMT:
-        return validate_bstmt(csub, asub, pdata, fdata);
+        return validate_bstmt(csub, asub, pdata, fdata, for_bstmt1, for_bstmt2);
+    case YFCS_RET:
+        return validate_return(csub, asub, pdata, fdata, for_bstmt1);
     default:
         YF_PRINT_ERROR("internal error: unknown CST node type");
         return 1;
@@ -106,7 +110,7 @@ int validate_program(
             return 2;
 
         /* Validate */
-        if (validate_node(cnode, anode, pdata, fdata)) {
+        if (validate_node(cnode, anode, pdata, fdata, NULL, NULL)) {
             yf_free(anode);
             fdata->error = 1;
             err = 1;

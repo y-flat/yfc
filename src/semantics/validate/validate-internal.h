@@ -63,4 +63,12 @@ int yfv_add_type(
     struct yfs_type * type
 );
 
+/**
+ * Get a type from a file's type table.
+ */
+struct yfs_type * yfv_get_type(
+    struct yf_file_compilation_data * fdata,
+    struct yfcs_type type
+);
+
 #endif /* SEMANTICS_VALIDATE_UTILS_H */

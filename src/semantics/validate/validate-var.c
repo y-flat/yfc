@@ -72,7 +72,7 @@ int validate_vardecl(
     /* Verify type */
     /* We have to check that the type is valid here, because the type table
     doesn't exist during the symtab-building phase. */
-    if ( (a->name->var.dtype = yfh_get(fdata->types.table, c->type.databuf)) == NULL) {
+    if ( (a->name->var.dtype = yfv_get_type(fdata, c->type)) == NULL) {
         YF_PRINT_ERROR(
             "Unknown type '%s' in declaration of '%s' (line %d)",
             c->type.databuf,

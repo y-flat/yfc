@@ -46,3 +46,13 @@ void exit_scope(void) {
     /* Don't free scope - used later during codegen */
     current_scope = current_scope->parent;
 }
+
+int yfv_add_type(
+    struct yf_file_compilation_data * fdata,
+    struct yfs_type * type
+) {
+    /**
+     * Set a value in the hashmap.
+     */
+    return yfh_set(fdata->types.table, type->name, type);
+}

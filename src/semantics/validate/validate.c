@@ -10,7 +10,7 @@ void add_type(
     type->kind = YFST_PRIMITIVE;
     type->primitive.type = fmt;
     type->name = name;
-    yfh_set(fdata->types.table, name, type);
+    yfv_add_type(fdata, type);
 }
 
 void yfv_add_builtin_types(struct yf_file_compilation_data * fdata) {

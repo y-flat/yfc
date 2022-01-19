@@ -55,4 +55,12 @@ VDECL(validate_bstmt);
 VDECL(validate_vardecl);
 VDECL(validate_node);
 
+/**
+ * Add a type to a file's type table.
+ */
+int yfv_add_type(
+    struct yf_file_compilation_data * fdata,
+    struct yfs_type * type
+);
+
 #endif /* SEMANTICS_VALIDATE_UTILS_H */

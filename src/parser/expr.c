@@ -48,6 +48,8 @@ int yfp_atomic_expr(struct yf_parse_node * node, struct yf_lexer * lexer) {
             return yfp_funccall(node, lexer);
         } else {
             /* No we don't. */
+            node->expr.type = YFCS_VALUE;
+            node->expr.value.type = YFCS_IDENT;
             memcpy(
                 &node->expr.value.identifier,
                 &ident,

@@ -1,3 +1,11 @@
 foo(): int {
     return 5;
 }
+
+bar() {
+
+}
+
+baz() {
+    return;
+}

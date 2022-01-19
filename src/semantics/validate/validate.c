@@ -155,7 +155,9 @@ int validate_return(
 
     if ( (type->primitive.size != 0) ?
             yfs_output_diagnostics(
-                yfse_get_expr_type(&a->expr->expr, fdata),
+                (a->expr != NULL)
+                    ? yfse_get_expr_type(&a->expr->expr, fdata)
+                    : yfv_get_type_s(fdata, "void"),
                 type,
                 fdata,
                 cin->lineno

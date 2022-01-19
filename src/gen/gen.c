@@ -12,6 +12,7 @@ static void yf_gen_vardecl(struct yfa_vardecl * node, FILE * out);
 static void yf_gen_funcdecl(struct yfa_funcdecl * node, FILE * out);
 static void yf_gen_expr(struct yfa_expr * node, FILE * out);
 static void yf_gen_bstmt(struct yfa_bstmt * node, FILE * out);
+static void yf_gen_return(struct yfa_return * node, FILE * out);
 
 /* TODO - non-static this, maybe by putting in a struct or something. */
 static int yf_dump_indent = 0;
@@ -48,6 +49,10 @@ void yf_gen_node(struct yf_ast_node * root, FILE *out) {
             break;
         case YFA_BSTMT:
             yf_gen_bstmt(&root->bstmt, out);
+            break;
+        case YFA_RETURN:
+            yf_gen_return(&root->ret, out);
+            break;
     }
 
 }
@@ -166,6 +171,11 @@ static void yf_gen_bstmt(struct yfa_bstmt * node, FILE * out) {
     }
     dedent();
     fprintf(out, "}");
+}
+
+static void yf_gen_return(struct yfa_return * node, FILE * out) {
+    fprintf(out, "return ");
+    yf_gen_node(node->expr, out);
 }
 
 int yfg_gen(struct yf_file_compilation_data * data) {

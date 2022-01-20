@@ -96,6 +96,12 @@ struct yfcs_funcdecl {
     struct yf_parse_node * body; /* The function body */
 };
 
+struct yfcs_if {
+    struct yf_parse_node * cond;
+    struct yf_parse_node * code;
+    struct yf_parse_node * elsebranch;
+};
+
 struct yfcs_program {
     struct yf_list decls;
 };
@@ -109,13 +115,14 @@ struct yfcs_bstmt {
 
 struct yf_parse_node {
     
-    enum {
+    enum yfcs_node_type {
         YFCS_EXPR,
         YFCS_VARDECL,
         YFCS_FUNCDECL,
         YFCS_PROGRAM,
         YFCS_BSTMT,
         YFCS_RET,
+        YFCS_IF,
     } type;
 
     union {
@@ -125,6 +132,7 @@ struct yf_parse_node {
         struct yfcs_program program;
         struct yfcs_bstmt bstmt;
         struct yfcs_return ret;
+        struct yfcs_if ifstmt;
     };
 
     int lineno, colno;

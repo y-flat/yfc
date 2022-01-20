@@ -10,8 +10,8 @@ struct keyword_lookup {
     { "return", YFT_RETURN },
     { "if", YFT_IF },
     { "else", YFT_ELSE },
-    { "true", YFT_TRUE },
-    { "false", YFT_FALSE },
+    { "true", YFT_LITERAL },
+    { "false", YFT_LITERAL },
     { NULL, YFT_EOF },
 };
 

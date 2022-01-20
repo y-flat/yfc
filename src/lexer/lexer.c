@@ -379,6 +379,8 @@ const char * yf_get_toktype(enum yf_token_type type) {
         "closing brace",
         "operator"    ,
         "<return>",
+        "<if>",
+        "<else>",
         "[TOO LARGE]",
     };
     

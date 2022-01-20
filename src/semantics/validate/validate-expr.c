@@ -1,5 +1,8 @@
 #include <semantics/validate/validate-internal.h>
 
+#include <ctype.h>
+#include <string.h>
+
 #include <semantics/types.h>
 
 /**
@@ -40,22 +43,40 @@ static int validate_expr_e(struct yfcs_expr * c, struct yfa_expr * a,
 
             a->as.value.type = YFA_LITERAL;
 
-            /* Parse literal */
-            a->as.value.as.literal.type = YFCS_NUM;
-            a->as.value.as.literal.val = 0;
+            if (isdigit(c->value.literal.value[0])) {
 
-            for (intparse = c->value.literal.value; *intparse; ++intparse) {
-                dig = *intparse - '0';
-                if (dig < 0 || dig > 9) {
-                    YF_PRINT_ERROR(
-                        "Invalid literal '%s' (line %d), "
-                        "found invalid character '%c' in int literal",
-                        c->value.literal.value, lineno, *intparse
-                    );
-                    return 1;
+                /* Parse integer literal */
+                a->as.value.as.literal.type = YFAL_NUM;
+                a->as.value.as.literal.val = 0;
+
+                for (intparse = c->value.literal.value; *intparse; ++intparse) {
+                    dig = *intparse - '0';
+                    if (dig < 0 || dig > 9) {
+                        YF_PRINT_ERROR(
+                            "Invalid literal '%s' (line %d), "
+                            "found invalid character '%c' in int literal",
+                            c->value.literal.value, lineno, *intparse
+                        );
+                        return 1;
+                    }
+                    a->as.value.as.literal.val *= 10;
+                    a->as.value.as.literal.val += dig;
                 }
-                a->as.value.as.literal.val *= 10;
-                a->as.value.as.literal.val += dig;
+
+                return 0;
+
+            }
+
+            /* Check for 'true' or 'false' */
+            if (strcmp(c->value.literal.value, "true") == 0) {
+                a->as.value.as.literal.type = YFAL_BOOL;
+                a->as.value.as.literal.val = 1;
+                return 0;
+            }
+            if (strcmp(c->value.literal.value, "false") == 0) {
+                a->as.value.as.literal.type = YFAL_BOOL;
+                a->as.value.as.literal.val = 0;
+                return 0;
             }
 
         }

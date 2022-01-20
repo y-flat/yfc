@@ -69,8 +69,15 @@ struct yfs_type * yfse_get_expr_type(
         if (v->type == YFA_IDENT) {
             return v->as.identifier->var.dtype;
         } else {
-            /* TODO once strings and floats are implemented */
-            return yfh_get(fdata->types.table, "int");
+            switch (v->as.literal.type) {
+            case YFAL_NUM:
+                return yfv_get_type_s(fdata, "int");
+            case YFAL_BOOL:
+                return yfv_get_type_s(fdata, "bool");
+            default:
+                YF_PRINT_ERROR("panic: Unknown literal type");
+                return NULL;
+            }
         }
         break;
     case YFA_FUNCCALL:

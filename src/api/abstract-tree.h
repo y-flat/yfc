@@ -26,7 +26,8 @@ struct yfa_value {
         struct yf_sym * identifier;
         struct {
             enum {
-                YFCS_NUM, /* TODO */
+                YFAL_NUM,
+                YFAL_BOOL,
             } type;
             union {
                 int val;

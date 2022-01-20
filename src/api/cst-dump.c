@@ -10,6 +10,7 @@ static void yf_dump_funcdecl(struct yfcs_funcdecl * node, FILE * out);
 static void yf_dump_expr(struct yfcs_expr * node, FILE * out);
 static void yf_dump_bstmt(struct yfcs_bstmt * node, FILE * out);
 static void yf_dump_ret(struct yfcs_return * node, FILE * out);
+static void yf_dump_if(struct yfcs_if * node, FILE * out);
 
 /* TODO - non-static this, maybe by putting in a struct or something. */
 static int yf_dump_indent = 0;
@@ -53,6 +54,9 @@ void yf_dump_cst(struct yf_parse_node * root, FILE *out) {
             break;
         case YFCS_RET:
             yf_dump_ret(&root->ret, out);
+            break;
+        case YFCS_IF:
+            yf_dump_if(&root->ifstmt, out);
             break;
     }
 
@@ -186,4 +190,24 @@ static void yf_dump_ret(struct yfcs_return * node, FILE * out) {
         yf_dump_expr(&node->expr->expr, out);
     dedent();
     yf_print_line(out, "end return");
+}
+
+static void yf_dump_if(struct yfcs_if * node, FILE * out) {
+    yf_print_line(out, "if");
+    yf_print_line(out, "condition");
+    indent();
+    yf_dump_expr(&node->cond->expr, out);
+    dedent();
+    yf_print_line(out, "end condition");
+    yf_print_line(out, "then");
+    indent();
+    yf_dump_cst(node->cond, out);
+    dedent();
+    if (node->elsebranch != NULL) {
+        yf_print_line(out, "else");
+        indent();
+        yf_dump_cst(node->elsebranch, out);
+        dedent();
+    }
+    yf_print_line(out, "end if");
 }

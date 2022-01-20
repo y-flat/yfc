@@ -23,6 +23,8 @@ enum yf_token_type {
     YFT_CBRACE, /* } */
     YFT_OP    , /* =, etc. */
     YFT_RETURN, /* return */
+    YFT_IF,
+    YFT_ELSE,
     YFT_TOO_LARGE, /* A token was too large */
 
 };

@@ -8,6 +8,8 @@ struct keyword_lookup {
     enum yf_token_type value;
 } keywords[] = {
     { "return", YFT_RETURN },
+    { "if", YFT_IF },
+    { "else", YFT_ELSE },
     { NULL, YFT_EOF },
 };
 

@@ -35,6 +35,9 @@ void yfv_add_builtin_types(struct yf_file_compilation_data * fdata) {
     add_type(fdata, "f32",        32, YFS_FLOAT);
     add_type(fdata, "f64",        64, YFS_FLOAT);
 
+    /* We're considering bool to be one bit for conversion purposes. */
+    add_type(fdata, "bool",       1,  YFS_INT  );
+
 }
 
 int yfs_validate(

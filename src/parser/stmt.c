@@ -67,6 +67,9 @@ int yfp_stmt(struct yf_parse_node * node, struct yf_lexer * lexer) {
                 ret = yfp_expr(node->ret.expr, lexer, false, NULL);
             }
             goto out;
+        case YFT_IF:
+            ret = yfp_if(node, lexer);
+            goto out;
         default:
             YF_TOKERR(tok, "identifier, '{', or '('");
     }

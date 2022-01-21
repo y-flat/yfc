@@ -43,4 +43,8 @@
     YF_PRINT_WITH_COLOR(YF_CODE_BLUE, "Warning: yfc: " msg "\n" ,##__VA_ARGS__); \
 } while (0)
 
+#define YF_PRINT_DEFAULT(msg, ...) do { \
+    YF_PRINT_WITH_COLOR(YF_CODE_WHITE, "yfc: " msg "\n" ,##__VA_ARGS__); \
+} while (0)
+
 #endif /* UTIL_OUT_H */

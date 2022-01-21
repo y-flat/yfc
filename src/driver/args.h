@@ -65,6 +65,11 @@ struct yf_args {
      */
     bool just_semantics;
 
+    /**
+     * Should we be profiling how long it takes?
+     */
+    bool profile;
+
 };
 
 /**

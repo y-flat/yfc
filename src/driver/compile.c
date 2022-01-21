@@ -3,6 +3,7 @@
 #include <stdio.h> /* fopen, etc. */
 #include <stdlib.h> /* malloc */
 #include <string.h> /* strcpy */
+#include <sys/time.h> /* struct timeval */
 #include <unistd.h> /* getcwd */
 
 #include <api/compilation-data.h>
@@ -53,7 +54,13 @@ static int yf_run_compiler_on_data(
 
     int i, err = 0;
 
+    /* For profiling purposes only */
+    double time_for_step, time_total;
+    struct timeval total_begin, step_begin, step_end, total_end;
+
     /* Parse the frontend for all and create symtabs */
+    gettimeofday(&step_begin, NULL);
+    total_begin = step_begin;
     for (i = 0; i < data->num_files; ++i) {
         data->files[i]->error = 0; /* Starting off clean */
         if (yf_run_frontend(data->files[i], args)) {
@@ -62,6 +69,19 @@ static int yf_run_compiler_on_data(
         if (args->cstdump || args->tdump) {
             return data->files[i]->error;
         }
+    }
+    gettimeofday(&step_end, NULL);
+    if (args->profile) {
+        time_for_step = (step_end.tv_sec - step_begin.tv_sec) * 1000000 +
+            (step_end.tv_usec - step_begin.tv_usec);
+        YF_PRINT_DEFAULT(
+            "Time for parsing: %f seconds",
+            ( (double) time_for_step ) / 1000000.0
+        );
+    }
+
+    gettimeofday(&step_begin, NULL);
+    for (i = 0; i < data->num_files; ++i) {
         if (!data->files[i]->error) {
             if (yf_build_symtab(data->files[i])) {
                 data->files[i]->error = 1;
@@ -71,10 +91,20 @@ static int yf_run_compiler_on_data(
             }
         }
     }
+    gettimeofday(&step_end, NULL);
+    if (args->profile) {
+        time_for_step = (step_end.tv_sec - step_begin.tv_sec) * 1000000 +
+            (step_end.tv_usec - step_begin.tv_usec);
+        YF_PRINT_DEFAULT(
+            "Time for building symtabs: %f seconds",
+            ( (double) time_for_step ) / 1000000.0
+        );
+    }
 
     /* TODO - set flags so we can efficiently avoid compiling the bad ones */
 
     /* Now validate everything. */
+    gettimeofday(&step_begin, NULL);
     for (i = 0; i < data->num_files; ++i) {
         if (!data->files[i]->error
             && yf_validate_ast(
@@ -85,10 +115,39 @@ static int yf_run_compiler_on_data(
             err = 1;
         }
     }
+    gettimeofday(&step_end, NULL);
+    if (args->profile) {
+        time_for_step = (step_end.tv_sec - step_begin.tv_sec) * 1000000 +
+            (step_end.tv_usec - step_begin.tv_usec);
+        YF_PRINT_DEFAULT(
+            "Time for validating code: %f seconds",
+            ( (double) time_for_step ) / 1000000.0
+        );
+    }
 
     /* Finally, generate code. */
-    if (!args->just_semantics)
+    if (!args->just_semantics) {
+        gettimeofday(&step_begin, NULL);
         yf_run_backend(data, args);
+        gettimeofday(&step_end, NULL);
+        if (args->profile) {
+            time_for_step = (step_end.tv_sec - step_begin.tv_sec) * 1000000 +
+                (step_end.tv_usec - step_begin.tv_usec);
+            YF_PRINT_DEFAULT(
+                "Time for generating code code: %f seconds",
+                ( (double) time_for_step ) / 1000000.0
+            );
+        }
+    }
+    total_end = step_end;
+    if (args->profile) {
+        time_total = (total_end.tv_sec - total_begin.tv_sec) * 1000000 +
+            (total_end.tv_usec - total_begin.tv_usec);
+        YF_PRINT_DEFAULT(
+            "Total time: %f seconds",
+            ( (double) time_total ) / 1000000.0
+        );
+    }
 
     return err;
 

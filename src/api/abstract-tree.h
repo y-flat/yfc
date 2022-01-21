@@ -45,7 +45,7 @@ struct yfa_funccall {
 struct yfa_expr {
     union {
         struct yfa_value value;
-        struct {
+        struct yfa_binary {
             struct yfa_expr *left;
             struct yfa_expr *right;
             enum yf_operator op;

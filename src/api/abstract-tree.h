@@ -26,7 +26,8 @@ struct yfa_value {
         struct yf_sym * identifier;
         struct {
             enum {
-                YFCS_NUM, /* TODO */
+                YFAL_NUM,
+                YFAL_BOOL,
             } type;
             union {
                 int val;
@@ -44,7 +45,7 @@ struct yfa_funccall {
 struct yfa_expr {
     union {
         struct yfa_value value;
-        struct {
+        struct yfa_binary {
             struct yfa_expr *left;
             struct yfa_expr *right;
             enum yf_operator op;
@@ -93,15 +94,23 @@ struct yfa_bstmt {
 
 };
 
+struct yfa_if {
+    struct yf_ast_node * cond;
+    struct yf_ast_node * code;
+    struct yf_ast_node * elsebranch;
+};
+
 struct yf_ast_node {
     
     enum {
+        YFA_EMPTY,
         YFA_EXPR,
         YFA_VARDECL,
         YFA_FUNCDECL,
         YFA_PROGRAM,
         YFA_BSTMT,
         YFA_RETURN,
+        YFA_IF,
     } type;
 
     union {
@@ -111,6 +120,7 @@ struct yf_ast_node {
         struct yfa_program program;
         struct yfa_bstmt bstmt;
         struct yfa_return ret;
+        struct yfa_if ifstmt;
     };
 
 };

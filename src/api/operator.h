@@ -68,5 +68,6 @@ enum yfo_precedence yfo_prec(enum yf_operator op1, enum yf_operator op2);
 char * get_op_string(enum yf_operator op);
 
 bool yfo_is_assign(enum yf_operator op);
+bool yfo_is_bool(enum yf_operator op);
 
 #endif /* API_OPERATOR_H */

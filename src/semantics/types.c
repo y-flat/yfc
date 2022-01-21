@@ -53,10 +53,21 @@ struct yfs_type * yfse_get_expr_type(
 
     switch (expr->type) {
     case YFA_BINARY:
+
         ltype = yfse_get_expr_type(expr->as.binary.left, fdata);
         rtype = yfse_get_expr_type(expr->as.binary.right, fdata);
         lsize = ltype->primitive.size;
         rsize = rtype->primitive.size;
+
+        if (yfo_is_bool(expr->as.binary.op)) {
+            return yfv_get_type_s(fdata, "bool");
+        }
+
+        if (yfo_is_assign(expr->as.binary.op)) {
+            return ltype;
+        }
+
+        /* By default, ... */
         /* Return the larger size. TODO - make this better. */
         if (lsize > rsize) {
             return ltype;
@@ -64,13 +75,21 @@ struct yfs_type * yfse_get_expr_type(
             return rtype;
         }
         break;
+
     case YFA_VALUE:
         v = &expr->as.value;
         if (v->type == YFA_IDENT) {
             return v->as.identifier->var.dtype;
         } else {
-            /* TODO once strings and floats are implemented */
-            return yfh_get(fdata->types.table, "int");
+            switch (v->as.literal.type) {
+            case YFAL_NUM:
+                return yfv_get_type_s(fdata, "int");
+            case YFAL_BOOL:
+                return yfv_get_type_s(fdata, "bool");
+            default:
+                YF_PRINT_ERROR("panic: Unknown literal type");
+                return NULL;
+            }
         }
         break;
     case YFA_FUNCCALL:

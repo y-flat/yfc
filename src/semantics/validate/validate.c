@@ -35,6 +35,9 @@ void yfv_add_builtin_types(struct yf_file_compilation_data * fdata) {
     add_type(fdata, "f32",        32, YFS_FLOAT);
     add_type(fdata, "f64",        64, YFS_FLOAT);
 
+    /* We're considering bool to be one bit for conversion purposes. */
+    add_type(fdata, "bool",       1,  YFS_INT  );
+
 }
 
 int yfs_validate(
@@ -67,7 +70,12 @@ int validate_node(
     case YFCS_BSTMT:
         return validate_bstmt(csub, asub, pdata, fdata, for_bstmt1, for_bstmt2);
     case YFCS_RET:
-        return validate_return(csub, asub, pdata, fdata, for_bstmt1);
+        return validate_return(csub, asub, pdata, fdata, for_bstmt1, for_bstmt2);
+    case YFCS_IF:
+        return validate_if(csub, asub, pdata, fdata, for_bstmt1, for_bstmt2);
+    case YFCS_EMPTY:
+        asub->type = YFA_EMPTY;
+        return 0;
     default:
         YF_PRINT_ERROR("internal error: unknown CST node type");
         return 1;
@@ -133,7 +141,7 @@ int validate_return(
     struct yf_parse_node * cin, struct yf_ast_node * ain,
     struct yf_project_compilation_data * pdata,
     struct yf_file_compilation_data * fdata,
-    struct yfs_type * type
+    struct yfs_type * type, int * returns
 ) {
 
     struct yfcs_return * c = &cin->ret;
@@ -167,6 +175,8 @@ int validate_return(
         fdata->error = 1;
         return 1;
     }
+
+    *returns = 1;
 
     return 0;
 

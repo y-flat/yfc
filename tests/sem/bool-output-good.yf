@@ -1,0 +1,3 @@
+always_false(): bool {
+    return false;
+}

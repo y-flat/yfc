@@ -177,3 +177,17 @@ bool yfo_is_assign(enum yf_operator op) {
         return false;
     }
 }
+
+bool yfo_is_bool(enum yf_operator op) {
+    switch (op) {
+    case YFO_EQ:
+    case YFO_NEQ:
+    case YFO_LT:
+    case YFO_LTE:
+    case YFO_GT:
+    case YFO_GTE:
+        return true;
+    default:
+        return false;
+    }
+}

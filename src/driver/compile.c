@@ -72,7 +72,7 @@ static int yf_run_compiler_on_data(
     gettimeofday(&step_end, NULL);
     if (args->profile) {
         time_for_step = (step_end.tv_sec - step_begin.tv_sec) * 1000000 +
-            (step_end.tv_usec - step_begin.tv_usec) / 1000000.0;
+            (step_end.tv_usec - step_begin.tv_usec);
         YF_PRINT_DEFAULT(
             "Time for parsing: %f seconds",
             ( (double) time_for_step ) / 1000000.0

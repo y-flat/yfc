@@ -11,7 +11,8 @@ const char
       "Read documentation for more specifics on this flag.\n"
       "--dump-tokens: Test lexer by printing out all tokens.\n"
       "--dump-cst: Test parser by printing out the CST.\n"
-      "--just-semantics: Only verify the code, do not generate it.\n",
+      "--just-semantics: Only verify the code, do not generate it.\n"
+      "--benchmark: Print out time taken for each step\n",
     * HELP_HINT_MSG = "Invalid command. "
       "Use \"-h\" or \"--help\" for a list of possible commands.\n",
     * NO_ARGS_MSG = "yfc: Use \"-h\" or \"--help\" "

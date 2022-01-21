@@ -148,6 +148,15 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
             continue;
         }
 
+        if (STREQ(arg, "--benchmark")) {
+            if (args->profile || args->wanted_output != YF_NONE) {
+                yf_set_error(args);
+                return;
+            }
+            args->just_semantics = 1;
+            continue;
+        }
+
         /* No other options are known. Yet. */
         if (arg[0] == '-') {
             yf_set_error(args);

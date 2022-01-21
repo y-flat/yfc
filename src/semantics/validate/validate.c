@@ -73,6 +73,9 @@ int validate_node(
         return validate_return(csub, asub, pdata, fdata, for_bstmt1, for_bstmt2);
     case YFCS_IF:
         return validate_if(csub, asub, pdata, fdata, for_bstmt1, for_bstmt2);
+    case YFCS_EMPTY:
+        asub->type = YFA_EMPTY;
+        return 0;
     default:
         YF_PRINT_ERROR("internal error: unknown CST node type");
         return 1;

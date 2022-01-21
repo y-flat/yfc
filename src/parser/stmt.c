@@ -71,6 +71,11 @@ int yfp_stmt(struct yf_parse_node * node, struct yf_lexer * lexer) {
             ret = yfp_if(node, lexer);
             expect_semicolon = false;
             goto out;
+        case YFT_SEMICOLON:
+            /* An empty statement. */
+            ret = 0;
+            node->type = YFCS_EMPTY;
+            goto out;
         default:
             YF_TOKERR(tok, "identifier, '{', or '('");
     }

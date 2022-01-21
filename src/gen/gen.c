@@ -58,6 +58,9 @@ void yf_gen_node(struct yf_ast_node * root, FILE *out) {
         case YFA_IF:
             yf_gen_if(&root->ifstmt, out);
             break;
+        case YFA_EMPTY:
+            fprintf(out, ";\n");
+            break;
     }
 
 }

@@ -116,6 +116,7 @@ struct yfcs_bstmt {
 struct yf_parse_node {
     
     enum yfcs_node_type {
+        YFCS_EMPTY,
         YFCS_EXPR,
         YFCS_VARDECL,
         YFCS_FUNCDECL,

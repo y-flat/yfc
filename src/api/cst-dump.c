@@ -58,6 +58,9 @@ void yf_dump_cst(struct yf_parse_node * root, FILE *out) {
         case YFCS_IF:
             yf_dump_if(&root->ifstmt, out);
             break;
+        case YFCS_EMPTY:
+            yf_print_line(out, "<empty statement>");
+            break;
     }
 
 }

@@ -103,6 +103,7 @@ struct yfa_if {
 struct yf_ast_node {
     
     enum {
+        YFA_EMPTY,
         YFA_EXPR,
         YFA_VARDECL,
         YFA_FUNCDECL,

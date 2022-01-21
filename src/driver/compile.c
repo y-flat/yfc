@@ -3,6 +3,7 @@
 #include <stdio.h> /* fopen, etc. */
 #include <stdlib.h> /* malloc */
 #include <string.h> /* strcpy */
+#include <sys/time.h> /* struct timeval */
 #include <unistd.h> /* getcwd */
 
 #include <api/compilation-data.h>
@@ -53,7 +54,12 @@ static int yf_run_compiler_on_data(
 
     int i, err = 0;
 
+    /* For profiling purposes only */
+    double time_for_step;
+    struct timeval step_begin, step_end;
+
     /* Parse the frontend for all and create symtabs */
+    gettimeofday(&step_begin, NULL);
     for (i = 0; i < data->num_files; ++i) {
         data->files[i]->error = 0; /* Starting off clean */
         if (yf_run_frontend(data->files[i], args)) {
@@ -62,6 +68,18 @@ static int yf_run_compiler_on_data(
         if (args->cstdump || args->tdump) {
             return data->files[i]->error;
         }
+    }
+    gettimeofday(&step_end, NULL);
+    if (args->profile) {
+        time_for_step = (step_end.tv_sec - step_begin.tv_sec) * 1000000 +
+            (step_end.tv_usec - step_begin.tv_usec) / 1000000.0;
+        YF_PRINT_DEFAULT(
+            "Time for parsing: %f seconds",
+            ( (double) time_for_step ) / 1000000.0
+        );
+    }
+
+    for (i = 0; i < data->num_files; ++i) {
         if (!data->files[i]->error) {
             if (yf_build_symtab(data->files[i])) {
                 data->files[i]->error = 1;

@@ -94,6 +94,12 @@ struct yfa_bstmt {
 
 };
 
+struct yfa_if {
+    struct yf_ast_node * cond;
+    struct yf_ast_node * code;
+    struct yf_ast_node * elsebranch;
+};
+
 struct yf_ast_node {
     
     enum {
@@ -103,6 +109,7 @@ struct yf_ast_node {
         YFA_PROGRAM,
         YFA_BSTMT,
         YFA_RETURN,
+        YFA_IF,
     } type;
 
     union {
@@ -112,6 +119,7 @@ struct yf_ast_node {
         struct yfa_program program;
         struct yfa_bstmt bstmt;
         struct yfa_return ret;
+        struct yfa_if ifstmt;
     };
 
 };

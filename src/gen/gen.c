@@ -14,6 +14,7 @@ static void yf_gen_funcdecl(struct yfa_funcdecl * node, FILE * out);
 static void yf_gen_expr(struct yfa_expr * node, FILE * out);
 static void yf_gen_bstmt(struct yfa_bstmt * node, FILE * out);
 static void yf_gen_return(struct yfa_return * node, FILE * out);
+static void yf_gen_if(struct yfa_if * node, FILE * out);
 
 /* TODO - non-static this, maybe by putting in a struct or something. */
 static int yf_dump_indent = 0;
@@ -53,6 +54,9 @@ void yf_gen_node(struct yf_ast_node * root, FILE *out) {
             break;
         case YFA_RETURN:
             yf_gen_return(&root->ret, out);
+            break;
+        case YFA_IF:
+            yf_gen_if(&root->ifstmt, out);
             break;
     }
 
@@ -194,6 +198,17 @@ static void yf_gen_return(struct yfa_return * node, FILE * out) {
     fprintf(out, "return ");
     if (node->expr)
         yf_gen_node(node->expr, out);
+}
+
+static void yf_gen_if(struct yfa_if * node, FILE * out) {
+    fprintf(out, "if (");
+    yf_gen_node(node->cond, out);
+    fprintf(out, ") ");
+    yf_gen_node(node->code, out);
+    if (node->elsebranch) {
+        fprintf(out, " else ");
+        yf_gen_node(node->elsebranch, out);
+    }
 }
 
 int yfg_gen(struct yf_file_compilation_data * data) {

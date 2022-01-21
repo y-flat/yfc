@@ -143,6 +143,7 @@ int validate_bstmt(struct yf_parse_node * cin, struct yf_ast_node * ain,
             yf_list_add(&a->stmts, asub);
         }
 
+        /* Probably redundant */
         if (asub->type == YFA_RETURN) {
             *returns = 1;
         }

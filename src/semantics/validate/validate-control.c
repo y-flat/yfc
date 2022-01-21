@@ -1,3 +1,4 @@
+#include <semantics/types.h>
 #include <semantics/validate/validate-internal.h>
 
 int validate_if(struct yf_parse_node * cin, struct yf_ast_node * ain,
@@ -10,6 +11,7 @@ int validate_if(struct yf_parse_node * cin, struct yf_ast_node * ain,
     struct yfcs_if * c = &cin->ifstmt;
     struct yfa_if  * a = &ain->ifstmt;
     int if_always_returns = 0, else_always_returns = 0;
+    struct yfs_type * t;
     
     ain->type = YFA_IF;
 
@@ -21,6 +23,18 @@ int validate_if(struct yf_parse_node * cin, struct yf_ast_node * ain,
         return 2;
 
     if (validate_expr(c->cond, a->cond, pdata, fdata)) {
+        fdata->error = 1;
+        return 1;
+    }
+    
+    if ( (t = yfse_get_expr_type(
+        &a->cond->expr, fdata
+    )) != yfv_get_type_s(fdata, "bool")) {
+        YF_PRINT_ERROR(
+            "line %d: if condition must be of type bool, was %s",
+            cin->lineno,
+            t->name
+        );
         fdata->error = 1;
         return 1;
     }

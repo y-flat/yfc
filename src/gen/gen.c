@@ -203,11 +203,15 @@ static void yf_gen_return(struct yfa_return * node, FILE * out) {
 static void yf_gen_if(struct yfa_if * node, FILE * out) {
     fprintf(out, "if (");
     yf_gen_node(node->cond, out);
-    fprintf(out, ") ");
-    yf_gen_node(node->code, out);
+    yfg_print_line(out, ") {");
+        yf_gen_node(node->code, out);
+    yfg_print_line(out, ";");
+    fprintf(out, "}");
     if (node->elsebranch) {
-        fprintf(out, " else ");
+        yfg_print_line(out, " else {");
         yf_gen_node(node->elsebranch, out);
+        yfg_print_line(out, ";");
+        fprintf(out, "}");
     }
 }
 

@@ -64,6 +64,7 @@ def main():
     add_semantic_test("tests/sem/funcs-fail.yf",             False)
     add_semantic_test("tests/sem/funcs-pass.yf",             True )
     add_semantic_test("tests/sem/if-condition-not-bool.yf",  False)
+    add_semantic_test("tests/sem/if-good.yf",                True )
     add_semantic_test("tests/sem/invalid-int-literal.yf",    False)
     add_semantic_test("tests/sem/no-value-assign.yf",        False)
     add_semantic_test("tests/sem/return-bad.yf",             False)

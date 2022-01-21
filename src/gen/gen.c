@@ -96,8 +96,15 @@ static void yf_gen_funcdecl(struct yfa_funcdecl * node, FILE * out) {
 
     struct yf_ast_node * child;
     int argct = 0;
+    char typebuf[256];
+    yfg_ctype(256, typebuf, node->name->fn.rtype);
 
-    fprintf(out, "%s %s", node->name->fn.rtype->name, node->name->fn.name);
+    fprintf(
+        out, "%s /* %s */ %s",
+        typebuf,
+        node->name->fn.rtype->name,
+        node->name->fn.name
+    );
     fprintf(out, "(");
 
     /* Generate param list */

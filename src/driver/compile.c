@@ -135,6 +135,9 @@ static int yf_run_compiler_on_data(
         );
     }
 
+#undef BEGIN_PROFILE
+#undef END_PROFILE
+
     return err;
 
 }

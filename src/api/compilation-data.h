@@ -29,6 +29,10 @@ struct yf_file_compilation_data {
 
     int error; /* If an error has occurred */
 
+    /* Are we parsing this file? If false, a symbol table will be read from a
+     * file. */
+    int parse_anew;
+
 };
 
 struct yf_project_compilation_data {

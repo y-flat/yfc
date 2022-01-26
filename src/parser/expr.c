@@ -198,7 +198,7 @@ static int yfp_sort_expr_tree(
      */
     for (i = 0, index = 0; i < num_nodes - 1; i++) {
         prec = yfo_prec(operators[i], operators[index]);
-        if (prec == LESS || index == -1) {
+        if (prec == LESS) {
             index = i;
         }
         /* If left-associative and tied, we want the last. */

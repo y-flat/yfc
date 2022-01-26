@@ -108,6 +108,8 @@ int yfp_expr(struct yf_parse_node * node, struct yf_lexer * lexer,
 
     int i, lex_err;
 
+    node->type = YFCS_EXPR;
+
     /**
      * Explanation for this stage of the parsing algorithm - get all atomic
      * expressions and operators. Like so:

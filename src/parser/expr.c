@@ -108,6 +108,8 @@ int yfp_expr(struct yf_parse_node * node, struct yf_lexer * lexer,
 
     int i, lex_err;
 
+    node->type = YFCS_EXPR;
+
     /**
      * Explanation for this stage of the parsing algorithm - get all atomic
      * expressions and operators. Like so:
@@ -194,9 +196,9 @@ static int yfp_sort_expr_tree(
      * the expression tree based on it. If there are multiple tied operators,
      * we choose the first one if right-associative, and the last one if left.
      */
-    for (i = 0, index = -1; i < num_nodes - 1; i++) {
+    for (i = 0, index = 0; i < num_nodes - 1; i++) {
         prec = yfo_prec(operators[i], operators[index]);
-        if (prec == LESS || index == -1) {
+        if (prec == LESS) {
             index = i;
         }
         /* If left-associative and tied, we want the last. */

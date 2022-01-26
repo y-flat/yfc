@@ -42,7 +42,7 @@ int validate_funcdecl(
     for (;;) {
         if (yf_list_get(&c->params, (void**) &cv) == -1)
             break;
-        av = yf_malloc(sizeof (struct yfa_vardecl));
+        av = yf_malloc(sizeof (struct yf_ast_node));
         if (!av)
             return 2;
         if (validate_vardecl(cv, av, pdata, fdata))

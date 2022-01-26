@@ -139,13 +139,15 @@ int validate_bstmt(struct yf_parse_node * cin, struct yf_ast_node * ain,
             fdata->error = 1;
             err = 1;
         } else {
+
             /* Move to abstract list */
             yf_list_add(&a->stmts, asub);
-        }
 
-        /* Probably redundant */
-        if (asub->type == YFA_RETURN) {
-            *returns = 1;
+            /* Probably redundant */
+            if (asub->type == YFA_RETURN) {
+                *returns = 1;
+            }
+            
         }
 
         /* Keep going */

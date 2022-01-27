@@ -58,7 +58,7 @@ int yfd_folder_scan(
     DIR * dir;
     struct dirent * entry;
     char sub_entry_buf[256];
-    int ret;
+    int ret = 0;
 
     dir = opendir(folder_name);
     if (!dir) {
@@ -93,11 +93,12 @@ int yfd_folder_scan(
                 YF_PRINT_ERROR(
                     "Internal error: path too long: %s", sub_entry_buf
                 );
-                return 4;
+                ret = 4;
+                goto out;
             }
 
             if ( (ret =yfd_folder_scan(data, sub_entry_buf))) {
-                return ret;
+                goto out;
             }
 
         } else if (entry->d_type == DT_REG) {
@@ -106,13 +107,15 @@ int yfd_folder_scan(
             strcat(sub_entry_buf, entry->d_name);
             
             if ( (ret = yfd_add_file(data, entry->d_name))) {
-                return ret;
+                goto out;
             }
         }
 
     }
 
-    return 0;
+out:
+    closedir(dir);
+    return ret;
 
 }
 

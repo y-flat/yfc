@@ -70,6 +70,11 @@ struct yf_args {
      */
     bool profile;
 
+    /**
+     * Should we be dumping out all the files in a project?
+     */
+    bool dump_projfiles;
+
 };
 
 /**

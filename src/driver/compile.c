@@ -145,7 +145,7 @@ static int yf_run_compiler_on_data(
 static int yf_compile_project(struct yf_args * args) {
 
     struct yf_project_compilation_data data;
-    int ret;
+    int ret, i;
 
     data.ext_modules = yfh_new();
 
@@ -157,6 +157,25 @@ static int yf_compile_project(struct yf_args * args) {
 
     if (yf_find_project_files(&data)) {
         return 1;
+    }
+
+    if (args->dump_projfiles) {
+        YF_PRINT_DEFAULT("Project files: (green = needs to be recompiled):");
+        for (i = 0; i < data.num_files; ++i) {
+            if (data.files[i]->parse_anew) {
+                YF_PRINT_WITH_COLOR(
+                    YF_CODE_GREEN,
+                    "%s\n",
+                    data.files[i]->file_name
+                );
+            } else {
+                YF_PRINT_WITH_COLOR(
+                    YF_CODE_YELLOW,
+                    "%s\n",
+                    data.files[i]->file_name
+                );
+            }
+        }
     }
     
     ret = yf_run_compiler_on_data(&data, args);

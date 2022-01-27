@@ -184,12 +184,13 @@ int yfd_get_sym_file_name(
 ) {
 
     /* file name: src/file.yf
-     * sym file name: bin/sym/file.yf.sym
+     * sym file name: bin/sym/file.yf.yfsym
      */
 
     file_name += strlen("src/");
     strcpy(sym_file_name, "bin/sym/");
     strcat(sym_file_name, file_name);
+    strcat(sym_file_name, ".yfsym");
 
     return 0;
 

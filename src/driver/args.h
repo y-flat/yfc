@@ -41,7 +41,7 @@ struct yf_args {
     /**
      * The indiviidual files to compile, as well as how many files.
      */
-    const char * files[16];
+    char * files[16];
     int num_files;
 
     /**

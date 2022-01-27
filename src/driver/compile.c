@@ -145,7 +145,7 @@ static int yf_run_compiler_on_data(
 static int yf_compile_project(struct yf_args * args) {
 
     struct yf_project_compilation_data data;
-    int numf, ret;
+    int ret;
 
     data.ext_modules = yfh_new();
 
@@ -155,8 +155,9 @@ static int yf_compile_project(struct yf_args * args) {
     data.project_name = yf_malloc(50);
     getcwd(data.project_name, 50);
 
-    numf = yf_find_project_files(&data);
-    data.num_files = numf;
+    if (yf_find_project_files(&data)) {
+        return 1;
+    }
     
     ret = yf_run_compiler_on_data(&data, args);
 

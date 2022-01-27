@@ -159,6 +159,8 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
 
         if (STREQ(arg, "--dump-projfiles")) {
             args->dump_projfiles = 1;
+            args->project = 1;
+            continue;
         }
 
         /* No other options are known. Yet. */

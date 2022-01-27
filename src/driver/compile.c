@@ -179,6 +179,7 @@ static int yf_compile_files(struct yf_args * args) {
         data.files[i] = malloc(sizeof (struct yf_file_compilation_data));
         data.files[i]->file_name = args->files[i];
         data.files[i]->parse_anew = 1;
+        data.files[i]->sym_file = NULL;
         data.ext_modules = NULL;
         /* TODO - more data */
     }
@@ -204,7 +205,10 @@ static int yf_run_frontend(
 
     int retval;
 
-    file_src = fopen(file->file_name, "r");
+    file_src = fopen(
+        file->parse_anew ? file->file_name : file->sym_file,
+        "r"
+    );
     if (!file_src) {
         YF_PRINT_ERROR("Could not open file %s", file->file_name);
         return 1;

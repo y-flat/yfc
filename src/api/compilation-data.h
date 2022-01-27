@@ -16,7 +16,7 @@
 struct yf_file_compilation_data {
 
     /* To start - for error messages */
-    const char * file_name;
+    char * file_name;
     char * sym_file; /* Where the symbols are stored */
     char * output_file;
 

@@ -52,6 +52,23 @@ static int yf_run_compiler_on_data(
     struct yf_args * args
 ) {
 
+/* Local defines for profiling */
+#define BEGIN_PROFILE() \
+    gettimeofday(&step_begin, NULL)
+
+#define END_PROFILE(step_name) do { \
+    gettimeofday(&step_end, NULL); \
+    if (args->profile) { \
+        time_for_step = (step_end.tv_sec - step_begin.tv_sec) * 1000000 + \
+            (step_end.tv_usec - step_begin.tv_usec); \
+        YF_PRINT_DEFAULT( \
+            "Time for %s: %f seconds", \
+            step_name, \
+            ( (double) time_for_step ) / 1000000.0 \
+        ); \
+    } \
+} while (0)
+
     int i, err = 0;
 
     /* For profiling purposes only */
@@ -59,7 +76,7 @@ static int yf_run_compiler_on_data(
     struct timeval total_begin, step_begin, step_end, total_end;
 
     /* Parse the frontend for all and create symtabs */
-    gettimeofday(&step_begin, NULL);
+    BEGIN_PROFILE();
     total_begin = step_begin;
     for (i = 0; i < data->num_files; ++i) {
         data->files[i]->error = 0; /* Starting off clean */
@@ -70,17 +87,9 @@ static int yf_run_compiler_on_data(
             return data->files[i]->error;
         }
     }
-    gettimeofday(&step_end, NULL);
-    if (args->profile) {
-        time_for_step = (step_end.tv_sec - step_begin.tv_sec) * 1000000 +
-            (step_end.tv_usec - step_begin.tv_usec);
-        YF_PRINT_DEFAULT(
-            "Time for parsing: %f seconds",
-            ( (double) time_for_step ) / 1000000.0
-        );
-    }
+    END_PROFILE("parsing");
 
-    gettimeofday(&step_begin, NULL);
+    BEGIN_PROFILE();
     for (i = 0; i < data->num_files; ++i) {
         if (!data->files[i]->error) {
             if (yf_build_symtab(data->files[i])) {
@@ -91,20 +100,12 @@ static int yf_run_compiler_on_data(
             }
         }
     }
-    gettimeofday(&step_end, NULL);
-    if (args->profile) {
-        time_for_step = (step_end.tv_sec - step_begin.tv_sec) * 1000000 +
-            (step_end.tv_usec - step_begin.tv_usec);
-        YF_PRINT_DEFAULT(
-            "Time for building symtabs: %f seconds",
-            ( (double) time_for_step ) / 1000000.0
-        );
-    }
+    END_PROFILE("building symtabs");
 
     /* TODO - set flags so we can efficiently avoid compiling the bad ones */
 
     /* Now validate everything. */
-    gettimeofday(&step_begin, NULL);
+    BEGIN_PROFILE();
     for (i = 0; i < data->num_files; ++i) {
         if (!data->files[i]->error
             && yf_validate_ast(
@@ -115,29 +116,14 @@ static int yf_run_compiler_on_data(
             err = 1;
         }
     }
-    gettimeofday(&step_end, NULL);
-    if (args->profile) {
-        time_for_step = (step_end.tv_sec - step_begin.tv_sec) * 1000000 +
-            (step_end.tv_usec - step_begin.tv_usec);
-        YF_PRINT_DEFAULT(
-            "Time for validating code: %f seconds",
-            ( (double) time_for_step ) / 1000000.0
-        );
-    }
+    END_PROFILE("validating code");
 
     /* Finally, generate code. */
     if (!args->just_semantics) {
-        gettimeofday(&step_begin, NULL);
+        BEGIN_PROFILE();
         yf_run_backend(data, args);
         gettimeofday(&step_end, NULL);
-        if (args->profile) {
-            time_for_step = (step_end.tv_sec - step_begin.tv_sec) * 1000000 +
-                (step_end.tv_usec - step_begin.tv_usec);
-            YF_PRINT_DEFAULT(
-                "Time for generating code code: %f seconds",
-                ( (double) time_for_step ) / 1000000.0
-            );
-        }
+        END_PROFILE("generating code");
     }
     total_end = step_end;
     if (args->profile) {
@@ -149,6 +135,9 @@ static int yf_run_compiler_on_data(
         );
     }
 
+#undef BEGIN_PROFILE
+#undef END_PROFILE
+
     return err;
 
 }
@@ -156,7 +145,7 @@ static int yf_run_compiler_on_data(
 static int yf_compile_project(struct yf_args * args) {
 
     struct yf_project_compilation_data data;
-    int numf, ret;
+    int ret, i;
 
     data.ext_modules = yfh_new();
 
@@ -166,8 +155,29 @@ static int yf_compile_project(struct yf_args * args) {
     data.project_name = yf_malloc(50);
     getcwd(data.project_name, 50);
 
-    numf = yf_find_project_files(&data);
-    data.num_files = numf;
+    if (yf_find_project_files(&data)) {
+        return 1;
+    }
+
+    if (args->dump_projfiles) {
+        YF_PRINT_DEFAULT("Project files: (green = needs to be recompiled):");
+        for (i = 0; i < data.num_files; ++i) {
+            if (data.files[i]->parse_anew) {
+                YF_PRINT_WITH_COLOR(
+                    YF_CODE_GREEN,
+                    "%s\n",
+                    data.files[i]->file_name
+                );
+            } else {
+                YF_PRINT_WITH_COLOR(
+                    YF_CODE_YELLOW,
+                    "%s\n",
+                    data.files[i]->file_name
+                );
+            }
+        }
+        return 0;
+    }
     
     ret = yf_run_compiler_on_data(&data, args);
 
@@ -189,6 +199,8 @@ static int yf_compile_files(struct yf_args * args) {
     for (i = 0; i < args->num_files; ++i) {
         data.files[i] = malloc(sizeof (struct yf_file_compilation_data));
         data.files[i]->file_name = args->files[i];
+        data.files[i]->parse_anew = 1;
+        data.files[i]->sym_file = NULL;
         data.ext_modules = NULL;
         /* TODO - more data */
     }
@@ -214,7 +226,10 @@ static int yf_run_frontend(
 
     int retval;
 
-    file_src = fopen(file->file_name, "r");
+    file_src = fopen(
+        file->parse_anew ? file->file_name : file->sym_file,
+        "r"
+    );
     if (!file_src) {
         YF_PRINT_ERROR("Could not open file %s", file->file_name);
         return 1;

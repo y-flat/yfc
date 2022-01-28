@@ -16,7 +16,8 @@
 struct yf_file_compilation_data {
 
     /* To start - for error messages */
-    const char * file_name;
+    char * file_name;
+    char * sym_file; /* Where the symbols are stored */
     char * output_file;
 
     struct yf_parse_node parse_tree;
@@ -28,6 +29,10 @@ struct yf_file_compilation_data {
     struct yf_ast_node ast_tree;
 
     int error; /* If an error has occurred */
+
+    /* Are we parsing this file? If false, a symbol table will be read from a
+     * file. */
+    int parse_anew;
 
 };
 

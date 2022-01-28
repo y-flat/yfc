@@ -41,7 +41,7 @@ struct yf_args {
     /**
      * The indiviidual files to compile, as well as how many files.
      */
-    const char * files[16];
+    char * files[16];
     int num_files;
 
     /**
@@ -69,6 +69,11 @@ struct yf_args {
      * Should we be profiling how long it takes?
      */
     bool profile;
+
+    /**
+     * Should we be dumping out all the files in a project?
+     */
+    bool dump_projfiles;
 
 };
 

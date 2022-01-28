@@ -8,6 +8,14 @@
 
 #include <api/compilation-data.h>
 
+/**
+ * Returns:
+ * 0 - OK
+ * 1 - no src/ folder
+ * 2 - folder name too long
+ * 3 - too many files
+ * 4 - internal error
+ */
 int yfd_find_projfiles(struct yf_project_compilation_data * data);
 
 #endif /* DRIVER_FIND_FILES_H */

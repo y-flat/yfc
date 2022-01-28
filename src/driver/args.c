@@ -37,7 +37,7 @@ static void yf_check_action(struct yf_args * args, enum yf_info_output out) {
 /**
  * Internal - add a file. Return 1 if too many files.
  */
-static int yf_add_file(struct yf_args * args, const char * file) {
+static int yf_add_file(struct yf_args * args, char * file) {
     if (args->num_files >= 16) {
         yf_set_error(args);
         return 1;
@@ -154,6 +154,12 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
                 return;
             }
             args->profile = 1;
+            continue;
+        }
+
+        if (STREQ(arg, "--dump-projfiles")) {
+            args->dump_projfiles = 1;
+            args->project = 1;
             continue;
         }
 

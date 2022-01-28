@@ -66,6 +66,9 @@ int yfd_folder_scan(
         return 4;
     }
 
+    strcpy(sub_entry_buf, folder_name);
+    strcat(sub_entry_buf, "/");
+
     /**
      * Loop through folder, recursing if necessary, to add all files.
      */
@@ -97,7 +100,7 @@ int yfd_folder_scan(
                 goto out;
             }
 
-            if ( (ret =yfd_folder_scan(data, sub_entry_buf))) {
+            if ( (ret = yfd_folder_scan(data, sub_entry_buf))) {
                 goto out;
             }
 

@@ -176,6 +176,7 @@ static int yf_compile_project(struct yf_args * args) {
                 );
             }
         }
+        return 0;
     }
     
     ret = yf_run_compiler_on_data(&data, args);

@@ -66,9 +66,6 @@ int yfd_folder_scan(
         return 4;
     }
 
-    strcpy(sub_entry_buf, folder_name);
-    strcat(sub_entry_buf, "/");
-
     /**
      * Loop through folder, recursing if necessary, to add all files.
      */
@@ -106,10 +103,13 @@ int yfd_folder_scan(
 
         } else if (entry->d_type == DT_REG) {
 
-            strcat(sub_entry_buf, "/");
-            strcat(sub_entry_buf, entry->d_name);
+            snprintf(
+                sub_entry_buf, sizeof(sub_entry_buf),
+                "%s/%s",
+                folder_name, entry->d_name
+            );
             
-            if ( (ret = yfd_add_file(data, entry->d_name))) {
+            if ( (ret = yfd_add_file(data, sub_entry_buf))) {
                 goto out;
             }
         }

@@ -93,7 +93,7 @@ struct yfa_return {
  * A node representing a variable decl IN THE CODE, NOT in any abstract
  * symbol table. This node exists only to generate the appropriate code and is
  * in no way a dependence of any other validation process.
- * Made of a variablee symbol which is referenced, and the expression being
+ * Made of a variable symbol which is referenced, and the expression being
  * assigned to it, if any.
  */
 struct yfa_vardecl {

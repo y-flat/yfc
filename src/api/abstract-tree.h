@@ -90,7 +90,7 @@ struct yfa_return {
 };
 
 /**
- * A node representing a variable function IN THE CODE, NOT in any abstract
+ * A node representing a variable decl IN THE CODE, NOT in any abstract
  * symbol table. This node exists only to generate the appropriate code and is
  * in no way a dependence of any other validation process.
  * Made of a variablee symbol which is referenced, and the expression being

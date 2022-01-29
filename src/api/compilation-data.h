@@ -15,10 +15,9 @@
 
 struct yf_file_compilation_data {
 
-    /* To start - for error messages */
-    char * file_name;
+    char * file_name; /* Where the source code is */
     char * sym_file; /* Where the symbols are stored */
-    char * output_file;
+    char * output_file; /* Where the C code is written */
 
     struct yf_parse_node parse_tree;
 
@@ -30,30 +29,38 @@ struct yf_file_compilation_data {
 
     int error; /* If an error has occurred */
 
-    /* Are we parsing this file? If false, a symbol table will be read from a
-     * file. */
+    /**
+     * Are we parsing this file anew (recompiling it)? Two options:
+     * 0:
+     * - we read source code from file_name
+     * - we dump symbol data to sym_file
+     * 1:
+     * - we read symbol data from sym_file because the symbol format is / will
+     *   be the same as the source code format, and only use it to validate
+     *   other files.
+     */
     int parse_anew;
 
 };
 
+/**
+ * TODO - distinguish project compilation and manual file compilation
+ * ( --project vs. not )
+ */
 struct yf_project_compilation_data {
 
     /* To start - also for error messages */
     char * project_name;
 
-    /* There are indeed a lot of pointers here, but this is so that a project\
+    /* There are indeed a lot of pointers here, but this is so that a project
     with 5 files does not take up as much space as a project with 1000. */
+    /* This will probably be changed to a hashmap in the future, mapping file
+    path (enclosing.package.file) to file cocmpilation data structs for project
+    compilations, but not necessarily for manual file compilations.
+    */
     struct yf_file_compilation_data * files [1000];
 
     int num_files;
-
-    /**
-     * A map of module prefix -> symbol table.
-     * Strictly speaking, this is not *just* external modules - local files that
-     * don't need to be recompiled are still loaded in here, because they might
-     * need to be imported.
-     */
-    struct yf_hashmap * ext_modules;
 
 };
 

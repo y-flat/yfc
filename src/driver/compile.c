@@ -147,8 +147,6 @@ static int yf_compile_project(struct yf_args * args) {
     struct yf_project_compilation_data data;
     int ret, i;
 
-    data.ext_modules = yfh_new();
-
     /**
      * Project name is current directory
      */
@@ -201,7 +199,6 @@ static int yf_compile_files(struct yf_args * args) {
         data.files[i]->file_name = args->files[i];
         data.files[i]->parse_anew = 1;
         data.files[i]->sym_file = NULL;
-        data.ext_modules = NULL;
         /* TODO - more data */
     }
 
@@ -326,9 +323,6 @@ static int yf_validate_ast(
 static int yf_cleanup(struct yf_project_compilation_data * data) {
 
     int iter; /* For all iterations needed */
-
-    if (data->ext_modules)
-        yfh_destroy(data->ext_modules, 1);
     
     for (iter = 0; iter < data->num_files; ++iter) {
         yf_free(data->files[iter]);

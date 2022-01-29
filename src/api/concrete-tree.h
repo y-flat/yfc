@@ -1,5 +1,21 @@
 /**
  * All parse tree data structure definitions.
+ * These are all context-free - this means no validation has been performed
+ * whatsoever, and all we know is that these have been parsed correctly.
+ * This closely mirrors the structure of the AST defined in api/abstract-tree.h
+ * and some more informative comments are located there about what each node
+ * does, but here are the basics:
+ * - A node is one of several structures in a tagged union, representing every
+ * possible lower-level structure of a program. Each node has a location for
+ * error-reporting purposes, given to it by the lexer (whose tokens have
+ * location information as well).
+ * - There is no statement node, and the "parse_stmt" function really just looks
+ * for whatever kind of node follows. As an example:
+ *     x: int;
+ *     x = 2;
+ *     return x;
+ * - Is just a list of nodes with types YFCS_VARDECL, YFCS_EXPR, and YFCS_RETURN
+ * with no statement type needed.
  */
 
 #ifndef API_CST_H
@@ -51,9 +67,6 @@ struct yfcs_funccall {
     struct yf_list args; /* A list of yf_parse_node */
 };
 
-/**
- * TODO - funccalls, etc.
- */
 struct yfcs_expr {
 
     union {

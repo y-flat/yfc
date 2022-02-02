@@ -3,6 +3,12 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+/**
+ * The CST-dumping routines are just for debugging purposes. Each node type has
+ * a corresponding dump function (except for empty nodes, which just print out)
+ * <empty statement>.
+ */
+
 /* Forwards */
 static void yf_dump_program(struct yfcs_program * node, FILE * out);
 static void yf_dump_vardecl(struct yfcs_vardecl * node, FILE * out);
@@ -12,7 +18,13 @@ static void yf_dump_bstmt(struct yfcs_bstmt * node, FILE * out);
 static void yf_dump_ret(struct yfcs_return * node, FILE * out);
 static void yf_dump_if(struct yfcs_if * node, FILE * out);
 
-/* TODO - non-static this, maybe by putting in a struct or something. */
+/**
+ * TODO - non-static this, maybe by putting in a struct or something.
+ * 
+ * Because the dumped code is well-formatted (by some bare standards), code is
+ * indented and that amount is stored here. As shown in yf_print_line, every new
+ * line gets printed with a number of tabs equal to this variable.
+ */
 static int yf_dump_indent = 0;
 
 static void indent() { ++yf_dump_indent; }
@@ -30,7 +42,10 @@ static void yf_print_line(FILE * out, char * data, ...) {
     va_end(args);
 }
 
-
+/**
+ * Finds the underlying type of a tagged union and calls the appropriate
+ * function.
+ */
 void yf_dump_cst(struct yf_parse_node * root, FILE *out) {
 
     if (root->lineno && root->colno)

@@ -15,17 +15,30 @@
 
 struct yf_ast_node;
 
+/**
+ * This represents a single, indivisible value.
+ */
 struct yfa_value {
 
-    enum {
+    /**
+     * Each single value is either an identifier (a, x.y.z, etc.) or a valuee
+     * (like 2 or 57).
+     */
+    enum yfav_type {
         YFA_IDENT,
         YFA_LITERAL,
     } type;
 
+    /**
+     * The core is either a reference to an identifier, or one of the two types
+     * of literal - a number or a boolean. In the future, there will be more
+     * types, like strings and floating-point numbers. The future representation
+     * of arrays is still an open question.
+     */
     union {
         struct yf_sym * identifier;
         struct {
-            enum {
+            enum yfa_lit_type {
                 YFAL_NUM,
                 YFAL_BOOL,
             } type;
@@ -37,11 +50,19 @@ struct yfa_value {
 
 };
 
+/**
+ * A call to a function, made of a reference to the function along with a list
+ * of its arguments.
+ */
 struct yfa_funccall {
     struct yf_sym * name;
     struct yf_list args; /* A list of yf_ast_node */
 };
 
+/**
+ * An expression is one of three types: a function call, a binary expression
+ * with an operator and two operands, or a value.
+ */
 struct yfa_expr {
     union {
         struct yfa_value value;
@@ -61,16 +82,29 @@ struct yfa_expr {
     
 };
 
+/**
+ * A return statement only needs the expression it returns.
+ */
 struct yfa_return {
     struct yf_ast_node * expr;
 };
 
+/**
+ * A node representing a variable decl IN THE CODE, NOT in any abstract
+ * symbol table. This node exists only to generate the appropriate code and is
+ * in no way a dependence of any other validation process.
+ * Made of a variable symbol which is referenced, and the expression being
+ * assigned to it, if any.
+ */
 struct yfa_vardecl {
     struct yf_sym * name;
     /* Can be NULL, and is always of type expr, is the right-hand side */
     struct yf_ast_node * expr;
 };
 
+/**
+ * Same deal as vardecl - this only exists to output the appropriate code.
+ */
 struct yfa_funcdecl {
     struct yf_sym * name;
     struct yfs_type * ret; /* The return type */
@@ -79,6 +113,9 @@ struct yfa_funcdecl {
     struct yf_ast_node * body; /* The function body */
 };
 
+/**
+ * A program is just a list of top-level declarations.
+ */
 struct yfa_program {
     struct yf_list decls;
 };
@@ -94,12 +131,19 @@ struct yfa_bstmt {
 
 };
 
+/**
+ * An if statement is composed of a condition, the code which runs if the
+ * condition is satisfied, and an optional else clause (NULL if no else).
+ */
 struct yfa_if {
     struct yf_ast_node * cond;
     struct yf_ast_node * code;
     struct yf_ast_node * elsebranch;
 };
 
+/**
+ * Just a tagged union with all the possible types of nodes.
+ */
 struct yf_ast_node {
     
     enum {

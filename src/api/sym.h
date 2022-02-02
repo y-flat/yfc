@@ -12,6 +12,9 @@
 #include <util/list.h>
 #include <util/hashmap.h>
 
+/**
+ * What 'kind' of number does a primitive type represent?
+ */
 enum yfpt_format {
     YFS_INT, /* NOT just "int", but a whole number. */
     YFS_FLOAT, /* ANY number with a decimal part. */
@@ -46,6 +49,11 @@ struct yfs_var {
 
 };
 
+/**
+ * This is a parameter for a function. The reason this isn't a vardecl is that
+ * a symbol table needs variable types, but when a symbol table is being built
+ * the types that exist are not yet known.
+ */
 struct yfsn_param {
     char * name, * type;
 };

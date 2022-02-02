@@ -10,6 +10,21 @@
  *   .getc = getc,
  *   .ungetc = ungetc
  * };
+ * 
+ * Example usage (with a string):
+ * int str_getc(char * str) {
+ *  int ret;
+ *  if (ret = *str++) {
+ *    return ret;
+ *  } else {
+ *    return EOF;
+ *  }
+ * }
+ * struct yf_lexer_input input {
+ *   .input = str,
+ *   .getc = str_getc,
+ *   // Make up your own ungetc function.
+ * };
  */
 
 #ifndef API_LEXER_INPUT_H

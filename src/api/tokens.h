@@ -29,6 +29,9 @@ enum yf_token_type {
 
 };
 
+/**
+ * TODO - have source file name
+ */
 struct yf_token {
 
     enum yf_token_type type;

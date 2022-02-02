@@ -3,6 +3,9 @@
 #include <stdlib.h> /* NULL */
 #include <string.h>
 
+/**
+ * Get the type of operator from its string representation.
+ */
 enum yf_operator yf_get_operator(const char * str) {
 
     static struct opdef {
@@ -47,6 +50,11 @@ enum yf_operator yf_get_operator(const char * str) {
 
 }
 
+/**
+ * Get the association of an operator. If @ is the operator:
+ * Left associative: a @ b @ c -> (a @ b) @ c
+ * Right associative: a @ b @ c -> a @ (b @ c)
+ */
 enum yfo_assoc yf_get_operator_assoc(enum yf_operator op) {
     
         switch (op) {
@@ -81,7 +89,12 @@ enum yfo_assoc yf_get_operator_assoc(enum yf_operator op) {
     
 }
 
-
+/**
+ * There are multiple precedence tiers - higher levels are more tightly binding
+ * than lower levels. As an example, assume @1 and @2 are operators, with @2
+ * having a higher precedence.
+ * x @1 y @2 z is ALWAYS parsed as x @1 (y @2 z).
+ */
 static int get_precedence_tier(enum yf_operator op) {
 
     static int precedences[] = {
@@ -128,6 +141,10 @@ enum yfo_precedence yfo_prec(enum yf_operator op1, enum yf_operator op2) {
     }
 }
 
+/**
+ * Convert operator back to string.
+ * TODO - separate into "get Y-flat operator" and "get C operator".
+ */
 char * get_op_string(enum yf_operator op) {
 
     static char * op_strings[] = {
@@ -161,6 +178,9 @@ char * get_op_string(enum yf_operator op) {
 
 }
 
+/**
+ * Does this operator require a variable as a left-hand side?
+ */
 bool yfo_is_assign(enum yf_operator op) {
     switch (op) {
     case YFO_AADD:
@@ -178,6 +198,11 @@ bool yfo_is_assign(enum yf_operator op) {
     }
 }
 
+/**
+ * Is the value of this operator a boolean? Other operators (for now) are valued
+ * as the larger-sized type of their operands. Once user-defined operators are a
+ * thing, this will change.
+ */
 bool yfo_is_bool(enum yf_operator op) {
     switch (op) {
     case YFO_EQ:

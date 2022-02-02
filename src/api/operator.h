@@ -1,5 +1,6 @@
 /**
- * An enum of all binary operators. Possibly more later.
+ * An enum of all binary operators and their associated operations. Information
+ * about specific semantics are in the C file.
  */
 
 #ifndef API_OPERATOR_H

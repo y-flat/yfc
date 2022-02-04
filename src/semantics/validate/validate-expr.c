@@ -8,7 +8,7 @@
 
 static int validate_expr_e(struct yfcs_expr * c, struct yfa_expr * a,
     struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata, int lineno
+    struct yf_file_compilation_data * fdata, struct yf_location * loc
 );
 
 /**
@@ -18,7 +18,7 @@ static int validate_expr_e(struct yfcs_expr * c, struct yfa_expr * a,
 static int validate_value(
     struct yfcs_value * c,
     struct yfa_value  * a,
-    int lineno
+    struct yf_location * loc
 ) {
 
     char * intparse;
@@ -32,9 +32,11 @@ static int validate_value(
             c->identifier.name
         ) == -1) {
             YF_PRINT_ERROR(
-                "Unknown identifier '%s' (line %d)",
-                c->identifier.name,
-                lineno
+                "%s %d:%d: Unknown identifier '%s'",
+                loc->file,
+                loc->line,
+                loc->column,
+                c->identifier.name
             );
             return 1;
         }
@@ -53,9 +55,10 @@ static int validate_value(
                 dig = *intparse - '0';
                 if (dig < 0 || dig > 9) {
                     YF_PRINT_ERROR(
-                        "Invalid literal '%s' (line %d), "
+                        "%s %d:%d: Invalid literal '%s', "
                         "found invalid character '%c' in int literal",
-                        c->literal.value, lineno, *intparse
+                        loc->file, loc->line, loc->column,
+                        c->literal.value, *intparse
                     );
                     return 1;
                 }
@@ -88,21 +91,21 @@ static int validate_value(
 static int validate_binary(
     struct yfcs_binary * c, struct yfa_binary * a,
     struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata, int lineno
+    struct yf_file_compilation_data * fdata, struct yf_location * loc
 ) {
     /* First, if it's an assignment, the left side is a variable. */
     if (yfo_is_assign(c->op)) {
         if (c->left->type != YFCS_VALUE) {
             YF_PRINT_ERROR(
-                "Left side of assignment must not be compound (line %d)",
-                lineno
+                "%s %d:%d: Left side of assignment must not be compound",
+                loc->file, loc->line, loc->column
             );
             return 1;
         }
         if (c->left->expr.value.type != YFCS_IDENT) {
             YF_PRINT_ERROR(
-                "Left side of assignment must be an identifier (line %d)",
-                lineno
+                "%s %d:%d: Left side of assignment must be an identifier",
+                loc->file, loc->line, loc->column
             );
             return 1;
         }
@@ -114,7 +117,7 @@ static int validate_binary(
     if (!a->left)
         return 2;
     if (validate_expr_e(
-        &c->left->expr, a->left, pdata, fdata, lineno
+        &c->left->expr, a->left, pdata, fdata, loc
     ))
         return 1;
 
@@ -122,7 +125,7 @@ static int validate_binary(
     if (!a->right)
         return 2;
     if (validate_expr_e(
-        &c->right->expr, a->right, pdata, fdata, lineno
+        &c->right->expr, a->right, pdata, fdata, loc
     ))
         return 1;
 
@@ -131,7 +134,7 @@ static int validate_binary(
         yfse_get_expr_type(a->left, fdata),
         yfse_get_expr_type(a->right, fdata),
         fdata,
-        lineno
+        loc
     )) {
         return 1;
     }
@@ -144,7 +147,7 @@ static int validate_binary(
 static int validate_funccall(
     struct yfcs_funccall * c, struct yfa_funccall * a,
     struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata, int lineno
+    struct yf_file_compilation_data * fdata, struct yf_location * loc
 ) {
 
 
@@ -160,9 +163,11 @@ static int validate_funccall(
         &a->name, current_scope, c->name.name
     ) == -1) {
         YF_PRINT_ERROR(
-            "Unknown function '%s' (line %d)",
-            c->name.name,
-            c->name.lineno
+            "%s %d:%d: Unknown function '%s'",
+            loc->file,
+            loc->line,
+            loc->column,
+            c->name.name
         );
         return 1;
     }
@@ -170,9 +175,11 @@ static int validate_funccall(
     /* Make sure the function is actually a function. */
     if (a->name->type != YFS_FN) {
         YF_PRINT_ERROR(
-            "Identifier '%s' is not a function (line %d)",
-            c->name.name,
-            c->name.lineno
+            "%s %d:%d: Identifier '%s' is not a function",
+            loc->file,
+            loc->line,
+            loc->column,
+            c->name.name
         );
         return 1;
     }
@@ -195,8 +202,10 @@ static int validate_funccall(
             (lgres = yf_list_get(&c->args, (void **) &carg))
         ) {
             YF_PRINT_ERROR(
-                "line %d: too %s arguments in function call",
-                lineno,
+                "%s %d:%d: too %s arguments in function call",
+                loc->file,
+                loc->line,
+                loc->column,
                 lgres ? "few" : "many"
             );
             return 1;
@@ -213,8 +222,10 @@ static int validate_funccall(
 
         if ( (paramtype = yfv_get_type_s(fdata, param->type)) == NULL) {
             YF_PRINT_ERROR(
-                "line %d: Uncaught type error: unknown type '%s'",
-                lineno,
+                "%s %d:%d: Uncaught type error: unknown type '%s'",
+                loc->file,
+                loc->line,
+                loc->column,
                 param->type
             );
             return 1;
@@ -224,7 +235,7 @@ static int validate_funccall(
             yfse_get_expr_type(&aarg->expr, fdata),
             paramtype,
             fdata,
-            lineno
+            loc
         )) {
             return 1;
         }
@@ -244,7 +255,7 @@ static int validate_funccall(
  */
 static int validate_expr_e(struct yfcs_expr * c, struct yfa_expr * a,
     struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata, int lineno
+    struct yf_file_compilation_data * fdata, struct yf_location * loc
 ) {
     
     /* If this is unary - (just a value), ... */
@@ -252,15 +263,15 @@ static int validate_expr_e(struct yfcs_expr * c, struct yfa_expr * a,
 
     case YFCS_VALUE:
         a->type = YFA_VALUE;
-        return validate_value(&c->value, &a->as.value, lineno);
+        return validate_value(&c->value, &a->as.value, loc);
 
     case YFCS_BINARY:
         a->type = YFA_BINARY;
-        return validate_binary(&c->binary, &a->as.binary, pdata, fdata, lineno);
+        return validate_binary(&c->binary, &a->as.binary, pdata, fdata, loc);
 
     case YFCS_FUNCCALL:
         a->type = YFA_FUNCCALL;
-        return validate_funccall(&c->call, &a->as.call, pdata, fdata, lineno);
+        return validate_funccall(&c->call, &a->as.call, pdata, fdata, loc);
     }
 
     return 0;
@@ -272,5 +283,5 @@ int validate_expr(struct yf_parse_node * cin, struct yf_ast_node * ain,
     struct yf_file_compilation_data * fdata
 ) {
     ain->type = YFA_EXPR;
-    return validate_expr_e(&cin->expr, &ain->expr, pdata, fdata, cin->lineno);
+    return validate_expr_e(&cin->expr, &ain->expr, pdata, fdata, &cin->loc);
 }

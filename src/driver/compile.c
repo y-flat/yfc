@@ -220,22 +220,25 @@ static int yf_run_frontend(
     struct yf_lexer_input input;
     struct yf_lexer lexer;
     FILE * file_src;
+    char * file_name;
 
     int retval;
 
+    file_name = file->parse_anew ? file->file_name : file->sym_file;
     file_src = fopen(
-        file->parse_anew ? file->file_name : file->sym_file,
+        file_name,
         "r"
     );
     if (!file_src) {
-        YF_PRINT_ERROR("Could not open file %s", file->file_name);
+        YF_PRINT_ERROR("Could not open file %s", file_name);
         return 1;
     }
     
     input = (struct yf_lexer_input) {
         .input = file_src,
         .getc = (int (*)(void*)) getc,
-        .ungetc = (int (*)(int, void*)) ungetc
+        .ungetc = (int (*)(int, void*)) ungetc,
+        .input_name = file_name
     };
 
     yfl_init(&lexer, &input);
@@ -279,7 +282,9 @@ static int dump_tokens(struct yf_lexer * lexer) {
         }
         printf(
             "%20s, line: %3d, col: %3d, type: %20s\n",
-            token.data, token.lineno, token.colno, yf_get_toktype(token.type)
+            token.data,
+            token.loc.line, token.loc.column, 
+            yf_get_toktype(token.type)
         );
     }
 

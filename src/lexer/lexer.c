@@ -31,8 +31,9 @@ static int yfl_skip_all(struct yf_lexer * lexer);
 
 void yfl_init(struct yf_lexer * lexer, struct yf_lexer_input * input) {
     
-    lexer->line = 1; /* Line count starts at 1 */
-    lexer->col = 1;  /* Same with column */
+    lexer->loc.line = 1; /* Line count starts at 1 */
+    lexer->loc.column = 1;  /* Same with column */
+    lexer->loc.file = input->input_name;
 
     lexer->input = input;
     lexer->unlex_ct = 0;
@@ -168,8 +169,7 @@ static enum yfl_code yfl_core_lex(
     if (yfl_skip_all(lexer) == -1) return YFLC_OPEN_COMMENT;
 
     /* Get the start position */
-    token->lineno = lexer->line;
-    token->colno  = lexer->col;
+    token->loc = lexer->loc;
 
     startchar = yfl_getc(lexer);
 
@@ -228,11 +228,11 @@ static int yfl_getc(struct yf_lexer * lexer) {
     c = lexer->input->getc(lexer->input->input);
 
     if (c == '\n') {
-        ++lexer->line;
-        lexer->prev_col = lexer->col;
-        lexer->col = 1;
+        ++lexer->loc.line;
+        lexer->prev_col = lexer->loc.column;
+        lexer->loc.column = 1;
     } else {
-        ++lexer->col;
+        ++lexer->loc.column;
     }
 
     return c;
@@ -244,13 +244,13 @@ static int yfl_ungetc(struct yf_lexer * lexer, int c) {
     lexer->input->ungetc(c, lexer->input->input);
 
     if (c != '\n') {
-        --lexer->col;
+        --lexer->loc.column;
     } else {
-        --lexer->line;
+        --lexer->loc.line;
         /* This is why we need the prev_col. If we unlex a newline, we're at
          * the end of the previous line, with an unknown column number. */
         /* Let's just hope we never need to unlex across multiple lines. */
-        lexer->col = lexer->prev_col;
+        lexer->loc.column = lexer->prev_col;
     }
 
     return 0;

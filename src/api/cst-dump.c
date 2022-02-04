@@ -48,8 +48,11 @@ static void yf_print_line(FILE * out, char * data, ...) {
  */
 void yf_dump_cst(struct yf_parse_node * root, FILE *out) {
 
-    if (root->lineno && root->colno)
-        yf_print_line(out, "line: %d, colno: %d", root->lineno, root->colno);
+    if (root->loc.line && root->loc.column)
+        yf_print_line(
+            out, "line: %d, colno: %d",
+            root->loc.line, root->loc.column
+        );
 
     switch (root->type) {
         case YFCS_PROGRAM:

@@ -9,6 +9,7 @@
 #ifndef API_SYM_H
 #define API_SYM_H
 
+#include <api/loc.h>
 #include <util/list.h>
 #include <util/hashmap.h>
 
@@ -78,8 +79,7 @@ struct yf_sym {
         struct yfs_fn  fn;
     };
 
-    char * file; /* Source file */
-    int line; /* Line number of declaration */
+    struct yf_location loc;
 
 };
 

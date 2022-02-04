@@ -102,7 +102,7 @@ int yfs_output_diagnostics(
     struct yfs_type * from,
     struct yfs_type * to,
     struct yf_file_compilation_data * fdata,
-    int lineno
+    struct yf_location * loc
 ) {
 
     enum yfs_conversion_allowedness al;
@@ -113,15 +113,19 @@ int yfs_output_diagnostics(
     ) {
         /* TODO - reduce repetition */
         if (al == YFS_CONVERSION_LOSSY) {
-            YF_PRINT_WARNING("line %d: %s when converting from %s to %s",
-                lineno,
+            YF_PRINT_WARNING("%s %d:%d: %s when converting from %s to %s",
+                loc->file,
+                loc->line,
+                loc->column,
                 yfse_get_error_message(al),
                 from->name,
                 to->name
             );
         } else {
-            YF_PRINT_ERROR("line %d: %s when converting from %s to %s",
-                lineno,
+            YF_PRINT_ERROR("%s %d:%d: %s when converting from %s to %s",
+                loc->file,
+                loc->line,
+                loc->column,
                 yfse_get_error_message(al),
                 from->name,
                 to->name

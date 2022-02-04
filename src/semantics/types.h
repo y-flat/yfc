@@ -8,6 +8,7 @@
 #include <stdbool.h>
 
 #include <api/abstract-tree.h>
+#include <api/loc.h>
 #include <semantics/validate/validate-internal.h>
 
 enum yfs_conversion_allowedness {
@@ -37,7 +38,7 @@ struct yfs_type * yfse_get_expr_type(
  */
 int yfs_output_diagnostics(
     struct yfs_type *, struct yfs_type *, struct yf_file_compilation_data *,
-    int lineno
+    struct yf_location * loc
 );
 
 #endif /* SEMANTICS_TYPES_H */

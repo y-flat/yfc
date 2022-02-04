@@ -7,12 +7,13 @@
 #define LEXER_LEXER_H
 
 #include <api/lexer-input.h>
+#include <api/loc.h>
 #include <api/tokens.h>
 
 struct yf_lexer {
 
     /* Current parsing data */
-    int line, col;
+    struct yf_location loc;
 
     /* There's an explanation for this in yfl_ungetc */
     int prev_col;

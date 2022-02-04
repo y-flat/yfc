@@ -24,7 +24,7 @@ int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer) {
     struct yf_parse_node * decl;
 
     /* Unimportant */
-    node->lineno = node->colno = -1;
+    node->loc.line = node->loc.column = -1;
 
     node->type = YFCS_PROGRAM;
     yf_list_init(&node->program.decls);

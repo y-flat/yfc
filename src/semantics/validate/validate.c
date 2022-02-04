@@ -168,7 +168,7 @@ int validate_return(
                     : yfv_get_type_s(fdata, "void"),
                 type,
                 fdata,
-                cin->lineno
+                &cin->loc
             )
         :   (a->expr != NULL)
     ) {

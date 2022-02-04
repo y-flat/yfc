@@ -17,11 +17,12 @@
  */
 #define YF_TOKERR(tok, expected) do { \
     YF_PRINT_ERROR( \
-        "Unexpected token \"%s\", line %d column %d: " \
+        "%s %d:%d: unexpected token '%s'; " \
         "expected %s, found token of type \"%s\"", \
+        tok.loc.file, \
+        tok.loc.line, \
+        tok.loc.column, \
         tok.data, \
-        tok.lineno, \
-        tok.colno, \
         expected, \
         yf_get_toktype(tok.type) \
     ); \
@@ -44,8 +45,7 @@
  * Set the node's position information to that of the tok.
  */
 #define P_GETCT(node, tok) do { \
-  (node)->colno =  (tok).colno; \
-  (node)->lineno = (tok).lineno; \
+  (node)->loc = (tok).loc; \
 } while (0)
 
 int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer);

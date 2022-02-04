@@ -5,6 +5,8 @@
 #ifndef API_TOKENS_H
 #define API_TOKENS_H
 
+#include <api/loc.h>
+
 enum yf_token_type {
 
     /* Not much yet */
@@ -39,8 +41,7 @@ struct yf_token {
     /* Maybe increase this later, for long strings? */
     char data [ 256 ];
 
-    int lineno;
-    int colno;
+    struct yf_location loc;
 
 };
 

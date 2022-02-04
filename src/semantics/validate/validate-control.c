@@ -31,8 +31,8 @@ int validate_if(struct yf_parse_node * cin, struct yf_ast_node * ain,
         &a->cond->expr, fdata
     )) != yfv_get_type_s(fdata, "bool")) {
         YF_PRINT_ERROR(
-            "line %d: if condition must be of type bool, was %s",
-            cin->lineno,
+            "%s %d: %d: if condition must be of type bool, was %s",
+            cin->loc.file, cin->loc.line, cin->loc.column,
             t->name
         );
         fdata->error = 1;

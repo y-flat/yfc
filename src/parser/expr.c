@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include <api/loc.h>
 #include <api/operator.h>
 #include <parser/parser-internals.h>
 
@@ -29,7 +30,7 @@ int yfp_atomic_expr(struct yf_parse_node * node, struct yf_lexer * lexer) {
     node->type = YFCS_EXPR;
     
     P_LEX(lexer, &tok);
-    node->lineno = tok.lineno;
+    P_GETCT(node, tok);
     switch (tok.type) {
     case YFT_IDENTIFIER:
         yfl_unlex(lexer, &tok);
@@ -84,7 +85,7 @@ int yfp_atomic_expr(struct yf_parse_node * node, struct yf_lexer * lexer) {
 static int yfp_sort_expr_tree(
     struct yf_parse_node * nodes, int num_nodes,
     enum yf_operator * operators, /* num_operators = num_nodes - 1 */
-    int * operator_lines,
+    struct yf_location * operator_lines,
     struct yf_parse_node * node
 );
 
@@ -102,7 +103,7 @@ int yfp_expr(struct yf_parse_node * node, struct yf_lexer * lexer,
 
     struct yf_parse_node atomics[64];
     enum yf_operator operators[63];
-    int operator_lines[63]; /* The line number of the operator */
+    struct yf_location operator_lines[63]; /* The location of the operator */
 
     struct yf_token tok;
 
@@ -141,7 +142,7 @@ int yfp_expr(struct yf_parse_node * node, struct yf_lexer * lexer,
                 YF_TOKERR(tok, "valid operator");
                 return 2;
             }
-            operator_lines[i] = tok.lineno;
+            operator_lines[i] = tok.loc;
             if (yfp_atomic_expr(&atomics[i + 1], lexer)) {
                 return 4;
             }
@@ -165,7 +166,7 @@ int yfp_expr(struct yf_parse_node * node, struct yf_lexer * lexer,
  */
 static int yfp_sort_expr_tree(
     struct yf_parse_node * nodes, int num_nodes,
-    enum yf_operator * operators, int * operator_lines,
+    enum yf_operator * operators, struct yf_location * operator_lines,
     struct yf_parse_node * n_node
 ) {
 
@@ -209,7 +210,7 @@ static int yfp_sort_expr_tree(
         }
     }
 
-    n_node->lineno = operator_lines[index];
+    n_node->loc = operator_lines[index];
 
     /* Now that we have our splitting location, we recurse. */
     node->type = YFCS_BINARY;

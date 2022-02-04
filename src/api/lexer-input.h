@@ -37,6 +37,8 @@ struct yf_lexer_input {
      */
     void * input;
 
+    char * input_name;
+
     /**
      * This function needs to provide the next character of input data.
      */

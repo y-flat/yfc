@@ -30,21 +30,23 @@ int validate_vardecl(
     ) != -1 && !global) {
         if (ssym == 0) {
             YF_PRINT_ERROR(
-                "Duplicate declaration of symbol '%s'"
+                "File %s: duplicate declaration of symbol '%s'"
                 ", lines %d and %d",
+                cin->loc.file,
                 c->name.name,
-                entry->line,
-                cin->lineno
+                entry->loc.line,
+                cin->loc.line
             );
             return 1;
         } else {
             /* Just a warning about shadowing. */
             YF_PRINT_WARNING(
-                "Global symbol '%s' (line %d) "
+                "File %s: global symbol '%s' (line %d) "
                 "shadowed by local symbol (line %d)",
+                cin->loc.file,
                 c->name.name,
-                entry->line,
-                cin->lineno
+                entry->loc.line,
+                cin->loc.line
             );
         }
     }
@@ -74,10 +76,12 @@ int validate_vardecl(
     doesn't exist during the symtab-building phase. */
     if ( (a->name->var.dtype = yfv_get_type_t(fdata, c->type)) == NULL) {
         YF_PRINT_ERROR(
-            "Unknown type '%s' in declaration of '%s' (line %d)",
+            "%s %d:%d: Unknown type '%s' in declaration of '%s'",
+            cin->loc.file,
+            cin->loc.line,
+            cin->loc.column,
             c->type.databuf,
-            c->name.name,
-            cin->lineno
+            c->name.name
         );
         free(a->name);
         return 1;
@@ -89,15 +93,17 @@ int validate_vardecl(
         && a->name->var.dtype->primitive.size == 0
     ) {
         YF_PRINT_ERROR(
-            "Variable '%s' has type 'void' (line %d)",
-            c->name.name,
-            cin->lineno
+            "%s %d:%d: Variable '%s' has type 'void'",
+            cin->loc.file,
+            cin->loc.line,
+            cin->loc.column,
+            c->name.name
         );
         free(a->name);
         return 1;
     }
     
-    a->name->line = cin->lineno;
+    a->name->loc = cin->loc;
 
     if (c->expr) {
         a->expr = yf_malloc(sizeof (struct yf_ast_node));
@@ -116,7 +122,7 @@ int validate_vardecl(
             yfse_get_expr_type(&a->expr->expr, fdata),
             a->name->var.dtype,
             fdata,
-            cin->lineno
+            &cin->loc
         )) {
             return 1;
         }

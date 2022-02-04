@@ -28,7 +28,12 @@ int validate_funcdecl(
     if ((a->name->fn.rtype = yfv_get_type_t(
         fdata, c->ret
     )) == NULL) {
-        YF_PRINT_ERROR("error: %d: return type not found", cin->lineno);
+        YF_PRINT_ERROR(
+            "%s %d:%d: return type not found",
+            cin->loc.file,
+            cin->loc.line,
+            cin->loc.column
+        );
         return 2;
     }
 
@@ -54,10 +59,12 @@ int validate_funcdecl(
     /* Validate the return type. */
     if ((a->ret = yfv_get_type_t(fdata, c->ret)) == NULL) {
         YF_PRINT_ERROR(
-            "Unknown return type '%s' of function '%s' (line %d)",
+            "%s %d:%d: Unknown return type '%s' of function '%s'",
+            cin->loc.file,
+            cin->loc.line,
+            cin->loc.column,
             c->ret.databuf,
-            c->name.name,
-            cin->lineno
+            c->name.name
         );
         return 1;
     }
@@ -75,9 +82,11 @@ int validate_funcdecl(
 
     if (returns == 0 && a->ret->primitive.size != 0) {
         YF_PRINT_ERROR(
-            "Function '%s' does not always return a value (line %d)",
-            c->name.name,
-            cin->lineno
+            "%s %d:%d: Function '%s' does not always return a value",
+            cin->loc.file,
+            cin->loc.line,
+            cin->loc.column,
+            c->name.name
         );
         return 1;
     }
@@ -122,9 +131,10 @@ int validate_bstmt(struct yf_parse_node * cin, struct yf_ast_node * ain,
         if (*returns && !ret_warning_reported) {
             ret_warning_reported = 1;
             YF_PRINT_WARNING(
-                "Code on line %d until the end of the current "
+                "File %s: code on line %d until the end of the current "
                 "block will never execute",
-                csub->lineno
+                csub->loc.file,
+                csub->loc.line
             );
         }
         

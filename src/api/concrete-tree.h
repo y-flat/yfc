@@ -21,6 +21,7 @@
 #ifndef API_CST_H
 #define API_CST_H
 
+#include <api/loc.h>
 #include <api/operator.h>
 #include <util/list.h>
 
@@ -29,7 +30,7 @@ struct yf_parse_node;
 typedef char yfcs_databuf[256];
 
 struct yfcs_identifier {
-    int lineno, colno;
+    struct yf_location loc;
     yfcs_databuf name;
 };
 
@@ -56,7 +57,7 @@ struct yfcs_value {
  * types like "class<type> follows constraint". */
 struct yfcs_type {
     yfcs_databuf databuf;
-    int lineno, colno;
+    struct yf_location loc;
 };
 
 /**
@@ -149,7 +150,7 @@ struct yf_parse_node {
         struct yfcs_if ifstmt;
     };
 
-    int lineno, colno;
+    struct yf_location loc;
 
 };
 

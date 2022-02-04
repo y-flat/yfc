@@ -45,6 +45,7 @@ void yfh_destroy(struct yf_hashmap * hm, bool sub) {
         }
     }
 
+    free(hm->buckets);
     free(hm);
 
 }

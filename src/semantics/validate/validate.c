@@ -120,13 +120,15 @@ int validate_program(
         /* Validate */
         if (validate_node(cnode, anode, pdata, fdata, NULL, NULL)) {
             yf_free(anode);
+            anode = NULL;
             fdata->error = 1;
             err = 1;
             /* No return, keep going to find more errors. */
         }
 
         /* Move to abstract list */
-        yf_list_add(&aprog->decls, anode);
+        if (anode)
+            yf_list_add(&aprog->decls, anode);
 
         /* Keep going */
         yf_list_next(&cprog->decls);

@@ -50,8 +50,11 @@ int validate_funcdecl(
         av = yf_malloc(sizeof (struct yf_ast_node));
         if (!av)
             return 2;
-        if (validate_vardecl(cv, av, pdata, fdata))
+        if (validate_vardecl(cv, av, pdata, fdata)) {
+            yf_free(av);
+            fdata->error = 1;
             return 1;
+        }
         yf_list_add(&a->params, av);
         yf_list_next(&c->params);
     }
@@ -74,8 +77,11 @@ int validate_funcdecl(
         return 2;
 
     /* Now, validate the body. */
-    if (validate_bstmt(c->body, a->body, pdata, fdata, a->ret, &returns))
+    if (validate_bstmt(c->body, a->body, pdata, fdata, a->ret, &returns)) {
+        yf_free(a->body);
+        a->body = NULL;
         return 1;
+    }
 
     /* Close the scope. */
     exit_scope();

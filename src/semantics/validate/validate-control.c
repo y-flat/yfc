@@ -45,6 +45,8 @@ int validate_if(struct yf_parse_node * cin, struct yf_ast_node * ain,
         type, &if_always_returns
     )) {
         fdata->error = 1;
+        yf_free(a->code);
+        a->code = NULL;
         return 1;
     }
 

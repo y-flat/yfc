@@ -110,8 +110,11 @@ int validate_vardecl(
         if (!a->expr)
             return 2;
         a->expr->type = YFA_EXPR;
-        if (validate_expr(c->expr, a->expr, pdata, fdata))
+        if (validate_expr(c->expr, a->expr, pdata, fdata)) {
+            free(a->expr);
+            a->expr = NULL;
             return 1;
+        }
     } else {
         a->expr = NULL;
     }

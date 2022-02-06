@@ -118,16 +118,21 @@ static int validate_binary(
         return 2;
     if (validate_expr_e(
         &c->left->expr, a->left, pdata, fdata, loc
-    ))
+    )) {
+        free(a->left);
         return 1;
+    }
 
     a->right = yf_malloc(sizeof (struct yf_ast_node));
     if (!a->right)
         return 2;
     if (validate_expr_e(
         &c->right->expr, a->right, pdata, fdata, loc
-    ))
+    )) {
+        free(a->right);
+        a->right = NULL;
         return 1;
+    }
 
     /* Check that the types are compatible. */
     if (yfs_output_diagnostics(
@@ -208,15 +213,18 @@ static int validate_funccall(
                 loc->column,
                 lgres ? "few" : "many"
             );
+            yf_free(aarg);
             return 1;
         }
         if (lgres == -1) {
+            yf_free(aarg);
             break;
         }
 
         if (validate_expr(
             carg, aarg, pdata, fdata
         )) {
+            yf_free(aarg);
             return 1;
         }
 

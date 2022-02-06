@@ -328,9 +328,18 @@ static int yf_validate_ast(
 static int yf_cleanup(struct yf_project_compilation_data * data) {
 
     int iter; /* For all iterations needed */
+    struct yf_file_compilation_data * file;
     
     for (iter = 0; iter < data->num_files; ++iter) {
-        yf_free(data->files[iter]);
+
+        file = data->files[iter];
+
+        yf_free(file->types.table);
+        yf_free(file->symtab.table);
+        yf_cleanup_ast(&file->ast_tree);
+
+        yf_free(file);
+
     }
 
     yf_free(data->project_name);

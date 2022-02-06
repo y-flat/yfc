@@ -175,9 +175,7 @@ void yf_cleanup_cexpr(struct yfcs_expr * node) {
         break;
     case YFCS_BINARY:
         yf_cleanup_cnode(node->binary.left, 1);
-        yf_free(node->binary.left);
         yf_cleanup_cnode(node->binary.right, 1);
-        yf_free(node->binary.right);
         break;
     case YFA_FUNCCALL:
         yf_list_reset(&node->call.args);
@@ -198,13 +196,12 @@ void yf_cleanup_cvardecl(struct yfcs_vardecl * node) {
 }
 
 void yf_cleanup_cfuncdecl(struct yfcs_funcdecl * node) {
-    struct yfcs_vardecl * vardecl;
+    struct yf_parse_node * vardecl;
     yf_list_reset(&node->params);
     for (;;) {
         if (yf_list_get(&node->params, (void **) &vardecl) == -1)
             break;
-        yf_cleanup_cvardecl(vardecl);
-        yf_free(vardecl);
+        yf_cleanup_cnode(vardecl, 1);
         yf_list_next(&node->params);
     }
     yf_list_destroy(&node->params);

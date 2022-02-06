@@ -238,7 +238,8 @@ static int yf_run_frontend(
         .input = file_src,
         .getc = (int (*)(void*)) getc,
         .ungetc = (int (*)(int, void*)) ungetc,
-        .input_name = file_name
+        .input_name = file_name,
+        .close = (int (*) (void*))fclose
     };
 
     yfl_init(&lexer, &input);

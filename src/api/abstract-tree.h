@@ -169,4 +169,6 @@ struct yf_ast_node {
 
 };
 
+void yf_cleanup_ast(struct yf_ast_node * node);
+
 #endif /* API_ABSTRACT_TREE_H */

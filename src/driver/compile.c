@@ -336,6 +336,7 @@ static int yf_cleanup(struct yf_project_compilation_data * data) {
 
         yf_free(file->types.table);
         yf_free(file->symtab.table);
+        yf_cleanup_ast(&file->ast_tree);
 
         yf_free(file);
 

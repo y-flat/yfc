@@ -154,4 +154,6 @@ struct yf_parse_node {
 
 };
 
+void yf_cleanup_cst(struct yf_parse_node * node);
+
 #endif /* API_CST_H */

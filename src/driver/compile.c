@@ -196,9 +196,9 @@ static int yf_compile_files(struct yf_args * args) {
 
     for (i = 0; i < args->num_files; ++i) {
         data.files[i] = malloc(sizeof (struct yf_file_compilation_data));
+        memset(data.files[i], 0, sizeof (struct yf_file_compilation_data));
         data.files[i]->file_name = args->files[i];
         data.files[i]->parse_anew = 1;
-        data.files[i]->sym_file = NULL;
         /* TODO - more data */
     }
 
@@ -238,7 +238,8 @@ static int yf_run_frontend(
         .input = file_src,
         .getc = (int (*)(void*)) getc,
         .ungetc = (int (*)(int, void*)) ungetc,
-        .input_name = file_name
+        .input_name = file_name,
+        .close = (int (*) (void*))fclose
     };
 
     yfl_init(&lexer, &input);
@@ -334,8 +335,11 @@ static int yf_cleanup(struct yf_project_compilation_data * data) {
 
         file = data->files[iter];
 
-        yf_free(file->types.table);
-        yf_free(file->symtab.table);
+        if (file->types.table)
+            yf_free(file->types.table);
+        if (file->symtab.table)
+            yf_free(file->symtab.table);
+        yf_cleanup_cst(&file->parse_tree);
         yf_cleanup_ast(&file->ast_tree);
 
         yf_free(file);

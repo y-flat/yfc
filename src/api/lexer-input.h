@@ -50,6 +50,8 @@ struct yf_lexer_input {
      */
     int (*ungetc)(int c, void * input);
 
+    int (*close)(void * input);
+
 };
 
 #endif /* API_LEXER_INPUT_H */

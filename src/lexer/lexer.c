@@ -177,6 +177,7 @@ static enum yfl_code yfl_core_lex(
     if (startchar == EOF) {
         token->type = YFT_EOF;
         strcpy(token->data, "[EOF]");
+        lexer->input->close(lexer->input->input);
         return YFLC_OK;
     }
     

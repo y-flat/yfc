@@ -112,6 +112,7 @@ void yf_cleanup_abstmt(struct yfa_bstmt * node) {
         yf_list_next(&node->stmts);
     }
     yf_list_destroy(&node->stmts);
+    yfh_destroy(node->symtab->table, 1);
 }
 
 void yf_cleanup_areturn(struct yfa_return * node) {

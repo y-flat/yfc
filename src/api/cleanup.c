@@ -86,6 +86,8 @@ void yf_cleanup_afuncdecl(struct yfa_funcdecl * node) {
     yf_list_destroy(&node->params);
     if (node->body)
         yf_cleanup_anode(node->body, 1);
+    yfh_destroy(node->param_scope->table, (int(*)(void*)) yfs_cleanup_sym);
+    yf_free(node->param_scope);
 }
 
 void yf_cleanup_aprogram(struct yfa_program * node) {

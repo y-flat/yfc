@@ -39,7 +39,7 @@ int validate_funcdecl(
 
     /* Now, validate the argument list. */
     /* Also, open a new scope for arguments. */
-    enter_scope(NULL);
+    enter_scope(&a->param_scope);
 
     /* Add the arguments to the scope. */
     yf_list_reset(&c->params);

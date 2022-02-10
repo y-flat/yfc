@@ -117,6 +117,7 @@ void yf_cleanup_abstmt(struct yfa_bstmt * node) {
         /* Sigh ... */
         (int (*)(void *)) yfs_cleanup_sym
     );
+    yf_free(node->symtab);
 }
 
 void yf_cleanup_areturn(struct yfa_return * node) {

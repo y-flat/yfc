@@ -34,14 +34,14 @@ struct yf_hashmap * yfh_new() {
     return hm;
 }
 
-void yfh_destroy(struct yf_hashmap * hm, bool sub) {
+void yfh_destroy(struct yf_hashmap * hm, int (*cleanup)(void *)) {
 
     int index;
 
-    if (sub) {
+    if (cleanup) {
         for (index = 0; index < BUCKETS; ++index) {
             if (hm->buckets[index].value)
-                free(hm->buckets[index].value);
+                cleanup(hm->buckets[index].value);
         }
     }
 

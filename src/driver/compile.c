@@ -336,9 +336,9 @@ static int yf_cleanup(struct yf_project_compilation_data * data) {
         file = data->files[iter];
 
         if (file->types.table)
-            yfh_destroy(file->types.table, 1);
+            yfh_destroy(file->types.table, (int (*)(void *)) yfs_cleanup_type);
         if (file->symtab.table)
-            yfh_destroy(file->symtab.table, 1);
+            yfh_destroy(file->symtab.table, (int (*)(void *)) yfs_cleanup_sym);
         yf_cleanup_cst(&file->parse_tree);
         yf_cleanup_ast(&file->ast_tree);
         yf_free(file->output_file);

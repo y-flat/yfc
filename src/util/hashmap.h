@@ -17,9 +17,12 @@ struct yf_hashmap;
 /* Create a new hashmap and return a pointer to it. */
 struct yf_hashmap * yfh_new();
 
-/* Destroy a hashmap. The "sub" argument is whether or not to free the pointers
-stored as hashmap values. */
-void yfh_destroy(struct yf_hashmap *, bool sub);
+/**
+ * Destroy a hashmap.
+ * The cleanup hook is a function used to free the values stored in the hashmap,
+ * if cleanup is NULL then no cleanup takes places.
+ */
+void yfh_destroy(struct yf_hashmap *, int (*cleanup)(void *));
 
 /**
  * Return 1 if adding a value failed.

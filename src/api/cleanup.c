@@ -112,7 +112,11 @@ void yf_cleanup_abstmt(struct yfa_bstmt * node) {
         yf_list_next(&node->stmts);
     }
     yf_list_destroy(&node->stmts);
-    yfh_destroy(node->symtab->table, 1);
+    yfh_destroy(
+        node->symtab->table,
+        /* Sigh ... */
+        (int (*)(void *)) yfs_cleanup_sym
+    );
 }
 
 void yf_cleanup_areturn(struct yfa_return * node) {
@@ -250,4 +254,18 @@ void yf_cleanup_cif(struct yfcs_if * node) {
 
 void yf_cleanup_cst(struct yf_parse_node * node) {
     yf_cleanup_cnode(node, 0);
+}
+
+int yfs_cleanup_type(struct yfs_type * type) {
+    return 0;
+}
+
+int yfs_cleanup_sym(struct yf_sym * sym) {
+    switch (sym->type) {
+    case YFS_VAR:
+        return 0;
+    case YFS_FN:
+        yf_list_destroy(&sym->fn.params);
+        return 0;
+    }
 }

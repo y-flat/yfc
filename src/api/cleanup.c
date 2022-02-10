@@ -260,6 +260,7 @@ void yf_cleanup_cst(struct yf_parse_node * node) {
 }
 
 int yfs_cleanup_type(struct yfs_type * type) {
+    yf_free(type);
     return 0;
 }
 
@@ -271,4 +272,6 @@ int yfs_cleanup_sym(struct yf_sym * sym) {
         yf_list_destroy(&sym->fn.params);
         return 0;
     }
+    yf_free(sym);
+    return 0;
 }

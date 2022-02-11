@@ -3,6 +3,7 @@
 #include <stdio.h> /* fopen, etc. */
 #include <stdlib.h> /* malloc */
 #include <string.h> /* strcpy */
+#include <sys/stat.h>
 #include <sys/time.h> /* struct timeval */
 #include <unistd.h> /* getcwd */
 
@@ -221,6 +222,7 @@ static int yf_run_frontend(
     struct yf_lexer lexer;
     FILE * file_src;
     char * file_name;
+    struct stat file_stat;
 
     int retval;
 
@@ -231,6 +233,11 @@ static int yf_run_frontend(
     );
     if (!file_src) {
         YF_PRINT_ERROR("Could not open file %s", file_name);
+        return 1;
+    }
+    stat(file_name, &file_stat);
+    if (!S_ISREG(file_stat.st_mode)) {
+        YF_PRINT_ERROR("%s is not a regular file", file_name);
         return 1;
     }
     

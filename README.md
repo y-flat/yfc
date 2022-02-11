@@ -17,3 +17,6 @@ and other components in the future.
 ```
 ./cmake/yfc
 ```
+
+## Internal documentation
+[General documentation](https://github.com/adamhutchings/yfc/blob/main/docs/compiler-design.md)

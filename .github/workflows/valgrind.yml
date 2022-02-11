@@ -1,0 +1,21 @@
+name: valgrind
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: make
+      run: |
+        mkdir -p cmake
+        ./scripts/build.sh
+        sudo apt-get install -y valgrind 
+        valgrind --leak-check=full ./cmake/yfc tests/*

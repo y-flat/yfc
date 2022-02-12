@@ -50,11 +50,11 @@ void yfh_destroy(struct yf_hashmap * hm, int (*cleanup)(void *)) {
 
 }
 
-static int hash(char * key);
+static unsigned long hash(char * key);
 
 int yfh_set(struct yf_hashmap * hm, char * key, void * value) {
 
-    int loc, newloc;
+    unsigned loc, newloc;
     int i;
 
     loc = hash(key) % BUCKETS;
@@ -82,7 +82,7 @@ int yfh_set(struct yf_hashmap * hm, char * key, void * value) {
 
 void * yfh_get(struct yf_hashmap * hm, char * key) {
     
-    int loc, newloc;
+    unsigned loc, newloc;
     int i;
 
     loc = hash(key) % BUCKETS;
@@ -103,7 +103,7 @@ void * yfh_get(struct yf_hashmap * hm, char * key) {
 }
 
 /* Credit - djb2 */
-static int hash(char * key) {
+static unsigned long hash(char * key) {
 
     unsigned long hash = 5381;
     int c;

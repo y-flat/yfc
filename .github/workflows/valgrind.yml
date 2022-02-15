@@ -13,13 +13,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: build
+    - name: dependencies
       run: |
         mkdir -p cmake
         ./scripts/build.sh
-    - name: Install Valgrind
-      run: |
         sudo apt-get install -y valgrind
-    - name: Run Valgrind
+    - name: Valgrind
       run: |
         sudo valgrind --error-exitcode=1 --leak-check=full ./cmake/yfc tests/sem/funcs-pass.yf

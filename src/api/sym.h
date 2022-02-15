@@ -43,6 +43,11 @@ struct yfs_type {
 
 };
 
+/**
+ * Free up a type.
+ */
+int yfs_cleanup_type(struct yfs_type * type);
+
 struct yfs_var {
 
     char * name;
@@ -82,6 +87,8 @@ struct yf_sym {
     struct yf_location loc;
 
 };
+
+int yfs_cleanup_sym(struct yf_sym * sym);
 
 struct yfs_symtab {
 

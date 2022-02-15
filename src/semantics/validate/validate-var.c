@@ -83,7 +83,10 @@ int validate_vardecl(
             c->type.databuf,
             c->name.name
         );
-        free(a->name);
+        /**
+         * Don't free the name, since it's still in the symbol table, and every
+         * entry is freed later.
+         */
         return 1;
     }
 
@@ -99,7 +102,6 @@ int validate_vardecl(
             cin->loc.column,
             c->name.name
         );
-        free(a->name);
         return 1;
     }
     

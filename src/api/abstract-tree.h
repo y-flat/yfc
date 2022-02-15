@@ -111,6 +111,8 @@ struct yfa_funcdecl {
     /* All parameters are stored as vardecls. expr WILL be null for these. */
     struct yf_list params;
     struct yf_ast_node * body; /* The function body */
+    /* The parameter scope */
+    struct yfs_symtab * param_scope;
 };
 
 /**

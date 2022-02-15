@@ -64,7 +64,7 @@ void yf_cleanup_aexpr(struct yfa_expr * node) {
                 yf_cleanup_anode(anode, 1);
             yf_list_next(&node->as.call.args);
         }
-        yf_list_destroy(&node->as.call.args);
+        yf_list_destroy(&node->as.call.args, 0);
     }
 }
 
@@ -74,18 +74,19 @@ void yf_cleanup_avardecl(struct yfa_vardecl * node) {
 }
 
 void yf_cleanup_afuncdecl(struct yfa_funcdecl * node) {
-    struct yfa_vardecl * vardecl;
+    struct yf_ast_node * vardecl;
     yf_list_reset(&node->params);
     for (;;) {
         if (yf_list_get(&node->params, (void **) &vardecl) == -1)
             break;
-        yf_cleanup_avardecl(vardecl);
-        yf_free(vardecl);
+        yf_cleanup_anode(vardecl, 1);
         yf_list_next(&node->params);
     }
-    yf_list_destroy(&node->params);
+    yf_list_destroy(&node->params, 0);
     if (node->body)
         yf_cleanup_anode(node->body, 1);
+    yfh_destroy(node->param_scope->table, (int(*)(void*)) yfs_cleanup_sym);
+    yf_free(node->param_scope);
 }
 
 void yf_cleanup_aprogram(struct yfa_program * node) {
@@ -98,7 +99,7 @@ void yf_cleanup_aprogram(struct yfa_program * node) {
             yf_cleanup_anode(decl, 1);
         yf_list_next(&node->decls);
     }
-    yf_list_destroy(&node->decls);
+    yf_list_destroy(&node->decls, 0);
 }
 
 void yf_cleanup_abstmt(struct yfa_bstmt * node) {
@@ -111,7 +112,13 @@ void yf_cleanup_abstmt(struct yfa_bstmt * node) {
             yf_cleanup_anode(stmt, 1);
         yf_list_next(&node->stmts);
     }
-    yf_list_destroy(&node->stmts);
+    yf_list_destroy(&node->stmts, 0);
+    yfh_destroy(
+        node->symtab->table,
+        /* Sigh ... */
+        (int (*)(void *)) yfs_cleanup_sym
+    );
+    yf_free(node->symtab);
 }
 
 void yf_cleanup_areturn(struct yfa_return * node) {
@@ -186,7 +193,7 @@ void yf_cleanup_cexpr(struct yfcs_expr * node) {
                 yf_cleanup_cnode(cnode, 1);
             yf_list_next(&node->call.args);
         }
-        yf_list_destroy(&node->call.args);
+        yf_list_destroy(&node->call.args, 0);
     }
 }
 
@@ -204,7 +211,7 @@ void yf_cleanup_cfuncdecl(struct yfcs_funcdecl * node) {
         yf_cleanup_cnode(vardecl, 1);
         yf_list_next(&node->params);
     }
-    yf_list_destroy(&node->params);
+    yf_list_destroy(&node->params, 0);
     if (node->body)
         yf_cleanup_cnode(node->body, 1);
 }
@@ -219,7 +226,7 @@ void yf_cleanup_cprogram(struct yfcs_program * node) {
             yf_cleanup_cnode(decl, 1);
         yf_list_next(&node->decls);
     }
-    yf_list_destroy(&node->decls);
+    yf_list_destroy(&node->decls, 0);
 }
 
 void yf_cleanup_cbstmt(struct yfcs_bstmt * node) {
@@ -232,7 +239,7 @@ void yf_cleanup_cbstmt(struct yfcs_bstmt * node) {
             yf_cleanup_cnode(stmt, 1);
         yf_list_next(&node->stmts);
     }
-    yf_list_destroy(&node->stmts);
+    yf_list_destroy(&node->stmts, 0);
 }
 
 void yf_cleanup_creturn(struct yfcs_return * node) {
@@ -249,4 +256,21 @@ void yf_cleanup_cif(struct yfcs_if * node) {
 
 void yf_cleanup_cst(struct yf_parse_node * node) {
     yf_cleanup_cnode(node, 0);
+}
+
+int yfs_cleanup_type(struct yfs_type * type) {
+    yf_free(type);
+    return 0;
+}
+
+int yfs_cleanup_sym(struct yf_sym * sym) {
+    switch (sym->type) {
+    case YFS_VAR:
+        break;
+    case YFS_FN:
+        yf_list_destroy(&sym->fn.params, 1);
+        break;
+    }
+    yf_free(sym);
+    return 0;
 }

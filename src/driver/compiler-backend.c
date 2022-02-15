@@ -91,8 +91,9 @@ int yf_run_c_backend(
     strcpy(link_buf, YF_C_COMPILER);
     strcat(link_buf, " ");
 
-    for (i = 0; i < data->num_files; ++i) {
-        file = data->files[i];
+    for (i = 0; i < YFH_BUCKETS; ++i) {
+        file = data->files->buckets[i].value;
+        if (!file) continue;
         /* Run compiler */
         sprintf(
             compile_buf,
@@ -135,8 +136,9 @@ int yf_run_backend(
     int i, err = 0;
     struct yf_file_compilation_data * file;
 
-    for (i = 0; i < data->num_files; ++i) {
-        file = data->files[i];
+    for (i = 0; i < YFH_BUCKETS; ++i) {
+        file = data->files->buckets[i].value;
+        if (!file) continue;
         if (file->error) {
             err = 1;
             continue;

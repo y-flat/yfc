@@ -76,10 +76,12 @@ int yf_list_add(struct yf_list * list, void * element) {
 
 }
 
-void yf_list_destroy(struct yf_list * list) {
+void yf_list_destroy(struct yf_list * list, int free_elements) {
 
     struct yf_list_block * block = list->current;
     struct yf_list_block * last; /* See below */
+
+    int i;
 
     if (!block) return;
 
@@ -87,6 +89,11 @@ void yf_list_destroy(struct yf_list * list) {
     for (;;) {
         last = block;
         block = block->next;
+        if (free_elements) {
+            for (i = 0; i < last->numfull; i++) {
+                free(last->data[i]);
+            }
+        }
         yf_free(last);
         if (!block) break;
     }

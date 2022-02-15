@@ -66,6 +66,6 @@ int yf_list_add(struct yf_list * list, void * element);
 /**
  * Destroy a list.
  */
-void yf_list_destroy(struct yf_list * list);
+void yf_list_destroy(struct yf_list * list, int free_elements);
 
 #endif /* UTIL_LIST_H */

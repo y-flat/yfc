@@ -368,6 +368,7 @@ static int yf_cleanup(struct yf_project_compilation_data * data) {
     }
 
     yf_free(data->project_name);
+    yfh_destroy(data->files, NULL);
 
     return 0;
 

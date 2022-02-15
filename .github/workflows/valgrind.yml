@@ -13,9 +13,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: make
+    - name: dependencies
       run: |
         mkdir -p cmake
         ./scripts/build.sh
-        sudo apt-get install -y valgrind 
-        sudo valgrind --leak-check=full ./cmake/yfc tests/sem/funcs-pass.yf
+        sudo apt-get install -y valgrind
+    - name: Valgrind
+      run: |
+        sudo valgrind --error-exitcode=1 --leak-check=full ./cmake/yfc tests/sem/funcs-pass.yf

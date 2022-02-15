@@ -74,13 +74,12 @@ void yf_cleanup_avardecl(struct yfa_vardecl * node) {
 }
 
 void yf_cleanup_afuncdecl(struct yfa_funcdecl * node) {
-    struct yfa_vardecl * vardecl;
+    struct yf_ast_node * vardecl;
     yf_list_reset(&node->params);
     for (;;) {
         if (yf_list_get(&node->params, (void **) &vardecl) == -1)
             break;
-        yf_cleanup_avardecl(vardecl);
-        yf_free(vardecl);
+        yf_cleanup_anode(vardecl, 1);
         yf_list_next(&node->params);
     }
     yf_list_destroy(&node->params);

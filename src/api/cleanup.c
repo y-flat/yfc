@@ -266,10 +266,10 @@ int yfs_cleanup_type(struct yfs_type * type) {
 int yfs_cleanup_sym(struct yf_sym * sym) {
     switch (sym->type) {
     case YFS_VAR:
-        return 0;
+        break;
     case YFS_FN:
         yf_list_destroy(&sym->fn.params, 1);
-        return 0;
+        break;
     }
     yf_free(sym);
     return 0;

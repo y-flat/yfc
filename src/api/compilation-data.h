@@ -57,8 +57,6 @@ struct yf_project_compilation_data {
     with 5 files does not take up as much space as a project with 1000. */
     struct yf_hashmap * files;
 
-    int num_files;
-
 };
 
 #endif /* API_COMPILATION_DATA_H */

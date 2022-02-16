@@ -12,6 +12,7 @@
 #include <api/abstract-tree.h>
 #include <api/concrete-tree.h>
 #include <api/sym.h>
+#include <util/hashmap.h>
 
 struct yf_file_compilation_data {
 
@@ -54,13 +55,7 @@ struct yf_project_compilation_data {
 
     /* There are indeed a lot of pointers here, but this is so that a project
     with 5 files does not take up as much space as a project with 1000. */
-    /* This will probably be changed to a hashmap in the future, mapping file
-    path (enclosing.package.file) to file cocmpilation data structs for project
-    compilations, but not necessarily for manual file compilations.
-    */
-    struct yf_file_compilation_data * files [1000];
-
-    int num_files;
+    struct yf_hashmap * files;
 
 };
 

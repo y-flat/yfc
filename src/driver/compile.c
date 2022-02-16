@@ -71,6 +71,7 @@ static int yf_run_compiler_on_data(
 } while (0)
 
     int i, err = 0;
+    struct yf_file_compilation_data * fdata;
 
     /* For profiling purposes only */
     double time_for_step, time_total;
@@ -79,25 +80,29 @@ static int yf_run_compiler_on_data(
     /* Parse the frontend for all and create symtabs */
     BEGIN_PROFILE();
     total_begin = step_begin;
-    for (i = 0; i < data->num_files; ++i) {
-        data->files[i]->error = 0; /* Starting off clean */
-        if (yf_run_frontend(data->files[i], args)) {
-            data->files[i]->error = 1;
+    for (i = 0; i < YFH_BUCKETS; ++i) {
+        fdata = data->files->buckets[i].value;
+        if (!fdata) continue;
+        fdata->error = 0; /* Starting off clean */
+        if (yf_run_frontend(fdata, args)) {
+            fdata->error = 1;
         }
         if (args->cstdump || args->tdump) {
-            return data->files[i]->error;
+            return fdata->error;
         }
     }
     END_PROFILE("parsing");
 
     BEGIN_PROFILE();
-    for (i = 0; i < data->num_files; ++i) {
-        if (!data->files[i]->error) {
-            if (yf_build_symtab(data->files[i])) {
-                data->files[i]->error = 1;
+    for (i = 0; i < YFH_BUCKETS; ++i) {
+        fdata = data->files->buckets[i].value;
+        if (!fdata) continue;
+        if (!fdata->error) {
+            if (yf_build_symtab(fdata)) {
+                fdata->error = 1;
                 err = 1;
             } else {
-                data->files[i]->error = 0;
+                fdata->error = 0;
             }
         }
     }
@@ -107,13 +112,15 @@ static int yf_run_compiler_on_data(
 
     /* Now validate everything. */
     BEGIN_PROFILE();
-    for (i = 0; i < data->num_files; ++i) {
-        if (!data->files[i]->error
+    for (i = 0; i < YFH_BUCKETS; ++i) {
+        fdata = data->files->buckets[i].value;
+        if (!fdata) continue;
+        if (!fdata->error
             && yf_validate_ast(
-                data, data->files[i], args
+                data, fdata, args
             )
         ) {
-            data->files[i]->error = 1;
+            fdata->error = 1;
             err = 1;
         }
     }
@@ -146,6 +153,7 @@ static int yf_run_compiler_on_data(
 static int yf_compile_project(struct yf_args * args) {
 
     struct yf_project_compilation_data data;
+    struct yf_file_compilation_data * fdata;
     int ret, i;
 
     /**
@@ -159,19 +167,21 @@ static int yf_compile_project(struct yf_args * args) {
     }
 
     if (args->dump_projfiles) {
-        YF_PRINT_DEFAULT("Project files: (green = needs to be recompiled):");
-        for (i = 0; i < data.num_files; ++i) {
-            if (data.files[i]->parse_anew) {
+        YF_PRINT_DEFAULT("Project files: (green = needs to be recompiled):");    
+        for (i = 0; i < YFH_BUCKETS; ++i) {
+            fdata = data.files->buckets[i].value;
+            if (!fdata) continue;
+            if (fdata->parse_anew) {
                 YF_PRINT_WITH_COLOR(
                     YF_CODE_GREEN,
                     "%s\n",
-                    data.files[i]->file_name
+                    fdata->file_name
                 );
             } else {
                 YF_PRINT_WITH_COLOR(
                     YF_CODE_YELLOW,
                     "%s\n",
-                    data.files[i]->file_name
+                    fdata->file_name
                 );
             }
         }
@@ -190,20 +200,22 @@ static int yf_compile_files(struct yf_args * args) {
     
     struct yf_project_compilation_data data;
     int i, ret;
+    struct yf_file_compilation_data * fdata;
 
     /* No project name */
     data.project_name = yf_malloc(50);
     strcpy(data.project_name, "<none>");
 
-    for (i = 0; i < args->num_files; ++i) {
-        data.files[i] = malloc(sizeof (struct yf_file_compilation_data));
-        memset(data.files[i], 0, sizeof (struct yf_file_compilation_data));
-        data.files[i]->file_name = args->files[i];
-        data.files[i]->parse_anew = 1;
-        /* TODO - more data */
-    }
+    data.files = yfh_new();
 
-    data.num_files = args->num_files;
+    for (i = 0; i < args->num_files; ++i) {
+        fdata = malloc(sizeof(struct yf_file_compilation_data));
+        memset(fdata, 0, sizeof (struct yf_file_compilation_data));
+        fdata->file_name = args->files[i];
+        fdata->parse_anew = 1;
+        /* TODO - more data */
+        yfh_set(data.files, fdata->file_name, fdata);
+    }
 
     ret = yf_run_compiler_on_data(&data, args);
     yf_cleanup(&data);
@@ -338,9 +350,10 @@ static int yf_cleanup(struct yf_project_compilation_data * data) {
     int iter; /* For all iterations needed */
     struct yf_file_compilation_data * file;
     
-    for (iter = 0; iter < data->num_files; ++iter) {
+    for (iter = 0; iter < YFH_BUCKETS; ++iter) {
 
-        file = data->files[iter];
+        file = data->files->buckets[iter].value;
+        if (!file) continue;
 
         if (file->types.table)
             yfh_destroy(file->types.table, (int (*)(void *)) yfs_cleanup_type);
@@ -355,6 +368,7 @@ static int yf_cleanup(struct yf_project_compilation_data * data) {
     }
 
     yf_free(data->project_name);
+    yfh_destroy(data->files, NULL);
 
     return 0;
 

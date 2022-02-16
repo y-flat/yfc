@@ -129,11 +129,6 @@ int yfd_add_file(
 
     struct yf_file_compilation_data * file;
 
-    if (data->num_files++ >= 1000) {
-        YF_PRINT_ERROR("Too many files");
-        return 4;
-    }
-
     file = yf_malloc(sizeof(struct yf_file_compilation_data));
     file->file_name = yf_malloc(sizeof (char) * strlen(file_name));
     strcpy(file->file_name, file_name);
@@ -149,7 +144,10 @@ int yfd_add_file(
         file->parse_anew = 0;
     }
 
-    data->files[data->num_files - 1] = file;
+    if (yfh_set(data->files, file_name, file)) {
+        YF_PRINT_ERROR("Internal error: could not add file %s", file_name);
+        return 4;
+    }
 
     return 0;
 

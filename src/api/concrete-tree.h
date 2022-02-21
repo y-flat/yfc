@@ -29,9 +29,13 @@ struct yf_parse_node;
 
 typedef char yfcs_databuf[256];
 
+/**
+ * An identifier is like path.to.file::a.b .
+ */
 struct yfcs_identifier {
     struct yf_location loc;
-    yfcs_databuf name;
+    yfcs_databuf filepath; /* path.to.file */
+    yfcs_databuf name;     /* a.b */
 };
 
 struct yfcs_literal {

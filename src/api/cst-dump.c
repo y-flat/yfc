@@ -108,7 +108,7 @@ static void yf_dump_vardecl(struct yfcs_vardecl * node, FILE * out) {
     yf_print_line(out, "vardecl");
     indent();
 
-    yf_print_line(out, "name: %s", node->name.name);
+    yf_print_line(out, "name: %s::%s", node->name.filepath, node->name.name);
     yf_print_line(out, "type: %s", node->type.databuf);
 
     yf_print_line(out, "initialization value:");
@@ -156,10 +156,14 @@ static void yf_dump_expr(struct yfcs_expr * node, FILE * out) {
 
     switch (node->type) {
     case YFCS_VALUE:
-        yf_print_line(out, "value: %s",
-            node->value.type == YFCS_IDENT ? node->value.identifier.name
-            : node->value.literal.value
-        );
+        if (node->value.type != YFCS_IDENT)
+            yf_print_line(out, "value: %s",
+                node->value.literal.value
+            );
+        else
+            yf_print_line(out, "identifier: %s::%s",
+                node->value.identifier.filepath, node->value.identifier.name
+            );
         break;
     case YFCS_BINARY:
         yf_print_line(out,
@@ -171,7 +175,10 @@ static void yf_dump_expr(struct yfcs_expr * node, FILE * out) {
         yf_dump_expr(&node->binary.right->expr, out);
         break;
     case YFCS_FUNCCALL:
-        yf_print_line(out, "function name: %s", node->call.name.name);
+        yf_print_line(
+            out, "function name: %s::%s",
+            node->call.name.filepath, node->call.name.name
+        );
         yf_print_line(out, "arguments:");
         indent();
         for (;;) {

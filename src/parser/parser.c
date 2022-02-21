@@ -137,18 +137,96 @@ int yfp_vardecl(struct yf_parse_node * node, struct yf_lexer * lexer) {
 
 }
 
+/**
+ * How this works:
+ * We copy data into the prefix buffer until we stop encountering a sequence of
+ * identifier - dot - identifier - dot ...
+ * If it's a namespace separator, we start parsing the actual name. Otherwise,
+ * we copy the "prefix" into the "actual" name and break.
+ */
 int yfp_ident(struct yfcs_identifier * node, struct yf_lexer * lexer) {
-    /* TODO - parse compound names like "foo.bar.baz" */
+   
     int lex_err;
     struct yf_token tok;
-    P_LEX(lexer, &tok);
+
+    P_PEEK(lexer, &tok);
     P_GETCT(node, tok);
+
+    P_LEX(lexer, &tok);
     if (tok.type != YFT_IDENTIFIER) {
         YF_TOKERR(tok, "identifier");
     } else {
-        strcpy(node->name, tok.data);
+        strcpy(node->filepath, tok.data);
     }
+
+    /* Go through the dot - identifier loop. */
+    for (;;) {
+        
+        P_LEX(lexer, &tok);
+        /* Either a dot or a namespace separator. */
+        switch (tok.type) {
+        case YFT_DOT:
+            /* Copy the dot into the prefix. */
+            strcat(node->filepath, tok.data);
+            goto cont;
+        case YFT_NAMESPACE:
+            goto parse_name;
+        default:
+            /* Unlex unimportant token. */
+            yfl_unlex(lexer, &tok);
+            /* There's no prefix. */
+            strcpy(node->name, node->filepath);
+            node->filepath[0] = '\0';
+            goto done;
+        }
+
+        P_LEX(lexer, &tok);
+        /* Should be an identifier. */
+        if (tok.type != YFT_IDENTIFIER) {
+            YF_TOKERR(tok, "identifier");
+        } else {
+            strcat(node->filepath, tok.data);
+        }
+
+cont:   ;
+
+    }
+
+parse_name:
+    /* Go through the dot - identifier loop. Similar code to above. */
+    for (;;) {
+        
+        P_LEX(lexer, &tok);
+        /* Either a dot or a namespace separator. */
+        switch (tok.type) {
+        case YFT_DOT:
+            /* Copy the dot into the prefix. */
+            strcat(node->name, tok.data);
+            goto cont2;
+        case YFT_NAMESPACE:
+            YF_PRINT_ERROR("Multiple namespace separators are not "
+                "allowed.");
+        default:
+            /* Unlex unimportant token. */
+            yfl_unlex(lexer, &tok);
+            goto done;
+        }
+
+        P_LEX(lexer, &tok);
+        /* Should be an identifier. */
+        if (tok.type != YFT_IDENTIFIER) {
+            YF_TOKERR(tok, "identifier");
+        } else {
+            strcat(node->name, tok.data);
+        }
+
+cont2:   ;
+
+    }
+
+done:
     return 0;
+
 }
 
 int yfp_type(struct yfcs_type * node, struct yf_lexer * lexer) {

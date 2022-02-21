@@ -141,6 +141,7 @@ static enum yf_token_type get_type(char * buf) {
 
     if (isalpha(buf[0])) return YFT_IDENTIFIER;
     if (isdigit(buf[0])) return YFT_LITERAL;
+    if (!strcmp(buf, "::")) return YFT_NAMESPACE;
     if (buf[0] == ';') return YFT_SEMICOLON;
     if (buf[0] == ',') return YFT_COMMA;
     if (buf[0] == ':') return YFT_COLON;
@@ -207,6 +208,10 @@ static enum yfl_code yfl_core_lex(
             is an operator, and this is the next character and is an equals,
             then lex it as one operator, like +=. */
             if (starttype == YFL_PUNCT && curchar == '=' && charpos == 1) {
+                continue;
+            }
+            /* Another such 'ugly hack' for namespaces */
+            if (token->data[0] == ':' && curchar == ':' && charpos == 1) {
                 continue;
             }
             yfl_ungetc(lexer, curchar);
@@ -382,6 +387,7 @@ const char * yf_get_toktype(enum yf_token_type type) {
         "<return>",
         "<if>",
         "<else>",
+        "namespace",
         "[TOO LARGE]",
     };
     

@@ -28,6 +28,7 @@ enum yf_token_type {
     YFT_IF,
     YFT_ELSE,
     YFT_NAMESPACE, /* :: */
+    YFT_DOT,
     YFT_TOO_LARGE, /* A token was too large */
 
 };

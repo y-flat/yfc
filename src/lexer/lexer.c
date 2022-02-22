@@ -149,6 +149,7 @@ static enum yf_token_type get_type(char * buf) {
     if (buf[0] == ')') return YFT_CPAREN;
     if (buf[0] == '{') return YFT_OBRACE;
     if (buf[0] == '}') return YFT_CBRACE;
+    if (buf[0] == '.') return YFT_DOT;
     if (ispunct(buf[0])) return YFT_OP; /* More */
     return YFT_INVALID;
 

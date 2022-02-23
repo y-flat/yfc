@@ -22,7 +22,6 @@
 static int yf_compile_project(struct yf_args *);
 static int yf_compile_files(struct yf_args *);
 static int yf_run_frontend(
-    struct yf_project_compilation_data *,
     struct yf_file_compilation_data *,
     struct yf_args *
 );
@@ -88,7 +87,7 @@ static int yf_run_compiler_on_data(
         fdata = data->files->buckets[i].value;
         if (!fdata) continue;
         fdata->error = 0; /* Starting off clean */
-        if (yf_run_frontend(data, fdata, args)) {
+        if (yf_run_frontend(fdata, args)) {
             fdata->error = 1;
         }
         if (args->cstdump || args->tdump) {
@@ -231,7 +230,6 @@ static int yf_compile_files(struct yf_args * args) {
  * Run the lexing and parsing on one file.
  */
 static int yf_run_frontend(
-    struct yf_project_compilation_data * pdata,
     struct yf_file_compilation_data * file,
     struct yf_args * args
 ) {
@@ -267,7 +265,7 @@ static int yf_run_frontend(
         .close = (int (*) (void*))fclose
     };
 
-    yfl_init(&lexer, &input, pdata->project_name);
+    yfl_init(&lexer, &input);
 
     if (args->tdump) {
         return dump_tokens(&lexer);

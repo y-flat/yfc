@@ -31,8 +31,7 @@ static int yfl_skip_all(struct yf_lexer * lexer);
 
 void yfl_init(
     struct yf_lexer * lexer,
-    struct yf_lexer_input * input,
-    char * project_name
+    struct yf_lexer_input * input
 ) {
     
     lexer->loc.line = 1; /* Line count starts at 1 */
@@ -41,8 +40,6 @@ void yfl_init(
 
     lexer->input = input;
     lexer->unlex_ct = 0;
-
-    lexer->project_name = project_name;
 
 }
 

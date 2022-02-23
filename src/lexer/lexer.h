@@ -23,6 +23,13 @@ struct yf_lexer {
     struct yf_token unlex_buf[16];
     int unlex_ct;
 
+    /* Project name */
+    /* This is stored here because it is copied into identifiers which the
+     * parser then uses, and the parser needs to know the project name. It is
+     * also passed in a lexer instance which makes this way easier.
+     */
+    char * project_name;
+
 };
 
 /**
@@ -51,7 +58,11 @@ void yfl_lexer_error(int lex_err);
 /**
  * Init a lexer.
  */
-void yfl_init(struct yf_lexer * lexer, struct yf_lexer_input * input);
+void yfl_init(
+    struct yf_lexer * lexer,
+    struct yf_lexer_input * input,
+    char * project_name
+);
 
 /**
  * Stuff a token with data.

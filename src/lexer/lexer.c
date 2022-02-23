@@ -29,7 +29,10 @@ static int yfl_skip_whitespace(struct yf_lexer * lexer);
 static int yfl_skip_comment(struct yf_lexer * lexer);
 static int yfl_skip_all(struct yf_lexer * lexer);
 
-void yfl_init(struct yf_lexer * lexer, struct yf_lexer_input * input) {
+void yfl_init(
+    struct yf_lexer * lexer,
+    struct yf_lexer_input * input
+) {
     
     lexer->loc.line = 1; /* Line count starts at 1 */
     lexer->loc.column = 1;  /* Same with column */

@@ -51,7 +51,10 @@ void yfl_lexer_error(int lex_err);
 /**
  * Init a lexer.
  */
-void yfl_init(struct yf_lexer * lexer, struct yf_lexer_input * input);
+void yfl_init(
+    struct yf_lexer * lexer,
+    struct yf_lexer_input * input
+);
 
 /**
  * Stuff a token with data.

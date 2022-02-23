@@ -21,7 +21,10 @@
 /* Forward decls for whole file */
 static int yf_compile_project(struct yf_args *);
 static int yf_compile_files(struct yf_args *);
-static int yf_run_frontend(struct yf_file_compilation_data *, struct yf_args *);
+static int yf_run_frontend(
+    struct yf_file_compilation_data *,
+    struct yf_args *
+);
 static int yf_find_project_files(struct yf_project_compilation_data *);
 static int dump_tokens(struct yf_lexer *);
 static int yf_build_symtab(struct yf_file_compilation_data *);
@@ -204,7 +207,7 @@ static int yf_compile_files(struct yf_args * args) {
 
     /* No project name */
     data.project_name = yf_malloc(50);
-    strcpy(data.project_name, "<none>");
+    strcpy(data.project_name, "");
 
     data.files = yfh_new();
 
@@ -227,7 +230,8 @@ static int yf_compile_files(struct yf_args * args) {
  * Run the lexing and parsing on one file.
  */
 static int yf_run_frontend(
-    struct yf_file_compilation_data * file, struct yf_args * args
+    struct yf_file_compilation_data * file,
+    struct yf_args * args
 ) {
 
     struct yf_lexer_input input;

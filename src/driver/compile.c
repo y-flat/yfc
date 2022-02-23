@@ -204,7 +204,7 @@ static int yf_compile_files(struct yf_args * args) {
 
     /* No project name */
     data.project_name = yf_malloc(50);
-    strcpy(data.project_name, "<none>");
+    strcpy(data.project_name, "");
 
     data.files = yfh_new();
 

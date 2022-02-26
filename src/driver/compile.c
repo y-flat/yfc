@@ -265,7 +265,8 @@ static int yf_run_frontend(
         .getc = (int (*)(void*)) getc,
         .ungetc = (int (*)(int, void*)) ungetc,
         .input_name = file_name,
-        .close = (int (*) (void*))fclose
+        .close = (int (*) (void*))fclose,
+        .identifier_prefix = args->project ? file->file_prefix : ""
     };
 
     yfl_init(&lexer, &input);

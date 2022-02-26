@@ -122,6 +122,15 @@ out:
 
 }
 
+/**
+ * Find the identifier prefix for a file.
+ */
+int yfd_get_identifier_prefix(
+    struct yf_project_compilation_data * data,
+    const char * file_name,
+    char * prefix
+);
+
 int yfd_add_file(
     struct yf_project_compilation_data * data,
     const char * file_name
@@ -130,8 +139,10 @@ int yfd_add_file(
     struct yf_file_compilation_data * file;
 
     file = yf_malloc(sizeof(struct yf_file_compilation_data));
-    file->file_name = yf_malloc(sizeof (char) * strlen(file_name));
+    file->file_name =   yf_malloc(sizeof (char) * strlen(file_name));
+    file->file_prefix = yf_malloc(sizeof (char) * strlen(file_name));
     strcpy(file->file_name, file_name);
+    yfd_get_identifier_prefix(data, file_name, file->file_prefix);
     file->error = 0;
 
     /* 16 is not really specific, just some extra padding */
@@ -198,4 +209,42 @@ int yfd_get_sym_file_name(
 
     return 0;
 
+}
+
+int yfd_get_identifier_prefix(
+    struct yf_project_compilation_data * data,
+    const char * file_name,
+    char * prefix
+) {
+
+    char * original_prefix_loc = prefix;
+    
+    /* file name: src/path/to/file.yf
+    * prefix: path.to.file
+    */
+
+    file_name = strchr(file_name, '/') + 1;
+    
+    /**
+     * Copy in characters, replacing '/' with '.'
+     */
+    while (*file_name) {
+        if (*file_name == '/') {
+            *prefix = '.';
+        } else {
+            *prefix = *file_name;
+        }
+        prefix++;
+        file_name++;
+    }
+
+    /**
+     * Remove trailing .yf
+     * We search original_prefix_loc
+     */
+    prefix = original_prefix_loc;
+    strrchr(prefix, '.')[0] = '\0';
+
+    return 0;
+    
 }

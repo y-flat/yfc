@@ -178,14 +178,16 @@ static int yf_compile_project(struct yf_args * args) {
             if (fdata->parse_anew) {
                 YF_PRINT_WITH_COLOR(
                     YF_CODE_GREEN,
-                    "%s\n",
-                    fdata->file_name
+                    "%s %s\n",
+                    fdata->file_name,
+                    fdata->file_prefix
                 );
             } else {
                 YF_PRINT_WITH_COLOR(
                     YF_CODE_YELLOW,
-                    "%s\n",
-                    fdata->file_name
+                    "%s %s\n",
+                    fdata->file_name,
+                    fdata->file_prefix
                 );
             }
         }

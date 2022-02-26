@@ -165,6 +165,7 @@ static int yf_compile_project(struct yf_args * args) {
     data.project_name = yf_malloc(50);
     getcwd(data.project_name, 50);
 
+    data.files = yfh_new();
     if (yf_find_project_files(&data)) {
         return 1;
     }

@@ -1,7 +1,5 @@
 #include <semantics/validate/validate-internal.h>
 
-struct yfs_symtab * current_scope;
-
 /**
  * Search all scopes, starting with the innermost one and heading out.
  * EXAMPLE:
@@ -20,7 +18,7 @@ int find_symbol(
 ) {
     int depth = 0;
     struct yfs_symtab * symtab = validator->current_scope;
-    while (validator->current_scope != NULL) {
+    while (symtab != NULL) {
         if ( (*sym = yfh_get(symtab->table, name)) != NULL) {
             return depth;
         }
@@ -30,10 +28,10 @@ int find_symbol(
     return -1;
 }
 
-int enter_scope(struct yfs_symtab ** stuff) {
+int enter_scope(struct yfv_validator * v, struct yfs_symtab ** stuff) {
 
     struct yfs_symtab * old_symtab, * new_symtab;
-    old_symtab = current_scope;
+    old_symtab = v->current_scope;
 
     new_symtab = yf_malloc(sizeof (struct yfs_symtab));
     if (!new_symtab) {
@@ -46,7 +44,7 @@ int enter_scope(struct yfs_symtab ** stuff) {
     }
 
     new_symtab->parent = old_symtab;
-    current_scope = new_symtab;
+    v->current_scope = new_symtab;
 
     if (stuff)
         *stuff = new_symtab;
@@ -55,9 +53,9 @@ int enter_scope(struct yfs_symtab ** stuff) {
 
 }
 
-void exit_scope(void) {
+void exit_scope(struct yfv_validator * v) {
     /* Don't free scope - used later during codegen */
-    current_scope = current_scope->parent;
+    v->current_scope = v->current_scope->parent;
 }
 
 int yfv_add_type(

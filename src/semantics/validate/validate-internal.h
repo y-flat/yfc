@@ -15,7 +15,7 @@
  * A struct containing all current validator information.
  */
 struct yfv_validator {
-    struct yf_compilation_data * pdata;
+    struct yf_project_compilation_data * pdata;
     struct yf_file_compilation_data * fdata;
     struct yfs_symtab * current_scope;
 };
@@ -35,12 +35,12 @@ int find_symbol(
  * The root of the created symtab is set to the current scope, and the current
  * scope is also set to the new scope.
  */
-int enter_scope(struct yfs_symtab ** stuff);
+int enter_scope(struct yfv_validator * v, struct yfs_symtab ** stuff);
 
 /**
  * Exit a scope.
  */
-void exit_scope(void);
+void exit_scope(struct yfv_validator * v);
 
 /* Any sort of "typical" transfer operation - takes a current file for local
  * decls, the project for all decls, and the two nodes to edit. */

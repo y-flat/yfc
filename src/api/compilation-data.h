@@ -16,7 +16,8 @@
 
 struct yf_file_compilation_data {
 
-    char * file_name; /* Where the source code is */
+    char * file_name; /* Where the source code is, like src/path/to/foo.yf */
+    char * file_prefix; /* Identifier prefix, like path.to.foo */
     char * sym_file; /* Where the symbols are stored */
     char * output_file; /* Where the C code is written */
 

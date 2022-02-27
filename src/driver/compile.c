@@ -165,6 +165,7 @@ static int yf_compile_project(struct yf_args * args) {
     data.project_name = yf_malloc(50);
     getcwd(data.project_name, 50);
 
+    data.files = yfh_new();
     if (yf_find_project_files(&data)) {
         return 1;
     }
@@ -177,14 +178,16 @@ static int yf_compile_project(struct yf_args * args) {
             if (fdata->parse_anew) {
                 YF_PRINT_WITH_COLOR(
                     YF_CODE_GREEN,
-                    "%s\n",
-                    fdata->file_name
+                    "%s %s\n",
+                    fdata->file_name,
+                    fdata->file_prefix
                 );
             } else {
                 YF_PRINT_WITH_COLOR(
                     YF_CODE_YELLOW,
-                    "%s\n",
-                    fdata->file_name
+                    "%s %s\n",
+                    fdata->file_name,
+                    fdata->file_prefix
                 );
             }
         }
@@ -262,7 +265,8 @@ static int yf_run_frontend(
         .getc = (int (*)(void*)) getc,
         .ungetc = (int (*)(int, void*)) ungetc,
         .input_name = file_name,
-        .close = (int (*) (void*))fclose
+        .close = (int (*) (void*))fclose,
+        .identifier_prefix = args->project ? file->file_prefix : ""
     };
 
     yfl_init(&lexer, &input);
@@ -366,6 +370,7 @@ static int yf_cleanup(struct yf_project_compilation_data * data) {
         yf_cleanup_cst(&file->parse_tree);
         yf_cleanup_ast(&file->ast_tree);
         yf_free(file->output_file);
+        yf_free(file->file_prefix);
 
         yf_free(file);
 

@@ -46,8 +46,14 @@ int yfs_validate(
 ) {
     fdata->types.table = yfh_new();
     yfv_add_builtin_types(fdata);
+    struct yfv_validator validator = {
+        /* Root symbol table is the global scope of the program. */
+        .current_scope = &fdata->symtab,
+        .fdata         = fdata,
+        .pdata         = pdata
+    };
     return validate_program(
-        &fdata->parse_tree, &fdata->ast_tree, pdata, fdata
+        &validator, &fdata->parse_tree, &fdata->ast_tree
     );
 }
 

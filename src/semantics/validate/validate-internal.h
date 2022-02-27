@@ -12,16 +12,21 @@
 #include <util/yfc-out.h>
 
 /**
- * Internal - the innermost scope we have open. TODO - un-global this.
+ * A struct containing all current validator information.
  */
-extern struct yfs_symtab * current_scope;
+struct yfv_validator {
+    struct yf_compilation_data * pdata;
+    struct yf_file_compilation_data * fdata;
+    struct yfs_symtab * current_scope;
+};
 
 /**
  * Search for a symbol with the given name. Return "depth" - innermost scope is
  * 0, the next-enclosing is 1, etc. If not found, -1.
  */
 int find_symbol(
-    struct yf_sym ** sym, struct yfs_symtab * symtab,
+    struct yfv_validator * validator,
+    struct yf_sym ** sym,
     char * name
 );
 
@@ -42,10 +47,9 @@ void exit_scope(void);
 
 /* I would use a typedef, but then the forwards would conflict. */
 #define VDECL(name) int name( \
+    struct yfv_validator *, \
     struct yf_parse_node *, \
-    struct yf_ast_node *, \
-    struct yf_project_compilation_data *, \
-    struct yf_file_compilation_data *\
+    struct yf_ast_node * \
 )
 
 VDECL(validate_program);
@@ -54,9 +58,8 @@ VDECL(validate_expr);
 VDECL(validate_vardecl);
 
 int validate_node(
+    struct yfv_validator * validator,
     struct yf_parse_node * cin, struct yf_ast_node * ain,
-    struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata,
     struct yfs_type * type, int * returns
 );
 
@@ -64,9 +67,8 @@ int validate_node(
  * Different - a type is passed in, so the expr can be checked.
  */
 int validate_return(
+    struct yfv_validator * validator,
     struct yf_parse_node * cin, struct yf_ast_node * ain,
-    struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata,
     struct yfs_type * type, int * returns
 );
 /**
@@ -74,17 +76,15 @@ int validate_return(
  * "returns" is stuffed with 1 if it *always* returns, and 0 otherwise.
  */
 int validate_bstmt(
+    struct yfv_validator * validator,
     struct yf_parse_node * cin, struct yf_ast_node * ain,
-    struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata,
     struct yfs_type * type,
     int * returns
 );
 
 int validate_if(
+    struct yfv_validator * validator,
     struct yf_parse_node * cin, struct yf_ast_node * ain,
-    struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata,
     struct yfs_type * type,
     int * returns
 );

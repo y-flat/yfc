@@ -2,12 +2,25 @@
 
 struct yfs_symtab * current_scope;
 
+/**
+ * Search all scopes, starting with the innermost one and heading out.
+ * EXAMPLE:
+ * x: int = 3; ~~ This scope last ~~
+ * foo() {
+ *  x: int = 4; ~~ This scope second ~~
+ *  if (true) {
+ *      x: int = 5; ~~ This scope is searched first ~~
+ *  }
+ * }
+ */
 int find_symbol(
-    struct yf_sym ** sym, struct yfs_symtab * symtab,
+    struct yfv_validator * validator,
+    struct yf_sym ** sym,
     char * name
 ) {
     int depth = 0;
-    while (symtab != NULL) {
+    struct yfs_symtab * symtab = validator->current_scope;
+    while (validator->current_scope != NULL) {
         if ( (*sym = yfh_get(symtab->table, name)) != NULL) {
             return depth;
         }

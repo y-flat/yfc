@@ -58,27 +58,26 @@ int yfs_validate(
 }
 
 int validate_node(
+    struct yfv_validator * validator,
     struct yf_parse_node * csub, struct yf_ast_node * asub,
-    struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata,
     struct yfs_type * for_bstmt1,
     int * for_bstmt2
 ) {
     switch (csub->type) {
     case YFCS_EXPR:
-        return validate_expr(csub, asub, pdata, fdata);
+        return validate_expr(validator, csub, asub);
     case YFCS_VARDECL:
-        return validate_vardecl(csub, asub, pdata, fdata);
+        return validate_vardecl(validator, csub, asub);
     case YFCS_FUNCDECL:
-        return validate_funcdecl(csub, asub, pdata, fdata);
+        return validate_funcdecl(validator, csub, asub);
     case YFCS_PROGRAM:
-        return validate_program(csub, asub, pdata, fdata);
+        return validate_program(validator, csub, asub);
     case YFCS_BSTMT:
-        return validate_bstmt(csub, asub, pdata, fdata, for_bstmt1, for_bstmt2);
+        return validate_bstmt(validator, csub, asub, for_bstmt1, for_bstmt2);
     case YFCS_RET:
-        return validate_return(csub, asub, pdata, fdata, for_bstmt1, for_bstmt2);
+        return validate_return(validator, csub, asub, for_bstmt1, for_bstmt2);
     case YFCS_IF:
-        return validate_if(csub, asub, pdata, fdata, for_bstmt1, for_bstmt2);
+        return validate_if(validator, csub, asub, for_bstmt1, for_bstmt2);
     case YFCS_EMPTY:
         asub->type = YFA_EMPTY;
         return 0;
@@ -89,9 +88,8 @@ int validate_node(
 }
 
 int validate_program(
-    struct yf_parse_node * cin, struct yf_ast_node * ain,
-    struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata
+    struct yfv_validator * validator,
+    struct yf_parse_node * cin, struct yf_ast_node * ain
 ) {
 
     struct yf_parse_node * cnode;
@@ -106,9 +104,6 @@ int validate_program(
 
     yf_list_init(&aprog->decls);
     yf_list_reset(&cprog->decls);
-
-    /* Initialize the scope */
-    current_scope = &fdata->symtab;
     
     /* Iterate through all decls, construct abstract instances of them, and move
     them into the abstract list. */
@@ -124,10 +119,10 @@ int validate_program(
             return 2;
 
         /* Validate */
-        if (validate_node(cnode, anode, pdata, fdata, NULL, NULL)) {
+        if (validate_node(validator, cnode, anode, NULL, NULL)) {
             yf_free(anode);
             anode = NULL;
-            fdata->error = 1;
+            validator->fdata->error = 1;
             err = 1;
             /* No return, keep going to find more errors. */
         }
@@ -146,9 +141,8 @@ int validate_program(
 }
 
 int validate_return(
+    struct yfv_validator * validator,
     struct yf_parse_node * cin, struct yf_ast_node * ain,
-    struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata,
     struct yfs_type * type, int * returns
 ) {
 
@@ -161,8 +155,8 @@ int validate_return(
         return 2;
 
     if (c->expr) {
-        if (validate_expr(c->expr, a->expr, pdata, fdata)) {
-            fdata->error = 1;
+        if (validate_expr(validator, c->expr, a->expr)) {
+            validator->fdata->error = 1;
             return 1;
         }
     } else {
@@ -172,15 +166,15 @@ int validate_return(
     if ( (type->primitive.size != 0) ?
             yfs_output_diagnostics(
                 (a->expr != NULL)
-                    ? yfse_get_expr_type(&a->expr->expr, fdata)
-                    : yfv_get_type_s(fdata, "void"),
+                    ? yfse_get_expr_type(&a->expr->expr, validator->fdata)
+                    : yfv_get_type_s(validator->fdata, "void"),
                 type,
-                fdata,
+                validator->fdata,
                 &cin->loc
             )
         :   (a->expr != NULL)
     ) {
-        fdata->error = 1;
+        validator->fdata->error = 1;
         return 1;
     }
 

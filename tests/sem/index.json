@@ -1,6 +1,7 @@
 {
     "flags": ["--just-semantics"],
     "tests": {
+        "bool-output-good": { "pass": true },
         "duplicate-decl-global": { "pass": false },
         "duplicate-decl-local": { "pass": false },
         "empty-stmt": { "pass": true },

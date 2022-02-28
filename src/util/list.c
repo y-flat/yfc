@@ -6,7 +6,7 @@
 #include <util/allocator.h>
 
 int yf_list_init(struct yf_list * list) {
-    list->first = malloc(sizeof(struct yf_list_block));
+    list->first = yf_malloc(sizeof(struct yf_list_block));
     list->first->numfull = 0;
     list->first->next = NULL;
     list->current = list->first;
@@ -62,7 +62,7 @@ int yf_list_add(struct yf_list * list, void * element) {
     }
 
     if (block->numfull == YF_LIST_BLOCK_SIZE) {
-        block->next = malloc(sizeof(struct yf_list_block));
+        block->next = yf_malloc(sizeof(struct yf_list_block));
         block->next->next = NULL;
         block = block->next;
         block->numfull = 0;

@@ -23,12 +23,12 @@
 int yfp_atomic_expr(struct yf_parse_node * node, struct yf_lexer * lexer) {
 
     int lex_err;
-    
+
     struct yf_token tok;
     struct yfcs_identifier ident;
 
     node->type = YFCS_EXPR;
-    
+
     P_LEX(lexer, &tok);
     P_GETCT(node, tok);
     switch (tok.type) {
@@ -182,8 +182,8 @@ static int yfp_sort_expr_tree(
     if (num_nodes == 2) {
         node->type = YFCS_BINARY;
         node->binary.op = operators[0];
-        node->binary.left = malloc(sizeof(struct yf_parse_node));
-        node->binary.right = malloc(sizeof(struct yf_parse_node));
+        node->binary.left = yf_malloc(sizeof(struct yf_parse_node));
+        node->binary.right = yf_malloc(sizeof(struct yf_parse_node));
         if (!node->binary.left || !node->binary.right) {
             return 1;
         }
@@ -203,7 +203,7 @@ static int yfp_sort_expr_tree(
             index = i;
         }
         /* If left-associative and tied, we want the last. */
-        if (prec == EQUAL && 
+        if (prec == EQUAL &&
             yf_get_operator_assoc(operators[i]) == YFOA_LEFT
         ) {
             index = i;
@@ -214,8 +214,8 @@ static int yfp_sort_expr_tree(
 
     /* Now that we have our splitting location, we recurse. */
     node->type = YFCS_BINARY;
-    node->binary.left = malloc(sizeof(struct yf_parse_node));
-    node->binary.right = malloc(sizeof(struct yf_parse_node));
+    node->binary.left = yf_malloc(sizeof(struct yf_parse_node));
+    node->binary.right = yf_malloc(sizeof(struct yf_parse_node));
     if (!node->binary.left || !node->binary.right) {
         return 1;
     }

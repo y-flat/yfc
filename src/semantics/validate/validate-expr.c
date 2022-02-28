@@ -6,9 +6,9 @@
 #include <api/abstract-tree.h>
 #include <semantics/types.h>
 
-static int validate_expr_e(struct yfcs_expr * c, struct yfa_expr * a,
-    struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata, struct yf_location * loc
+static int validate_expr_e(
+    struct yfv_validator * validator,
+    struct yfcs_expr * c, struct yfa_expr * a, struct yf_location * loc
 );
 
 /**
@@ -16,6 +16,7 @@ static int validate_expr_e(struct yfcs_expr * c, struct yfa_expr * a,
  */
 
 static int validate_value(
+    struct yfv_validator * validator,
     struct yfcs_value * c,
     struct yfa_value  * a,
     struct yf_location * loc
@@ -27,8 +28,8 @@ static int validate_value(
     /* If an identifier, make sure it actually exists. */
     if (c->type == YFCS_IDENT) {
         if (find_symbol(
+            validator,
             &a->as.identifier,
-            current_scope,
             c->identifier.name
         ) == -1) {
             YF_PRINT_ERROR(
@@ -89,9 +90,9 @@ static int validate_value(
 }
 
 static int validate_binary(
+    struct yfv_validator * validator,
     struct yfcs_binary * c, struct yfa_binary * a,
-    struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata, struct yf_location * loc
+    struct yf_location * loc
 ) {
     /* First, if it's an assignment, the left side is a variable. */
     if (yfo_is_assign(c->op)) {
@@ -117,7 +118,7 @@ static int validate_binary(
     if (!a->left)
         return 2;
     if (validate_expr_e(
-        &c->left->expr, a->left, pdata, fdata, loc
+        validator, &c->left->expr, a->left, loc
     )) {
         free(a->left);
         return 1;
@@ -127,7 +128,7 @@ static int validate_binary(
     if (!a->right)
         return 2;
     if (validate_expr_e(
-        &c->right->expr, a->right, pdata, fdata, loc
+        validator, &c->right->expr, a->right, loc
     )) {
         free(a->right);
         a->right = NULL;
@@ -136,9 +137,9 @@ static int validate_binary(
 
     /* Check that the types are compatible. */
     if (yfs_output_diagnostics(
-        yfse_get_expr_type(a->left, fdata),
-        yfse_get_expr_type(a->right, fdata),
-        fdata,
+        yfse_get_expr_type(a->left, validator->fdata),
+        yfse_get_expr_type(a->right, validator->fdata),
+        validator->fdata,
         loc
     )) {
         return 1;
@@ -150,9 +151,9 @@ static int validate_binary(
 
 
 static int validate_funccall(
+    struct yfv_validator * validator,
     struct yfcs_funccall * c, struct yfa_funccall * a,
-    struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata, struct yf_location * loc
+    struct yf_location * loc
 ) {
 
 
@@ -165,7 +166,7 @@ static int validate_funccall(
 
     /* Make sure the function exists. */
     if (find_symbol(
-        &a->name, current_scope, c->name.name
+        validator, &a->name, c->name.name
     ) == -1) {
         YF_PRINT_ERROR(
             "%s %d:%d: Unknown function '%s'",
@@ -222,13 +223,15 @@ static int validate_funccall(
         }
 
         if (validate_expr(
-            carg, aarg, pdata, fdata
+            validator, carg, aarg
         )) {
             yf_free(aarg);
             return 1;
         }
 
-        if ( (paramtype = yfv_get_type_s(fdata, param->type)) == NULL) {
+        if ( (paramtype =
+            yfv_get_type_s(validator->fdata, param->type)
+        ) == NULL) {
             YF_PRINT_ERROR(
                 "%s %d:%d: Uncaught type error: unknown type '%s'",
                 loc->file,
@@ -240,9 +243,9 @@ static int validate_funccall(
         }
 
         if (yfs_output_diagnostics(
-            yfse_get_expr_type(&aarg->expr, fdata),
+            yfse_get_expr_type(&aarg->expr, validator->fdata),
             paramtype,
-            fdata,
+            validator->fdata,
             loc
         )) {
             return 1;
@@ -261,9 +264,10 @@ static int validate_funccall(
 /**
  * Takes in parameters of expr, rather than node, types.
  */
-static int validate_expr_e(struct yfcs_expr * c, struct yfa_expr * a,
-    struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata, struct yf_location * loc
+static int validate_expr_e(
+    struct yfv_validator * validator,
+    struct yfcs_expr * c, struct yfa_expr * a,
+    struct yf_location * loc
 ) {
     
     /* If this is unary - (just a value), ... */
@@ -271,25 +275,25 @@ static int validate_expr_e(struct yfcs_expr * c, struct yfa_expr * a,
 
     case YFCS_VALUE:
         a->type = YFA_VALUE;
-        return validate_value(&c->value, &a->as.value, loc);
+        return validate_value(validator, &c->value, &a->as.value, loc);
 
     case YFCS_BINARY:
         a->type = YFA_BINARY;
-        return validate_binary(&c->binary, &a->as.binary, pdata, fdata, loc);
+        return validate_binary(validator, &c->binary, &a->as.binary, loc);
 
     case YFCS_FUNCCALL:
         a->type = YFA_FUNCCALL;
-        return validate_funccall(&c->call, &a->as.call, pdata, fdata, loc);
+        return validate_funccall(validator, &c->call, &a->as.call, loc);
     }
 
     return 0;
 
 }
 
-int validate_expr(struct yf_parse_node * cin, struct yf_ast_node * ain,
-    struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata
+int validate_expr(
+    struct yfv_validator * validator,
+    struct yf_parse_node * cin, struct yf_ast_node * ain
 ) {
     ain->type = YFA_EXPR;
-    return validate_expr_e(&cin->expr, &ain->expr, pdata, fdata, &cin->loc);
+    return validate_expr_e(validator, &cin->expr, &ain->expr, &cin->loc);
 }

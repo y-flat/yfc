@@ -6,10 +6,9 @@
  * Takes an input of a vardecl node.
  */
 int validate_vardecl(
+    struct yfv_validator * validator,
     struct yf_parse_node * cin,
-    struct yf_ast_node * ain,
-    struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata
+    struct yf_ast_node * ain
 ) {
 
     struct yf_sym * entry;
@@ -19,14 +18,14 @@ int validate_vardecl(
     ain->type = YFA_VARDECL;
 
     int ssym;
-    bool global = (current_scope == &fdata->symtab);
+    bool global = (validator->current_scope == &validator->fdata->symtab);
 
     /* Make sure it isn't declared twice */
     /* A variable is redeclared in the current scope. Whoops! */
     /* Only report this for non-global decls, those have been caught already
     in symtab building. */
     if ( (
-        ssym = find_symbol(&entry, current_scope, c->name.name)
+        ssym = find_symbol(validator, &entry, c->name.name)
     ) != -1 && !global) {
         if (ssym == 0) {
             YF_PRINT_ERROR(
@@ -63,7 +62,7 @@ int validate_vardecl(
     /* The global scope symtab is already set up. */
     if (!global) {
         a->name->var.name = c->name.name;
-        yfh_set(current_scope->table, c->name.name, a->name);
+        yfh_set(validator->current_scope->table, c->name.name, a->name);
     } else {
         /* Free the name, since it was only needed for type checking. */
         free(a->name);
@@ -74,7 +73,9 @@ int validate_vardecl(
     /* Verify type */
     /* We have to check that the type is valid here, because the type table
     doesn't exist during the symtab-building phase. */
-    if ( (a->name->var.dtype = yfv_get_type_t(fdata, c->type)) == NULL) {
+    if ( (a->name->var.dtype =
+            yfv_get_type_t(validator->fdata, c->type)
+    ) == NULL) {
         YF_PRINT_ERROR(
             "%s %d:%d: Unknown type '%s' in declaration of '%s'",
             cin->loc.file,
@@ -112,7 +113,7 @@ int validate_vardecl(
         if (!a->expr)
             return 2;
         a->expr->type = YFA_EXPR;
-        if (validate_expr(c->expr, a->expr, pdata, fdata)) {
+        if (validate_expr(validator, c->expr, a->expr)) {
             free(a->expr);
             a->expr = NULL;
             return 1;
@@ -124,9 +125,9 @@ int validate_vardecl(
     /* Check that the types are compatible. */
     if (a->expr) {
         if (yfs_output_diagnostics(
-            yfse_get_expr_type(&a->expr->expr, fdata),
+            yfse_get_expr_type(&a->expr->expr, validator->fdata),
             a->name->var.dtype,
-            fdata,
+            validator->fdata,
             &cin->loc
         )) {
             return 1;

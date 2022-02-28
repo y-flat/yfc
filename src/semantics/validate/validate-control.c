@@ -1,9 +1,9 @@
 #include <semantics/types.h>
 #include <semantics/validate/validate-internal.h>
 
-int validate_if(struct yf_parse_node * cin, struct yf_ast_node * ain,
-    struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata,
+int validate_if(
+    struct yfv_validator * validator,
+    struct yf_parse_node * cin, struct yf_ast_node * ain,
     struct yfs_type * type,
     int * returns
 ) {
@@ -22,29 +22,29 @@ int validate_if(struct yf_parse_node * cin, struct yf_ast_node * ain,
     if (!a->code)
         return 2;
 
-    if (validate_expr(c->cond, a->cond, pdata, fdata)) {
-        fdata->error = 1;
+    if (validate_expr(validator, c->cond, a->cond)) {
+        validator->fdata->error = 1;
         return 1;
     }
     
     if ( (t = yfse_get_expr_type(
-        &a->cond->expr, fdata
-    )) != yfv_get_type_s(fdata, "bool")) {
+        &a->cond->expr, validator->fdata
+    )) != yfv_get_type_s(validator->fdata, "bool")) {
         YF_PRINT_ERROR(
             "%s %d: %d: if condition must be of type bool, was %s",
             cin->loc.file, cin->loc.line, cin->loc.column,
             t->name
         );
-        fdata->error = 1;
+        validator->fdata->error = 1;
         return 1;
     }
 
     if (validate_node(
+        validator,
         c->code, a->code,
-        pdata, fdata,
         type, &if_always_returns
     )) {
-        fdata->error = 1;
+        validator->fdata->error = 1;
         yf_free(a->code);
         a->code = NULL;
         return 1;
@@ -55,11 +55,11 @@ int validate_if(struct yf_parse_node * cin, struct yf_ast_node * ain,
         if (!a->elsebranch)
             return 2;
         if (validate_node(
+            validator,
             c->elsebranch, a->elsebranch,
-            pdata, fdata,
             type, &else_always_returns
         )) {
-            fdata->error = 1;
+            validator->fdata->error = 1;
             return 1;
         }
     } else {

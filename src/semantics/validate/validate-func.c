@@ -1,9 +1,8 @@
 #include <semantics/validate/validate-internal.h>
 
 int validate_funcdecl(
-    struct yf_parse_node * cin, struct yf_ast_node * ain,
-    struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata
+    struct yfv_validator * validator,
+    struct yf_parse_node * cin, struct yf_ast_node * ain
 ) {
     
     struct yfcs_funcdecl  * c = &cin->funcdecl;
@@ -18,7 +17,7 @@ int validate_funcdecl(
 
     /* Functions are only global. */
     if ( (
-        ssym = find_symbol(&a->name, current_scope, c->name.name)
+        ssym = find_symbol(validator, &a->name, c->name.name)
     ) == -1) {
         /* Uh oh ... */
         YF_PRINT_ERROR("internal error: symbol not found");
@@ -26,7 +25,7 @@ int validate_funcdecl(
     }
 
     if ((a->name->fn.rtype = yfv_get_type_t(
-        fdata, c->ret
+        validator->fdata, c->ret
     )) == NULL) {
         YF_PRINT_ERROR(
             "%s %d:%d: return type not found",
@@ -39,7 +38,7 @@ int validate_funcdecl(
 
     /* Now, validate the argument list. */
     /* Also, open a new scope for arguments. */
-    enter_scope(&a->param_scope);
+    enter_scope(validator, &a->param_scope);
 
     /* Add the arguments to the scope. */
     yf_list_reset(&c->params);
@@ -50,9 +49,9 @@ int validate_funcdecl(
         av = yf_malloc(sizeof (struct yf_ast_node));
         if (!av)
             return 2;
-        if (validate_vardecl(cv, av, pdata, fdata)) {
+        if (validate_vardecl(validator, cv, av)) {
             yf_free(av);
-            fdata->error = 1;
+            validator->fdata->error = 1;
             return 1;
         }
         yf_list_add(&a->params, av);
@@ -60,7 +59,7 @@ int validate_funcdecl(
     }
 
     /* Validate the return type. */
-    if ((a->ret = yfv_get_type_t(fdata, c->ret)) == NULL) {
+    if ((a->ret = yfv_get_type_t(validator->fdata, c->ret)) == NULL) {
         YF_PRINT_ERROR(
             "%s %d:%d: Unknown return type '%s' of function '%s'",
             cin->loc.file,
@@ -77,14 +76,14 @@ int validate_funcdecl(
         return 2;
 
     /* Now, validate the body. */
-    if (validate_bstmt(c->body, a->body, pdata, fdata, a->ret, &returns)) {
+    if (validate_bstmt(validator, c->body, a->body, a->ret, &returns)) {
         yf_free(a->body);
         a->body = NULL;
         return 1;
     }
 
     /* Close the scope. */
-    exit_scope();
+    exit_scope(validator);
 
     if (returns == 0 && a->ret->primitive.size != 0) {
         YF_PRINT_ERROR(
@@ -101,9 +100,9 @@ int validate_funcdecl(
 
 }
 
-int validate_bstmt(struct yf_parse_node * cin, struct yf_ast_node * ain,
-    struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata,
+int validate_bstmt(
+    struct yfv_validator * validator,
+    struct yf_parse_node * cin, struct yf_ast_node * ain,
     struct yfs_type * type,
     int * returns
 ) {
@@ -119,7 +118,7 @@ int validate_bstmt(struct yf_parse_node * cin, struct yf_ast_node * ain,
     ain->type = YFA_BSTMT;
     
     /* Create a symbol table for this scope */
-    enter_scope(&a->symtab);
+    enter_scope(validator, &a->symtab);
 
     /* Validate each statement */
     yf_list_reset(&c->stmts);
@@ -150,9 +149,9 @@ int validate_bstmt(struct yf_parse_node * cin, struct yf_ast_node * ain,
             return 2;
 
         /* Validate */
-        if (validate_node(csub, asub, pdata, fdata, type, returns)) {
+        if (validate_node(validator, csub, asub, type, returns)) {
             yf_free(asub);
-            fdata->error = 1;
+            validator->fdata->error = 1;
             err = 1;
         } else {
 
@@ -171,7 +170,7 @@ int validate_bstmt(struct yf_parse_node * cin, struct yf_ast_node * ain,
         
     }
 
-    exit_scope();
+    exit_scope(validator);
 
     return err;
 

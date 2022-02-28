@@ -15,7 +15,7 @@ tests = []
 def add_test(test, flags, pass_):
     tests.append( (test, flags, pass_) )
 
-yfc_path = './cmake/yfc'
+yfc_path = "./cmake/yfc"
 def run_tests():
 
     total = passed = failed = 0

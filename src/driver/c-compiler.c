@@ -5,10 +5,22 @@
 #include "c-compiler.h"
 #include "driver/os.h"
 
+#include <fcntl.h>
 #include <stdio.h> /* sprintf */
 #include <stdlib.h> /* malloc */
 #include <string.h> /* strlen, strcpy */
 #include <unistd.h>
+
+/**
+ * More macOS hacks - memfd_create doesn't exist, so we create a file and
+ * immediately unlink it.
+ */
+#ifdef __APPLE__
+#define MEMFD_CREATE(fdbuf, path, flags) do { \
+    fdbuf = open(path, flags, 0); \
+    unlink(path); \
+} while (0)
+#endif /* __APPLE__ */
 
 /**
  * Internal - determine whether a compiler exists on this machine.
@@ -18,7 +30,12 @@ static int compiler_exists(const char * compiler, const char ** selected) {
 
     bool found;
 
+#ifndef __APPLE__
     int commf = memfd_create("compiler_path", 0);
+#else
+    int commf;
+    MEMFD_CREATE(commf, "compiler_path", 0);
+#endif /* __APPLE__ */
     /* Hack to get around descriptor allocation quirks in proc_exec */
     dup2(commf, 50);
     commf = 50;

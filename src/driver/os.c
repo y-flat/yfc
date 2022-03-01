@@ -11,6 +11,19 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 
+/**
+ * macOS closefrom hack
+ * closefrom doesn't exist on macOS, so here's a mock of it.
+ */
+#ifdef __APPLE__
+#define closefrom(fd) do { \
+    int i; \
+    for (i = fd; i < getdtablesize(); i++) { \
+        close(i); \
+    } \
+} while (0)
+#endif /* __APPLE__ */
+
 int proc_exec(const char * const argv[], const file_open_descriptor descs[], int flags) {
     pid_t child_pid = fork();
     if (child_pid == -1) {

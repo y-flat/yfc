@@ -1,11 +1,11 @@
 #include "os.h"
 
+#include <util/platform.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 
-/** TODO: Choose implementation based on platform */
-
-/** Unix implementation */
+#if defined(YF_PLATFORM_UNIX)
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -15,14 +15,14 @@
  * macOS closefrom hack
  * closefrom doesn't exist on macOS, so here's a mock of it.
  */
-#ifdef __APPLE__
+#if YF_SUBPLATFORM == YF_PLATFORMID_APPLE
 #define closefrom(fd) do { \
     int i; \
     for (i = fd; i < getdtablesize(); i++) { \
         close(i); \
     } \
 } while (0)
-#endif /* __APPLE__ */
+#endif /* YF_PLATFORMID_APPLE */
 
 int proc_exec(const char * const argv[], const file_open_descriptor descs[], int flags) {
     pid_t child_pid = fork();
@@ -33,12 +33,12 @@ int proc_exec(const char * const argv[], const file_open_descriptor descs[], int
         int* descriptors = NULL;
         size_t descriptors_sz = 0;
         int nullfd = -1, maxfd = 0, max_used_fd;
-        for (file_open_descriptor const* descriptor = descs; descriptor->target_fd != -1; ++descriptor) {
+        for (const file_open_descriptor * descriptor = descs; descriptor->target_fd != -1; ++descriptor) {
             if (descriptor->target_fd > maxfd)
                 maxfd = descriptor->target_fd;
         }
         max_used_fd = maxfd;
-        for (file_open_descriptor const* descriptor = descs; descriptor->target_fd != -1; ++descriptor) {
+        for (const file_open_descriptor * descriptor = descs; descriptor->target_fd != -1; ++descriptor) {
             if (descriptor->target_fd >= (int)descriptors_sz) {
                 descriptors = realloc(descriptors, (descriptor->target_fd + 1) * sizeof(int));
                 for (; descriptors_sz < descriptor->target_fd + 1; ++descriptors_sz)
@@ -86,3 +86,128 @@ int proc_exec(const char * const argv[], const file_open_descriptor descs[], int
     }
     return WEXITSTATUS(status);
 }
+#elif defined(YF_PLATFORM_WINNT)
+#include <Windows.h>
+
+#include <string.h>
+#include <stdbool.h>
+
+// Adapted from https://stackoverflow.com/questions/2611044/process-start-pass-html-code-to-exe-as-argument/2611075#2611075
+static void EscapeBackslashes(char ** sb, char const* s, char const* begin)
+{
+    // Backslashes must be escaped if and only if they precede a double quote.
+    while (*s == '\\')
+    {
+        *(*sb)++ = '\\';
+        --s;
+
+        if (s == begin)
+            break;
+    }
+}
+
+static const size_t cmdline_buffer_size = 256;
+static void ArgvToCommandLine(char * buffer, const char * const args[])
+{
+    const char * buffer_end = buffer + cmdline_buffer_size;
+    for (const char * s = *args; s; ++args)
+    {
+        const char * const sbeg = s;
+        size_t s_len = strlen(s);
+        const char * const send = s + s_len;
+        *buffer++ = '"';
+        // Escape double quotes (") and backslashes (\).
+        while (1)
+        {
+            // Put this test first to support zero length strings.
+            if (s >= send)
+                break;
+
+            const char * quote = strchr(s, '"');
+            if (quote == NULL)
+                break;
+
+            for (const char * p = s; p != quote; ++p)
+                *buffer++ = *p;
+            EscapeBackslashes(&buffer, quote - 1, s);
+            *buffer++ = '\\';
+            *buffer++ = '"';
+            s = quote + 1;
+        }
+        for (const char * p = s; p != send; ++p)
+            *buffer++ = *p;
+        EscapeBackslashes(&buffer, send - 1, sbeg);
+        *buffer++ = '"';
+        *buffer++ = ' ';
+    }
+    *buffer++ = 0;
+    if (buffer > buffer_end) {
+        /* Uh oh */
+        abort();
+    }
+}
+
+int proc_exec(const char * const argv[], const file_open_descriptor descs[], int flags)
+{
+    HANDLE handles[3] = {0};
+    for (const file_open_descriptor * descriptor = descs; descriptor->target_fd != -1; ++descriptor)
+    {
+        if (descriptor->target_fd > 2)
+        {
+            fputs("Warning: Windows process exec target fd > 2\n", stderr);
+            return -1;
+        }
+
+        HANDLE handle = NULL;
+        switch (descriptor->source_fd)
+        {
+            case YF_OS_FILE_CLOSED:
+            case YF_OS_FILE_DEVNULL:
+                break;
+
+            case 0:
+                handle = GetStdHandle(STD_INPUT_HANDLE);
+                break;
+            case 1:
+                handle = GetStdHandle(STD_OUTPUT_HANDLE);
+                break;
+            case 2:
+                handle = GetStdHandle(STD_ERROR_HANDLE);
+                break;
+            default:
+                fputs("Warning: Windows process exec source fd > 2\n", stderr);
+                return -1;
+        }
+        handles[descriptor->target_fd] = handle;
+    }
+    char cmd_line[cmdline_buffer_size];
+    ArgvToCommandLine(cmd_line, argv);
+    STARTUPINFOA startup_info{};
+    startup_info.cb = sizeof startup_info;
+    startup_info.dwFlags = STARTF_USESTDHANDLES;
+    startup_info.hStdInput = handles[0];
+    startup_info.hStdOutput = handles[1];
+    startup_info.hStdError = handles[2];
+
+    PROCESS_INFORMATION proc_info{};
+
+    if (!CreateProcessA(argv[0], cmd_line, NULL, NULL, false, 0, NULL, NULL, &start_info, &proc_info))
+    {
+        return -1;
+    }
+
+    // Wait until child process exits.
+    WaitForSingleObject(proc_info.hProcess, INFINITE);
+
+    int exit_code = -2;
+    GetExitCodeProcess(proc_info.hProcess, &exit_code);
+
+    // Close process and thread handles. 
+    CloseHandle(proc_info.hProcess);
+    CloseHandle(proc_info.hThread);
+
+    return exit_code;
+}
+#else /* YF_PLATFORM_UNIX | YF_PLATFORM_WINNT */
+#error Unknown platform
+#endif

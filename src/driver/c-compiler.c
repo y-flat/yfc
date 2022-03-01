@@ -1,6 +1,4 @@
 #include "driver/args.h"
-#define _GNU_SOURCE
-#include <sys/mman.h>
 
 #include "c-compiler.h"
 #include "driver/os.h"
@@ -12,17 +10,6 @@
 #include <unistd.h>
 
 /**
- * More macOS hacks - memfd_create doesn't exist, so we create a file and
- * immediately unlink it.
- */
-#ifdef __APPLE__
-#define MEMFD_CREATE(fdbuf, path, flags) do { \
-    fdbuf = open(path, flags, 0); \
-    unlink(path); \
-} while (0)
-#endif /* __APPLE__ */
-
-/**
  * Internal - determine whether a compiler exists on this machine.
  * This runs the command and sees if a non-existence error happens.
  */
@@ -30,39 +17,60 @@ static int compiler_exists(const char * compiler, const char ** selected) {
 
     bool found;
 
-#ifndef __APPLE__
-    int commf = memfd_create("compiler_path", 0);
-#else
-    int commf;
-    MEMFD_CREATE(commf, "compiler_path", 0);
-#endif /* __APPLE__ */
+    int commfp[2];
+    if (pipe(commfp))
+        abort();
+
     /* Hack to get around descriptor allocation quirks in proc_exec */
-    dup2(commf, 50);
-    commf = 50;
+    dup2(commfp[1], 50);
+    close(commfp[1]);
+    commfp[1] = 50;
 
     const char * command[] = { "which", compiler, NULL };
     const file_open_descriptor descs[] = {
         { 0, YF_OS_FILE_DEVNULL },
-        { 1, commf },
+        { 1, commfp[1] },
         { 2, YF_OS_FILE_DEVNULL },
         { -1, -1 }
     };
 
-    /* "which" returns an error if the command doesn't exist */
-    found = proc_exec(command, descs, YF_OS_USE_PATH) == 0;
-
-    if (found && selected) {
-        /* which produces extra endline */
-        off_t sz = lseek(commf, -1, SEEK_END);
-
-        lseek(commf, 0, SEEK_SET);
-        char * buf = malloc(sz + 1);
-        *selected = buf;
-        read(commf, buf, sz);
-        buf[sz] = 0;
+    process_handle proc;
+    if (proc_open(&proc, command, descs, YF_OS_USE_PATH)) {
+        close(commfp[0]);
+        close(commfp[1]);
+        return false;
     }
 
-    close(commf);
+    close(commfp[1]);
+
+    size_t buf_size = 255;
+    size_t buf_idx = 0;
+    char * buf = malloc(255);
+
+    ssize_t read_sz = 0;
+    while ((read_sz = read(commfp[0], buf + buf_idx, buf_size - buf_idx)) > 0) {
+        buf_idx += read_sz;
+        if (buf_size - buf_idx < 10)
+            buf = realloc(buf, buf_size *= 2);
+    }
+
+    if (read_sz < 0)
+        abort();
+
+    /* read_sz is 0 */
+    if (proc_wait(&proc))
+        abort();
+
+    /* "which" returns an error if the command doesn't exist */
+    found = proc.exit_code == 0;
+
+    if (found && selected) {
+        /* which produces extra endline; replace with NUL */
+        buf[buf_idx - 1] = 0;
+        *selected = buf;
+    }
+
+    close(commfp[0]);
     return found;
 
 }

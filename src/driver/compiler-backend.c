@@ -9,7 +9,7 @@
 #include <util/allocator.h>
 #include <util/yfc-out.h>
 
-#define DUMP_COMMANDS 1
+#define DUMP_COMMANDS 0
 
 #if DUMP_COMMANDS
 static void dump_command(const char * const cmd[]) {
@@ -116,7 +116,7 @@ int yf_run_c_backend(
         return 1;
     }
 
-    const file_open_descriptor descs[] = {
+    static const file_open_descriptor descs[] = {
         { 0, YF_OS_FILE_DEVNULL },
         { 1, YF_OS_FILE_DEVNULL },
         { 2, YF_OS_FILE_DEVNULL },
@@ -149,8 +149,8 @@ int yf_run_c_backend(
         #if DUMP_COMMANDS
         fputs("Compile command: ", YF_OUTPUT_STREAM);
         dump_command(compile_cmd);
-        proc_exec(compile_cmd, descs, 0);
         #endif
+        proc_exec(compile_cmd, descs, 0);
 
         /*
         Also append name to linker command.
@@ -186,8 +186,8 @@ int yf_run_c_backend(
     #if DUMP_COMMANDS
     fputs("Link command: ", YF_OUTPUT_STREAM);
     dump_command(link_cmd);
-    proc_exec(link_cmd, descs, 0);
     #endif
+    proc_exec(link_cmd, descs, 0);
 
     yf_free(link_cmd);
     yf_list_destroy(&link_objs, true);

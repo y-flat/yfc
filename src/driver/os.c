@@ -24,19 +24,6 @@ int proc_exec(const char * const argv[], const file_open_descriptor descs[], int
 #include <sys/wait.h>
 #include <fcntl.h>
 
-static void closefrom_impl(int fromfd) {
-    #if YF_SUBPLATFORM == YF_PLATFORMID_LINUX || YF_SUBPLATFORM == YF_PLATFORMID_BSD
-    closefrom(fromfd);
-    #elif YF_SUBPLATFORM == YF_PLATFORMID_APPLE
-    int i, maxfd = getdtablesize();
-    for (i = fromfd; i < maxfd; ++i) {
-        close(i);
-    }
-    #else
-    #error Closefrom unsupported
-    #endif /* YF_PLATFORMID_APPLE */
-}
-
 int proc_open(process_handle * proc, const char * const argv[], const file_open_descriptor descs[], int flags) {
     pid_t child_pid = fork();
     if (child_pid == -1) {
@@ -83,7 +70,6 @@ int proc_open(process_handle * proc, const char * const argv[], const file_open_
                 dup2(fd_src, fd_dst);
             ++fd_dst;
         }
-        closefrom_impl(max_used_fd);
         if (flags & YF_OS_USE_PATH)
             execvp(argv[0], (char **)argv);
         else

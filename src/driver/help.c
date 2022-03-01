@@ -14,7 +14,8 @@ const char
       "--dump-cst: Test parser by printing out the CST.\n"
       "--just-semantics: Only verify the code, do not generate it.\n"
       "--benchmark: Print out time taken for each step.\n"
-      "--dump-projfiles: Print out all files in a project.\n",
+      "--dump-projfiles: Print out all files in a project.\n"
+      "--dump-commands: Show all compiler invocations.\n",
     * HELP_HINT_MSG = "Invalid command. "
       "Use \"-h\" or \"--help\" for a list of possible commands.\n",
     * NO_ARGS_MSG = "yfc: Use \"-h\" or \"--help\" "

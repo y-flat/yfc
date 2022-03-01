@@ -9,9 +9,6 @@
 #include <util/allocator.h>
 #include <util/yfc-out.h>
 
-#define DUMP_COMMANDS 0
-
-#if DUMP_COMMANDS
 static void dump_command(const char * const cmd[]) {
     if (*cmd) {
         fputc('"', YF_OUTPUT_STREAM);
@@ -26,7 +23,6 @@ static void dump_command(const char * const cmd[]) {
     }
     fputc('\n', YF_OUTPUT_STREAM);
 }
-#endif
 
 int create_output_file_name(
     struct yf_file_compilation_data * data, struct yf_args * args
@@ -146,10 +142,10 @@ int yf_run_c_backend(
         /* <file-name> */ compile_cmd[2] = file->output_file;
         /* -o <output-name> */ compile_cmd[4] = object_file;
 
-        #if DUMP_COMMANDS
-        fputs("Compile command: ", YF_OUTPUT_STREAM);
-        dump_command(compile_cmd);
-        #endif
+        if (args->dump_commands) {
+            fputs("Compile command: ", YF_OUTPUT_STREAM);
+            dump_command(compile_cmd);
+        }
         proc_exec(compile_cmd, descs, 0);
 
         /*
@@ -183,10 +179,10 @@ int yf_run_c_backend(
     /* Finish argument list */
     *it = NULL;
 
-    #if DUMP_COMMANDS
-    fputs("Link command: ", YF_OUTPUT_STREAM);
-    dump_command(link_cmd);
-    #endif
+    if (args->dump_commands) {
+        fputs("Link command: ", YF_OUTPUT_STREAM);
+        dump_command(link_cmd);
+    }
     proc_exec(link_cmd, descs, 0);
 
     yf_free(link_cmd);

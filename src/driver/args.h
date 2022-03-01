@@ -87,6 +87,11 @@ struct yf_args {
      */
     bool dump_projfiles;
 
+    /**
+     * Should we be dumping compiler invocations?
+     */
+    bool dump_commands;
+
 };
 
 /**

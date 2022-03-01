@@ -194,6 +194,11 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
             continue;
         }
 
+        if (STREQ(arg, "--dump-commands")) {
+            args->dump_commands = 1;
+            continue;
+        }
+
         /* No other options are known. Yet. */
         if (arg[0] == '-') {
             yf_set_error(args);

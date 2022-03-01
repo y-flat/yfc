@@ -1,0 +1,25 @@
+{
+    "flags": ["--just-semantics"],
+    "tests": {
+        "bool-output-good": { "pass": true },
+        "duplicate-decl-global": { "pass": false },
+        "duplicate-decl-local": { "pass": false },
+        "empty-stmt": { "pass": true },
+        "funccall-bad": { "pass": false },
+        "funccall-good": { "pass": true },
+        "funccall-types": { "pass": false },
+        "funcs-fail": { "pass": false },
+        "funcs-pass": { "pass": true },
+        "if-condition-not-bool": { "pass": false },
+        "if-good": { "pass": true },
+        "invalid-int-literal": { "pass": false },
+        "no-value-assign": { "pass": false },
+        "return-bad": { "pass": false },
+        "return-block": { "pass": true },
+        "return-good": { "pass": true },
+        "return-warn": { "pass": true },
+        "shadow": { "pass": true },
+        "type-val-pass": { "pass": true },
+        "unknown-type": { "pass": false }
+    }
+}

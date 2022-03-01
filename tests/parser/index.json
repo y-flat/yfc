@@ -1,0 +1,11 @@
+{
+    "flags": ["--dump-cst"],
+    "tests": {
+        "funccall-parsing": { "pass": true },
+        "funcdecl-parsing": { "pass": true },
+        "op-parsing": { "pass": true },
+        "return-stmt": { "pass": true },
+        "vardecl-neq": { "pass": false },
+        "vardecl-test": { "pass": true }
+    }
+}

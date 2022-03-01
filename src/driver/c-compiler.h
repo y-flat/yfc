@@ -7,16 +7,11 @@
 
 #include <driver/args.h>
 
-/**
- * An access to the compiler used to compile the generated C code.
- */
-extern char YF_C_COMPILER[256];
-
 enum yf_c_compiler_status {
     YF_COMPILER_OK,
     YF_SPECIFIED_COMPILER_NOT_FOUND,
     YF_NO_COMPILER_FOUND,
-    YF_COMPILER_NAME_OVERFLOW,
+    YF_COMPILER_NO_CLASS,
 };
 
 /**

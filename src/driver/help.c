@@ -6,6 +6,7 @@ const char
       "-h, --help: Display this message.\n"
       "-v, --version: Display version.\n"
       "-native-compiler <compiler>: specify the native C compiler to use.\n"
+      "-compiler-type gcc|msvc: specify the class of a native C compiler. (default: gcc)\n"
       "yfc <file1> <file2> ...: compile and link the given files, up to 16.\n"
       "--project: Compile all files in src/ that need to be compiled. "
       "Read documentation for more specifics on this flag.\n"

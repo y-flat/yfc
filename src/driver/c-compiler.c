@@ -1,73 +1,89 @@
+#include "driver/args.h"
+#define _GNU_SOURCE
+#include <sys/mman.h>
+
 #include "c-compiler.h"
+#include "driver/os.h"
 
 #include <stdio.h> /* sprintf */
 #include <stdlib.h> /* malloc */
 #include <string.h> /* strlen, strcpy */
-
-char YF_C_COMPILER[256];
+#include <unistd.h>
 
 /**
  * Internal - determine whether a compiler exists on this machine.
  * This runs the command and sees if a non-existence error happens.
  */
-int compiler_exists(const char * compiler) {
-    
-    /* The command to run with system */
-    char * command;
-    /* The return value */
-    int ret;
-    
-    /* Allocate buffer for command */
-    command = malloc(
-        strlen(compiler) +
-        23 + /* The chars in "which [] 2>/dev/null 1>&2" (not counting []) */
-        1 /* null terminator */
-    );
+static int compiler_exists(const char * compiler, const char ** selected) {
 
-    sprintf(command, "which %s 2>/dev/null 1>&2", compiler);
+    bool found;
+
+    int commf = memfd_create("compiler_path", 0);
+    /* Hack to get around descriptor allocation quirks in proc_exec */
+    dup2(commf, 50);
+    commf = 50;
+
+    const char * command[] = { "which", compiler, NULL };
+    const file_open_descriptor descs[] = {
+        { 0, YF_OS_FILE_DEVNULL },
+        { 1, commf },
+        { 2, YF_OS_FILE_DEVNULL },
+        { -1, -1 }
+    };
 
     /* "which" returns an error if the command doesn't exist */
-    ret = system(command) == 0;
+    found = proc_exec(command, descs, YF_OS_USE_PATH) == 0;
 
-    free(command);
-    return ret;
+    if (found && selected) {
+        /* which produces extra endline */
+        off_t sz = lseek(commf, -1, SEEK_END);
+
+        lseek(commf, 0, SEEK_SET);
+        char * buf = malloc(sz + 1);
+        *selected = buf;
+        read(commf, buf, sz);
+        buf[sz] = 0;
+    }
+
+    close(commf);
+    return found;
 
 }
 
 enum yf_c_compiler_status yf_determine_c_compiler(struct yf_args * args) {
-    
+
     /* Check if the user has specified a compiler */
     if (args->compiler) {
-        if (compiler_exists(args->compiler)) {
-            /* Needs to be a short enough name! */
-            if (strlen(args->compiler) > 255) {
-                return YF_COMPILER_NAME_OVERFLOW;
-            } else {
-                strcpy(YF_C_COMPILER, args->compiler);
-                return YF_COMPILER_OK;
-            }
+        if (compiler_exists(args->compiler, &args->selected_compiler)) {
+            if (args->compiler_class == YF_COMPILER_UNKNOWN)
+                args->compiler_class = YF_COMPILER_GCC;
+            return YF_COMPILER_OK;
         } else {
             return YF_SPECIFIED_COMPILER_NOT_FOUND;
         }
     }
 
+    if (args->compiler_class != YF_COMPILER_UNKNOWN) {
+        return YF_COMPILER_NO_CLASS;
+    }
+
 /* Set the compiler. I don't want to type this out for a million names. */
-#define SET_COMPILER_IF_POSSIBLE(name) do { \
-    if (compiler_exists(name)) { \
-        strcpy(YF_C_COMPILER, name); \
+#define SET_COMPILER_IF_POSSIBLE(name, cls) do { \
+    if (compiler_exists(name, &args->selected_compiler)) { \
+        args->compiler_class = cls; \
         return YF_COMPILER_OK; \
     } \
 } while (0)
 
     /* clang is better. I said it. */
-    SET_COMPILER_IF_POSSIBLE("clang");
+    SET_COMPILER_IF_POSSIBLE("clang", YF_COMPILER_GCC);
 
     /* NOW try gcc. */
-    SET_COMPILER_IF_POSSIBLE("gcc");
+    SET_COMPILER_IF_POSSIBLE("gcc", YF_COMPILER_GCC);
 
     /* Now some others. */
-    SET_COMPILER_IF_POSSIBLE("cc");
-    SET_COMPILER_IF_POSSIBLE("tcc");
+    SET_COMPILER_IF_POSSIBLE("cc", YF_COMPILER_GCC);
+    SET_COMPILER_IF_POSSIBLE("tcc", YF_COMPILER_GCC);
 
     /* TODO - add more? */
 

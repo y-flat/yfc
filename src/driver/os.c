@@ -11,18 +11,18 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 
-/**
- * macOS closefrom hack
- * closefrom doesn't exist on macOS, so here's a mock of it.
- */
-#if YF_SUBPLATFORM == YF_PLATFORMID_APPLE
-#define closefrom(fd) do { \
-    int i; \
-    for (i = fd; i < getdtablesize(); i++) { \
-        close(i); \
-    } \
-} while (0)
-#endif /* YF_PLATFORMID_APPLE */
+static void closefrom_impl(int fromfd) {
+    #if YF_SUBPLATFORM == YF_PLATFORMID_LINUX || YF_SUBPLATFORM == YF_PLATFORMID_BSD
+    closefrom(fromfd);
+    #elif YF_SUBPLATFORM == YF_PLATFORMID_APPLE
+    int i, maxfd = getdtablesize();
+    for (i = fromfd; i < maxfd; ++i) {
+        close(i);
+    }
+    #else
+    #error Closefrom unsupported
+    #endif /* YF_PLATFORMID_APPLE */
+}
 
 int proc_exec(const char * const argv[], const file_open_descriptor descs[], int flags) {
     pid_t child_pid = fork();
@@ -70,7 +70,7 @@ int proc_exec(const char * const argv[], const file_open_descriptor descs[], int
                 dup2(fd_src, fd_dst);
             ++fd_dst;
         }
-        closefrom(max_used_fd);
+        closefrom_impl(max_used_fd);
         if (flags & YF_OS_USE_PATH)
             execvp(argv[0], (char **)argv);
         else

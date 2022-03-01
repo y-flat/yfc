@@ -1,0 +1,10 @@
+{
+    "flags": ["--dump-tokens"],
+    "tests": {
+        "broken-comment": { "pass": false },
+        "keyword-test": { "pass": true },
+        "large-token": { "pass": false },
+        "lexer-test": { "pass": true },
+        "namespace": { "pass": true }
+    }
+}

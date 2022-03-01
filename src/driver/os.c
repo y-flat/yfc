@@ -4,6 +4,19 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
+int proc_exec(const char * const argv[], const file_open_descriptor descs[], int flags) {
+    process_handle proc;
+    int ret = proc_open(&proc, argv, descs, flags);
+    if (ret != 0)
+        return ret;
+    ret = proc_wait(&proc);
+    if (ret != 0)
+        return ret;
+    return proc.exit_code;
+}
 
 #if defined(YF_PLATFORM_UNIX)
 #include <unistd.h>
@@ -24,7 +37,7 @@ static void closefrom_impl(int fromfd) {
     #endif /* YF_PLATFORMID_APPLE */
 }
 
-int proc_exec(const char * const argv[], const file_open_descriptor descs[], int flags) {
+int proc_open(process_handle * proc, const char * const argv[], const file_open_descriptor descs[], int flags) {
     pid_t child_pid = fork();
     if (child_pid == -1) {
         perror("Warning: fork failed");
@@ -79,18 +92,22 @@ int proc_exec(const char * const argv[], const file_open_descriptor descs[], int
         abort();
     }
 
+    memset(proc, 0, sizeof *proc);
+    proc->pid = child_pid;
+    return 0;
+}
+
+int proc_wait(process_handle * proc) {
     int status;
-    if (waitpid(child_pid, &status, 0) == -1) {
+    if (waitpid(proc->pid, &status, 0) == -1) {
         perror("Warning: wait failed");
         return -2;
     }
-    return WEXITSTATUS(status);
+    proc->exit_code = WEXITSTATUS(status);
+    return 0;
 }
 #elif defined(YF_PLATFORM_WINNT)
 #include <Windows.h>
-
-#include <string.h>
-#include <stdbool.h>
 
 // Adapted from https://stackoverflow.com/questions/2611044/process-start-pass-html-code-to-exe-as-argument/2611075#2611075
 static void EscapeBackslashes(char ** sb, char const* s, char const* begin)
@@ -147,7 +164,7 @@ static void ArgvToCommandLine(char * buffer, const char * const args[])
     }
 }
 
-int proc_exec(const char * const argv[], const file_open_descriptor descs[], int flags)
+int proc_open(process_handle * proc, const char * const argv[], const file_open_descriptor descs[], int flags)
 {
     HANDLE handles[3] = {0};
     for (const file_open_descriptor * descriptor = descs; descriptor->target_fd != -1; ++descriptor)
@@ -196,17 +213,23 @@ int proc_exec(const char * const argv[], const file_open_descriptor descs[], int
         return -1;
     }
 
-    // Wait until child process exits.
-    WaitForSingleObject(proc_info.hProcess, INFINITE);
-
-    int exit_code = -2;
-    GetExitCodeProcess(proc_info.hProcess, &exit_code);
-
-    // Close process and thread handles. 
-    CloseHandle(proc_info.hProcess);
     CloseHandle(proc_info.hThread);
 
-    return exit_code;
+    memset(proc, 0, sizeof *proc);
+    proc->pid = proc_info.hProcess;
+    return 0;
+}
+
+int proc_wait(process_handle * proc) {
+    // Wait until child process exits.
+    WaitForSingleObject(proc->pid, INFINITE);
+
+    proc->exit_code = -2;
+    GetExitCodeProcess(proc->pid, &proc->exit_code);
+
+    CloseHandle(proc->pid);
+
+    return 0;
 }
 #else /* YF_PLATFORM_UNIX | YF_PLATFORM_WINNT */
 #error Unknown platform

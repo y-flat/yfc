@@ -146,7 +146,10 @@ int yf_run_c_backend(
             fputs("Compile command: ", YF_OUTPUT_STREAM);
             dump_command(compile_cmd);
         }
-        proc_exec(compile_cmd, descs, 0);
+        if (proc_exec(compile_cmd, descs, 0) != 0) {
+            YF_PRINT_ERROR("Compilation of generated C of file %s failed", file->file_name);
+            return 2;
+        }
 
         /*
         Also append name to linker command.
@@ -183,7 +186,10 @@ int yf_run_c_backend(
         fputs("Link command: ", YF_OUTPUT_STREAM);
         dump_command(link_cmd);
     }
-    proc_exec(link_cmd, descs, 0);
+    if (proc_exec(link_cmd, descs, 0) != 0) {
+        YF_PRINT_ERROR("Linking of project failed");
+        return 2;
+    }
 
     yf_free(link_cmd);
     yf_list_destroy(&link_objs, true);
@@ -214,8 +220,8 @@ int yf_run_backend(
     }
 
     if (!err)
-        yf_run_c_backend(data, args);
+        err = yf_run_c_backend(data, args);
 
-    return 0;
+    return err;
 
 }

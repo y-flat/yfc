@@ -132,7 +132,7 @@ static int yf_run_compiler_on_data(
     /* Finally, generate code. */
     if (!args->just_semantics) {
         BEGIN_PROFILE();
-        yf_run_backend(data, args);
+        err = yf_run_backend(data, args);
         gettimeofday(&step_end, NULL);
         END_PROFILE("generating code");
     }

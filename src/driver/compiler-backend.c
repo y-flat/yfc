@@ -188,13 +188,19 @@ int yf_run_c_backend(
     }
     if (proc_exec(link_cmd, descs, 0) != 0) {
         YF_PRINT_ERROR("Linking of project failed");
-        return 2;
+        goto err2;
     }
 
+    int ret = 0;
+    goto out;
+
+err2:
+    ret = 2;
     yf_free(link_cmd);
     yf_list_destroy(&link_objs, true);
 
-    return 0;
+out:
+    return ret;
 
 }
 

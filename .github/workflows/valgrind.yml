@@ -20,4 +20,4 @@ jobs:
         sudo apt-get install -y valgrind
     - name: Valgrind
       run: |
-        sudo valgrind --error-exitcode=1 --leak-check=full ./cmake/yfc tests/sem/funcs-pass.yf
+        sudo valgrind --error-exitcode=1 --leak-check=full ./cmake/yfc tests/sem/funcs-pass.yf --just-semantics

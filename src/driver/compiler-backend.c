@@ -182,24 +182,21 @@ int yf_run_c_backend(
     /* Finish argument list */
     *it = NULL;
 
+    /* Return value */
+    int ret = 0;
+
     if (args->dump_commands) {
         fputs("Link command: ", YF_OUTPUT_STREAM);
         dump_command(link_cmd);
     }
     if (proc_exec(link_cmd, descs, 0) != 0) {
         YF_PRINT_ERROR("Linking of project failed");
-        goto err2;
+        ret = 2;
     }
 
-    int ret = 0;
-    goto out;
-
-err2:
-    ret = 2;
     yf_free(link_cmd);
     yf_list_destroy(&link_objs, true);
 
-out:
     return ret;
 
 }

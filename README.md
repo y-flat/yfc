@@ -2,7 +2,7 @@
 
 ## Overview
 Compiler for the Y-flat programming language. This is part of the wider Y-flat
-programming language project, which includes the [installer](https://github.com/jakeroggenbuck/yfin)
+programming language project, which includes the [installer](https://github.com/y-flat/yfin)
 and other components in the future.
 
 **Y-flat programming language project** <br/>
@@ -19,4 +19,4 @@ and other components in the future.
 ```
 
 ## Internal documentation
-[General documentation](https://github.com/adamhutchings/yfc/blob/main/docs/compiler-design.md)
+[General documentation](https://github.com/y-flat/yfc/blob/main/docs/compiler-design.md)

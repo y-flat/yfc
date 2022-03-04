@@ -18,6 +18,12 @@ enum yf_info_output {
     YF_ERROR_NO_ARGS, /* SPECIFICALLY if no arguments are given. */
 };
 
+enum yf_compiler_class {
+    YF_COMPILER_UNKNOWN,
+    YF_COMPILER_GCC, // A gcc-like compiler
+    YF_COMPILER_MSVC, // MS Visual C compiler (unsupported)
+};
+
 struct yf_args {
     
     /**
@@ -37,6 +43,12 @@ struct yf_args {
      * Set to NULL if none is specified.
      */
     const char * compiler;
+
+    /**
+     * Compiler chosen by the frontend
+     */
+    const char * selected_compiler;
+    enum yf_compiler_class compiler_class;
 
     /**
      * The indiviidual files to compile, as well as how many files.
@@ -74,6 +86,11 @@ struct yf_args {
      * Should we be dumping out all the files in a project?
      */
     bool dump_projfiles;
+
+    /**
+     * Should we be dumping compiler invocations?
+     */
+    bool dump_commands;
 
 };
 

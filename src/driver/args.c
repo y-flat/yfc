@@ -63,6 +63,7 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
     
     /* If the next option we're parsing is the native C compiler name */
     bool want_compiler_name = false;
+    bool want_compiler_type = false;
 
     /* Zero the args structure. */
     memset(args, 0, sizeof *args);
@@ -91,6 +92,27 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
             continue;
         }
 
+        if (want_compiler_type) {
+            want_compiler_type = false;
+            if (args->compiler_class == YF_COMPILER_UNKNOWN) {
+                if (STREQ(arg, "gcc")) {
+                    args->compiler_class = YF_COMPILER_GCC;
+                }
+                else if (STREQ(arg, "msvc")) {
+                    args->compiler_class = YF_COMPILER_MSVC;
+                }
+                else {
+                    /* Invalid compiler type */
+                    yf_set_error(args);
+                }
+            } else {
+                /* Name has already been set */
+                yf_set_error(args);
+                return;
+            }
+            continue;
+        }
+
         if (STREQ(arg, "-h") || STREQ(arg, "--help")) {
             yf_check_action(args, YF_HELP);
             continue;
@@ -104,6 +126,15 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
         if (STREQ(arg, "-native-compiler")) {
             want_compiler_name = true;
             /* Make sure there actually is a compiler to parse after */
+            if (i + 1 == argc) {
+                yf_set_error(args);
+                return;
+            }
+            continue;
+        }
+
+        if (STREQ(arg, "-compiler-type")) {
+            want_compiler_type = true;
             if (i + 1 == argc) {
                 yf_set_error(args);
                 return;
@@ -160,6 +191,11 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
         if (STREQ(arg, "--dump-projfiles")) {
             args->dump_projfiles = 1;
             args->project = 1;
+            continue;
+        }
+
+        if (STREQ(arg, "--dump-commands")) {
+            args->dump_commands = 1;
             continue;
         }
 

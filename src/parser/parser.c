@@ -54,9 +54,7 @@ int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer) {
         P_LEX(lexer, &tok);
         switch (tok.type) {
             case YFT_COLON:
-                strcpy(
-                    decl->vardecl.name.name, ident.name
-                );
+                decl->vardecl.name = ident;
                 if (yfp_vardecl(decl, lexer)) {
                     free(decl);
                     return 1;

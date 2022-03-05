@@ -113,7 +113,7 @@ static const size_t cmdline_buffer_size = 256;
 static void ArgvToCommandLine(char * buffer, const char * const args[])
 {
     const char * buffer_end = buffer + cmdline_buffer_size;
-    for (const char * s = *args; s; ++args)
+    for (const char * s; (s = *args); ++args)
     {
         const char * const sbeg = s;
         size_t s_len = strlen(s);
@@ -139,7 +139,8 @@ static void ArgvToCommandLine(char * buffer, const char * const args[])
         }
         for (const char * p = s; p != send; ++p)
             *buffer++ = *p;
-        EscapeBackslashes(&buffer, send - 1, sbeg);
+        if (sbeg != send)
+            EscapeBackslashes(&buffer, send - 1, sbeg);
         *buffer++ = '"';
         *buffer++ = ' ';
     }

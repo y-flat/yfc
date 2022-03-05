@@ -36,8 +36,14 @@ int find_symbol(
     struct yf_sym ** sym,
     struct yfcs_identifier * name
 ) {
+    if (name->filepath[0] == '\0')
+        return find_symbol_from_scope(
+            validator->current_scope,
+            sym,
+            name->name
+        );
     return find_symbol_from_scope(
-        validator->current_scope,
+        yfh_get(validator->pdata->files, name->filepath),
         sym,
         name->name
     );

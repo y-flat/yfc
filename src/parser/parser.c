@@ -66,9 +66,7 @@ int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer) {
                 }
                 break;
             case YFT_OPAREN:
-                strcpy(
-                    decl->funcdecl.name.name, ident.name
-                );
+                decl->funcdecl.name = ident;
                 if (yfp_funcdecl(decl, lexer)) {
                     free(decl);
                     return 1;

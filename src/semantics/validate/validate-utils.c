@@ -1,5 +1,7 @@
 #include <semantics/validate/validate-internal.h>
 
+#include <string.h>
+
 /**
  * Look up a name in a given scope.
  * EXAMPLE:
@@ -36,7 +38,7 @@ int find_symbol(
     struct yf_sym ** sym,
     struct yfcs_identifier * name
 ) {
-    if (name->filepath[0] == '\0')
+    if (!strcmp(name->filepath, ""))
         return find_symbol_from_scope(
             validator->current_scope,
             sym,

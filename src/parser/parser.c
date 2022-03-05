@@ -176,7 +176,8 @@ int yfp_ident(struct yfcs_identifier * node, struct yf_lexer * lexer) {
             yfl_unlex(lexer, &tok);
             /* There's no prefix. */
             strcpy(node->name, node->filepath);
-            strcpy(node->filepath, lexer->input->identifier_prefix);
+            //strcpy(node->filepath, lexer->input->identifier_prefix);
+            strcpy(node->filepath, "");
             goto done;
         }
 

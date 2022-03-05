@@ -1,8 +1,8 @@
-# yfc ![cmake](https://img.shields.io/github/workflow/status/adamhutchings/yfc/cmake) <img src="https://img.shields.io/tokei/lines/github/adamhutchings/yfc"> <img src="https://img.shields.io/github/languages/code-size/adamhutchings/yfc">
+# yfc ![cmake](https://img.shields.io/github/workflow/status/y-flat/yfc/cmake) <img src="https://img.shields.io/tokei/lines/github/adamhutchings/yfc"> <img src="https://img.shields.io/github/languages/code-size/adamhutchings/yfc">
 
 ## Overview
 Compiler for the Y-flat programming language. This is part of the wider Y-flat
-programming language project, which includes the [installer](https://github.com/jakeroggenbuck/yfin)
+programming language project, which includes the [installer](https://github.com/y-flat/yfin)
 and other components in the future.
 
 **Y-flat programming language project** <br/>
@@ -19,4 +19,4 @@ and other components in the future.
 ```
 
 ## Internal documentation
-[General documentation](https://github.com/adamhutchings/yfc/blob/main/docs/compiler-design.md)
+[General documentation](https://github.com/y-flat/yfc/blob/main/docs/compiler-design.md)

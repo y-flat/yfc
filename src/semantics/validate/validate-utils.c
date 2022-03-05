@@ -1,7 +1,9 @@
 #include <semantics/validate/validate-internal.h>
 
+#include <string.h>
+
 /**
- * Search all scopes, starting with the innermost one and heading out.
+ * Look up a name in a given scope.
  * EXAMPLE:
  * x: int = 3; ~~ This scope last ~~
  * foo() {
@@ -11,13 +13,12 @@
  *  }
  * }
  */
-int find_symbol(
-    struct yfv_validator * validator,
+static int find_symbol_from_scope(
+    struct yfs_symtab * symtab,
     struct yf_sym ** sym,
     char * name
 ) {
     int depth = 0;
-    struct yfs_symtab * symtab = validator->current_scope;
     while (symtab != NULL) {
         if ( (*sym = yfh_get(symtab->table, name)) != NULL) {
             return depth;
@@ -26,6 +27,28 @@ int find_symbol(
         symtab = symtab->parent;
     }
     return -1;
+}
+
+/**
+ * If the identifier has no prefix, search the current file. Otherwise, look up
+ * the loaded file.
+ */
+int find_symbol(
+    struct yfv_validator * validator,
+    struct yf_sym ** sym,
+    struct yfcs_identifier * name
+) {
+    if (!strcmp(name->filepath, ""))
+        return find_symbol_from_scope(
+            validator->current_scope,
+            sym,
+            name->name
+        );
+    return find_symbol_from_scope(
+        yfh_get(validator->pdata->files, name->filepath),
+        sym,
+        name->name
+    );
 }
 
 int enter_scope(struct yfv_validator * v, struct yfs_symtab ** stuff) {

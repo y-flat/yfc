@@ -49,9 +49,7 @@ int yfp_funcdecl(struct yf_parse_node * node, struct yf_lexer * lexer) {
         if (tok.type != YFT_COLON) {
             YF_TOKERR(tok, "':' following argument name");
         }
-        strcpy(
-            argp->vardecl.name.name, ident.name
-        );
+        argp->vardecl.name = ident;
         if (yfp_vardecl(argp, lexer)) {
             free(argp);
             return 1;

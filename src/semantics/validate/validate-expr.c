@@ -30,7 +30,7 @@ static int validate_value(
         if (find_symbol(
             validator,
             &a->as.identifier,
-            c->identifier.name
+            &c->identifier
         ) == -1) {
             YF_PRINT_ERROR(
                 "%s %d:%d: Unknown identifier '%s'",
@@ -166,7 +166,7 @@ static int validate_funccall(
 
     /* Make sure the function exists. */
     if (find_symbol(
-        validator, &a->name, c->name.name
+        validator, &a->name, &c->name
     ) == -1) {
         YF_PRINT_ERROR(
             "%s %d:%d: Unknown function '%s'",

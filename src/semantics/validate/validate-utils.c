@@ -14,12 +14,12 @@
 int find_symbol(
     struct yfv_validator * validator,
     struct yf_sym ** sym,
-    char * name
+    struct yfcs_identifier * name
 ) {
     int depth = 0;
     struct yfs_symtab * symtab = validator->current_scope;
     while (symtab != NULL) {
-        if ( (*sym = yfh_get(symtab->table, name)) != NULL) {
+        if ( (*sym = yfh_get(symtab->table, name->name)) != NULL) {
             return depth;
         }
         depth++;

@@ -33,10 +33,11 @@ static int validate_value(
             &c->identifier
         ) == -1) {
             YF_PRINT_ERROR(
-                "%s %d:%d: Unknown identifier '%s'",
+                "%s %d:%d: Unknown identifier '%s::%s'",
                 loc->file,
                 loc->line,
                 loc->column,
+                c->identifier.filepath,
                 c->identifier.name
             );
             return 1;

@@ -2,6 +2,8 @@
 
 #include <string.h>
 
+#include <util/yfc-out.h>
+
 /**
  * Look up a name in a given scope.
  * EXAMPLE:
@@ -38,17 +40,26 @@ int find_symbol(
     struct yf_sym ** sym,
     struct yfcs_identifier * name
 ) {
-    if (!strcmp(name->filepath, ""))
+    if (!strcmp(name->filepath, "")) {
         return find_symbol_from_scope(
             validator->current_scope,
             sym,
             name->name
         );
-    return find_symbol_from_scope(
-        yfh_get(validator->pdata->files, name->filepath),
-        sym,
-        name->name
-    );
+    } else {
+        struct yfs_symtab * symtab = yfh_get(
+            validator->pdata->files, name->filepath
+        );
+        if (symtab == NULL) {
+            YF_PRINT_ERROR("Could not find module: %s", name->filepath);
+            return -1;
+        }
+        return find_symbol_from_scope(
+            symtab,
+            sym,
+            name->name
+        );
+    }
 }
 
 int enter_scope(struct yfv_validator * v, struct yfs_symtab ** stuff) {

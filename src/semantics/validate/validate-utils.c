@@ -48,7 +48,7 @@ int find_symbol(
         );
     } else {
         struct yfs_symtab * symtab = yfh_get(
-            validator->pdata->files, name->filepath
+            validator->pdata->symtables, name->filepath
         );
         if (symtab == NULL) {
             YF_PRINT_ERROR("Could not find module: %s", name->filepath);

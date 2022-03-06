@@ -22,7 +22,10 @@
 /* Forward decls for whole file */
 static int yf_compile_project(struct yf_args *, struct yf_compilation_data *);
 static int yf_compile_files(struct yf_args *, struct yf_compilation_data *);
-static int yfc_analyse(struct yf_compile_analyse_job *);
+static int yfc_analyse(
+    struct yf_compilation_data *,
+    struct yf_compile_analyse_job *
+);
 static int yfc_compile(
     struct yf_compilation_data *,
     struct yf_compile_compile_job *
@@ -104,7 +107,7 @@ int yf_run_compiler(struct yf_args * args) {
                     yf_dump_compile_job((struct yf_compile_analyse_job *)job, "ANALYSE");
                 }
                 if (!args->simulate_run) {
-                    res = yfc_analyse((struct yf_compile_analyse_job *)job);
+                    res = yfc_analyse(&compilation, (struct yf_compile_analyse_job *)job);
                 }
                 break;
 
@@ -159,6 +162,7 @@ static int yf_create_compiler_jobs(
     /* Fill project info */
     compilation->project_name = data->project_name;
     yf_list_init(&compilation->jobs);
+    compilation->symtables = yfh_new();
 
     for (i = 0; i < YFH_BUCKETS; ++i) {
         fdata = data->files->buckets[i].value;
@@ -406,7 +410,10 @@ static int yfc_compile(
 /**
  * Run the lexing and parsing on one file.
  */
-static int yfc_analyse(struct yf_compile_analyse_job * data) {
+static int yfc_analyse(
+    struct yf_compilation_data * compilation,
+    struct yf_compile_analyse_job * data
+) {
 
     struct yf_lexer_input input;
     struct yf_lexer lexer;
@@ -454,6 +461,8 @@ static int yfc_analyse(struct yf_compile_analyse_job * data) {
             retval = yf_do_cst_dump(&data->parse_tree);
         } else {
             retval = yf_build_symtab(data);
+            if (!retval && data->unit_info->file_prefix)
+                yfh_set(compilation->symtables, data->unit_info->file_prefix, &data->symtab);
         }
         return retval;
     }
@@ -565,6 +574,7 @@ static int yf_cleanup(struct yf_compilation_data * data) {
 
     yf_free(data->project_name);
     yf_list_destroy(&data->jobs, true);
+    yfh_destroy(data->symtables, NULL);
 
     return 0;
 

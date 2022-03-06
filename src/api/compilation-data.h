@@ -101,6 +101,12 @@ struct yf_compilation_data {
     /** Name of the project, if any (can be NULL) */
     char * project_name;
 
+    /**
+     * Will contain pointers to translation_units' symbol tables as they are analysed
+     * @item_type yfs_symtab
+     */
+    struct yf_hashmap * symtables;
+
 };
 
 #endif /* API_COMPILATION_DATA_H */

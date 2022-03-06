@@ -138,6 +138,7 @@ int yf_run_compiler(struct yf_args * args) {
     }
 
     yf_cleanup(&compilation);
+    yf_free((void *)args->selected_compiler);
 
     return res;
 
@@ -163,6 +164,7 @@ static int yf_create_compiler_jobs(
     compilation->project_name = data->project_name;
     yf_list_init(&compilation->jobs);
     compilation->symtables = yfh_new();
+    yf_list_init(&compilation->garbage);
 
     for (i = 0; i < YFH_BUCKETS; ++i) {
         fdata = data->files->buckets[i].value;
@@ -204,8 +206,7 @@ static int yf_create_compiler_jobs(
         yf_backend_add_link_job(compilation, args, &link_objs);
     }
 
-    // This causes a memory leak. Too bad (jk, will fix soon)
-    yf_list_destroy(&link_objs, false);
+    yf_list_merge(&compilation->garbage, &link_objs);
     yfh_destroy(data->files, NULL);
 
     return 0;
@@ -575,6 +576,7 @@ static int yf_cleanup(struct yf_compilation_data * data) {
     yf_free(data->project_name);
     yf_list_destroy(&data->jobs, true);
     yfh_destroy(data->symtables, NULL);
+    yf_list_destroy(&data->garbage, true);
 
     return 0;
 

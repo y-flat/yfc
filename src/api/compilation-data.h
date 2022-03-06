@@ -107,6 +107,12 @@ struct yf_compilation_data {
      */
     struct yf_hashmap * symtables;
 
+    /**
+     * Holds additional references that will be cleaned
+     * @item_type ?
+     */
+     struct yf_list garbage;
+
 };
 
 #endif /* API_COMPILATION_DATA_H */

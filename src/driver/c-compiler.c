@@ -68,6 +68,8 @@ static int compiler_exists(const char * compiler, const char ** selected) {
         /* which produces extra endline; replace with NUL */
         buf[buf_idx - 1] = 0;
         *selected = buf;
+    } else {
+        free(buf);
     }
 
     close(commfp[0]);

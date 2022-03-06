@@ -137,9 +137,9 @@ static int validate_binary(
 
     /* Check that the types are compatible. */
     if (yfs_output_diagnostics(
-        yfse_get_expr_type(a->left, validator->fdata),
-        yfse_get_expr_type(a->right, validator->fdata),
-        validator->fdata,
+        yfse_get_expr_type(a->left, validator->udata),
+        yfse_get_expr_type(a->right, validator->udata),
+        validator->udata,
         loc
     )) {
         return 1;
@@ -230,7 +230,7 @@ static int validate_funccall(
         }
 
         if ( (paramtype =
-            yfv_get_type_s(validator->fdata, param->type)
+            yfv_get_type_s(validator->udata, param->type)
         ) == NULL) {
             YF_PRINT_ERROR(
                 "%s %d:%d: Uncaught type error: unknown type '%s'",
@@ -243,9 +243,9 @@ static int validate_funccall(
         }
 
         if (yfs_output_diagnostics(
-            yfse_get_expr_type(&aarg->expr, validator->fdata),
+            yfse_get_expr_type(&aarg->expr, validator->udata),
             paramtype,
-            validator->fdata,
+            validator->udata,
             loc
         )) {
             return 1;

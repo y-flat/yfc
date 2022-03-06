@@ -177,7 +177,7 @@ int yfp_ident(struct yfcs_identifier * node, struct yf_lexer * lexer) {
             goto done;
         }
 
-        P_LEX(lexer, &tok);
+cont:   P_LEX(lexer, &tok);
         /* Should be an identifier. */
         if (tok.type != YFT_IDENTIFIER) {
             YF_TOKERR(tok, "identifier");
@@ -185,11 +185,15 @@ int yfp_ident(struct yfcs_identifier * node, struct yf_lexer * lexer) {
             strcat(node->filepath, tok.data);
         }
 
-cont:   ;
-
     }
 
 parse_name:
+    P_LEX(lexer, &tok);
+    if (tok.type != YFT_IDENTIFIER) {
+        YF_TOKERR(tok, "identifier");
+    } else {
+        strcpy(node->name, tok.data);
+    }
     /* Go through the dot - identifier loop. Similar code to above. */
     for (;;) {
         
@@ -209,15 +213,13 @@ parse_name:
             goto done;
         }
 
-        P_LEX(lexer, &tok);
+cont2:  P_LEX(lexer, &tok);
         /* Should be an identifier. */
         if (tok.type != YFT_IDENTIFIER) {
             YF_TOKERR(tok, "identifier");
         } else {
             strcat(node->name, tok.data);
         }
-
-cont2:   ;
 
     }
 

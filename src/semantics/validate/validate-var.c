@@ -25,7 +25,7 @@ int validate_vardecl(
     /* Only report this for non-global decls, those have been caught already
     in symtab building. */
     if ( (
-        ssym = find_symbol(validator, &entry, c->name.name)
+        ssym = find_symbol(validator, &entry, &c->name)
     ) != -1 && !global) {
         if (ssym == 0) {
             YF_PRINT_ERROR(

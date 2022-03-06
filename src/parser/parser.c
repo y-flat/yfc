@@ -54,9 +54,7 @@ int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer) {
         P_LEX(lexer, &tok);
         switch (tok.type) {
             case YFT_COLON:
-                strcpy(
-                    decl->vardecl.name.name, ident.name
-                );
+                decl->vardecl.name = ident;
                 if (yfp_vardecl(decl, lexer)) {
                     free(decl);
                     return 1;
@@ -68,9 +66,7 @@ int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer) {
                 }
                 break;
             case YFT_OPAREN:
-                strcpy(
-                    decl->funcdecl.name.name, ident.name
-                );
+                decl->funcdecl.name = ident;
                 if (yfp_funcdecl(decl, lexer)) {
                     free(decl);
                     return 1;
@@ -176,11 +172,12 @@ int yfp_ident(struct yfcs_identifier * node, struct yf_lexer * lexer) {
             yfl_unlex(lexer, &tok);
             /* There's no prefix. */
             strcpy(node->name, node->filepath);
-            strcpy(node->filepath, lexer->input->identifier_prefix);
+            //strcpy(node->filepath, lexer->input->identifier_prefix);
+            strcpy(node->filepath, "");
             goto done;
         }
 
-        P_LEX(lexer, &tok);
+cont:   P_LEX(lexer, &tok);
         /* Should be an identifier. */
         if (tok.type != YFT_IDENTIFIER) {
             YF_TOKERR(tok, "identifier");
@@ -188,11 +185,15 @@ int yfp_ident(struct yfcs_identifier * node, struct yf_lexer * lexer) {
             strcat(node->filepath, tok.data);
         }
 
-cont:   ;
-
     }
 
 parse_name:
+    P_LEX(lexer, &tok);
+    if (tok.type != YFT_IDENTIFIER) {
+        YF_TOKERR(tok, "identifier");
+    } else {
+        strcpy(node->name, tok.data);
+    }
     /* Go through the dot - identifier loop. Similar code to above. */
     for (;;) {
         
@@ -212,15 +213,13 @@ parse_name:
             goto done;
         }
 
-        P_LEX(lexer, &tok);
+cont2:  P_LEX(lexer, &tok);
         /* Should be an identifier. */
         if (tok.type != YFT_IDENTIFIER) {
             YF_TOKERR(tok, "identifier");
         } else {
             strcat(node->name, tok.data);
         }
-
-cont2:   ;
 
     }
 

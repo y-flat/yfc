@@ -17,7 +17,7 @@ int validate_funcdecl(
 
     /* Functions are only global. */
     if ( (
-        ssym = find_symbol(validator, &a->name, c->name.name)
+        ssym = find_symbol(validator, &a->name, &c->name)
     ) == -1) {
         /* Uh oh ... */
         YF_PRINT_ERROR("internal error: symbol not found");

@@ -7,6 +7,7 @@
 #define SEMANTICS_VALIDATE_UTILS_H
 
 #include <api/compilation-data.h>
+#include <api/concrete-tree.h>
 #include <api/operator.h>
 #include <util/allocator.h>
 #include <util/yfc-out.h>
@@ -28,7 +29,7 @@ struct yfv_validator {
 int find_symbol(
     struct yfv_validator * validator,
     struct yf_sym ** sym,
-    char * name
+    struct yfcs_identifier * name
 );
 
 /**

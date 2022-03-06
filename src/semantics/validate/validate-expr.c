@@ -30,13 +30,14 @@ static int validate_value(
         if (find_symbol(
             validator,
             &a->as.identifier,
-            c->identifier.name
+            &c->identifier
         ) == -1) {
             YF_PRINT_ERROR(
-                "%s %d:%d: Unknown identifier '%s'",
+                "%s %d:%d: Unknown identifier '%s::%s'",
                 loc->file,
                 loc->line,
                 loc->column,
+                c->identifier.filepath,
                 c->identifier.name
             );
             return 1;
@@ -166,7 +167,7 @@ static int validate_funccall(
 
     /* Make sure the function exists. */
     if (find_symbol(
-        validator, &a->name, c->name.name
+        validator, &a->name, &c->name
     ) == -1) {
         YF_PRINT_ERROR(
             "%s %d:%d: Unknown function '%s'",

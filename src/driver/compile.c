@@ -154,6 +154,7 @@ static int yf_create_compiler_jobs(
     struct yf_compilation_unit_info * fdata;
     struct yf_compile_analyse_job * ujob;
     struct yf_compile_compile_job * cjob;
+    bool has_compiled_files = false;
 
     yf_backend_find_compiler(args);
 
@@ -199,10 +200,11 @@ static int yf_create_compiler_jobs(
         if (ujob->stage >= YF_COMPILE_CODEGEN) {
             char * object_file = yf_backend_add_compile_job(compilation, args, ujob->unit_info);
             yf_list_add(&link_objs, object_file);
+            has_compiled_files = true;
         }
     }
 
-    if (!args->just_semantics) {
+    if (has_compiled_files) {
         yf_backend_add_link_job(compilation, args, &link_objs);
     }
 

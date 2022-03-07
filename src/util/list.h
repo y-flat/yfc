@@ -64,6 +64,12 @@ void yf_list_reset(struct yf_list * list);
 int yf_list_add(struct yf_list * list, void * element);
 
 /**
+ * Merges two lists together.
+ * src will be empty after the operation, if successful
+ */
+int yf_list_merge(struct yf_list * dst, struct yf_list * src);
+
+/**
  * Destroy a list.
  */
 void yf_list_destroy(struct yf_list * list, int free_elements);

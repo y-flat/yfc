@@ -16,9 +16,10 @@
  * A struct containing all current validator information.
  */
 struct yfv_validator {
-    struct yf_project_compilation_data * pdata;
-    struct yf_file_compilation_data * fdata;
+    struct yf_compilation_data * pdata;
+    struct yf_compile_analyse_job * udata;
     struct yfs_symtab * current_scope;
+    int error;
 };
 
 /**
@@ -94,7 +95,7 @@ int validate_if(
  * Add a type to a file's type table.
  */
 int yfv_add_type(
-    struct yf_file_compilation_data * fdata,
+    struct yf_compile_analyse_job * udata,
     struct yfs_type * type
 );
 
@@ -102,7 +103,7 @@ int yfv_add_type(
  * Get a type from a file's type table, given a concrete type.
  */
 struct yfs_type * yfv_get_type_t(
-    struct yf_file_compilation_data * fdata,
+    struct yf_compile_analyse_job * udata,
     struct yfcs_type type
 );
 
@@ -110,7 +111,7 @@ struct yfs_type * yfv_get_type_t(
  * Get a type from a file's type table, given a string.
  */
 struct yfs_type * yfv_get_type_s(
-    struct yf_file_compilation_data * fdata,
+    struct yf_compile_analyse_job * udata,
     char * typestr
 );
 

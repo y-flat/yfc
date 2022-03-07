@@ -14,8 +14,8 @@
  * 2 - internal error
  */
 int yfs_validate(
-    struct yf_file_compilation_data *,
-    struct yf_project_compilation_data *
+    struct yf_compile_analyse_job *,
+    struct yf_compilation_data *
 );
 
 #endif /* SEMANTICS_VALIDATE_H */

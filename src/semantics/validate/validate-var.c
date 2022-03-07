@@ -18,7 +18,7 @@ int validate_vardecl(
     ain->type = YFA_VARDECL;
 
     int ssym;
-    bool global = (validator->current_scope == &validator->fdata->symtab);
+    bool global = (validator->current_scope == &validator->udata->symtab);
 
     /* Make sure it isn't declared twice */
     /* A variable is redeclared in the current scope. Whoops! */
@@ -74,7 +74,7 @@ int validate_vardecl(
     /* We have to check that the type is valid here, because the type table
     doesn't exist during the symtab-building phase. */
     if ( (a->name->var.dtype =
-            yfv_get_type_t(validator->fdata, c->type)
+            yfv_get_type_t(validator->udata, c->type)
     ) == NULL) {
         YF_PRINT_ERROR(
             "%s %d:%d: Unknown type '%s' in declaration of '%s'",
@@ -125,9 +125,9 @@ int validate_vardecl(
     /* Check that the types are compatible. */
     if (a->expr) {
         if (yfs_output_diagnostics(
-            yfse_get_expr_type(&a->expr->expr, validator->fdata),
+            yfse_get_expr_type(&a->expr->expr, validator->udata),
             a->name->var.dtype,
-            validator->fdata,
+            validator->udata,
             &cin->loc
         )) {
             return 1;

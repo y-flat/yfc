@@ -10,6 +10,6 @@
 /**
  * 0 - success, 1 - error
  */
-int yfs_build_symtab(struct yf_file_compilation_data *);
+int yfs_build_symtab(struct yf_compile_analyse_job *);
 
 #endif /* SEMANTICS_SYMTAB_H */

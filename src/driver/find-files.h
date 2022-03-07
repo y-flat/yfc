@@ -8,6 +8,20 @@
 
 #include <api/compilation-data.h>
 
+struct yf_project_compilation_data {
+
+    /** To start - also for error messages */
+    char * project_name;
+
+    /**
+     * There are indeed a lot of pointers here, but this is so that a project
+     * with 5 files does not take up as much space as a project with 1000.
+     * @item_type yf_compilation_unit_info
+     */
+    struct yf_hashmap * files;
+
+};
+
 /**
  * Returns:
  * 0 - OK

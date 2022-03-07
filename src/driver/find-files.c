@@ -6,13 +6,14 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <api/compilation-data.h>
 #include <util/allocator.h>
 #include <util/yfc-out.h>
 
 /**
  * Scan through all files in a folder, adding them to the project data.
  */
-int yfd_folder_scan(
+static int yfd_folder_scan(
     struct yf_project_compilation_data * data,
     const char * folder_name
 );
@@ -20,7 +21,7 @@ int yfd_folder_scan(
 /**
  * Add a file to either the "recompile" list or the "compiled" list.
  */
-int yfd_add_file(
+static int yfd_add_file(
     struct yf_project_compilation_data * data,
     const char * file_name
 );
@@ -28,12 +29,12 @@ int yfd_add_file(
 /**
  * Whether or not recompilation happens.
  */
-int yfd_should_recompile(const char * src_file, const char * sym_file);
+static int yfd_should_recompile(const char * src_file, const char * sym_file);
 
 /**
  * Get symbol file name.
  */
-int yfd_get_sym_file_name(
+static int yfd_get_sym_file_name(
     struct yf_project_compilation_data * data,
     const char * file_name,
     char * sym_file_name
@@ -50,7 +51,7 @@ int yfd_find_projfiles(struct yf_project_compilation_data * data) {
 
 }
 
-int yfd_folder_scan(
+static int yfd_folder_scan(
     struct yf_project_compilation_data * data,
     const char * folder_name
 ) {
@@ -136,20 +137,21 @@ int yfd_add_file(
     const char * file_name
 ) {
 
-    struct yf_file_compilation_data * file;
+    struct yf_compilation_unit_info * file;
 
-    file = yf_malloc(sizeof(struct yf_file_compilation_data));
-    file->file_name =   yf_malloc(sizeof (char) * strlen(file_name));
-    file->file_prefix = yf_malloc(sizeof (char) * strlen(file_name));
-    strcpy(file->file_name, file_name);
+    file = yf_malloc(sizeof(struct yf_compilation_unit_info));
+    // Don't forget the NUL char, char implicitly guarranteed 1 byte
+    file->file_name   = yf_strdup(file_name);
+    file->file_prefix = yf_malloc(strlen(file_name) + 1);
     yfd_get_identifier_prefix(data, file_name, file->file_prefix);
-    file->error = 0;
 
-    /* 16 is not really specific, just some extra padding */
-    file->sym_file = yf_malloc(sizeof (char) * strlen(file_name) + 16);
+    /* 16 is not really specific, but enough to hold the transformed name */
+    file->sym_file = yf_malloc(strlen(file_name) + 16);
     yfd_get_sym_file_name(data, file->file_name, file->sym_file);
 
-    if (yfd_should_recompile(file->file_name, file->sym_file) > 0) {
+    file->output_file = NULL;
+
+    if (yfd_should_recompile(file->file_name, file->sym_file) != 0) {
         file->parse_anew = 1;
     } else {
         file->parse_anew = 0;
@@ -198,14 +200,16 @@ int yfd_get_sym_file_name(
     char * sym_file_name
 ) {
 
-    /* file name: src/file.yf
-     * sym file name: bin/sym/file.yf.yfsym
-     */
+    /*
+    file name: src/file.yf
+    sym file name: bin/sym/file.yfsym
+    */
 
-    file_name += strlen("src/");
-    strcpy(sym_file_name, "bin/sym/");
-    strcat(sym_file_name, file_name);
-    strcat(sym_file_name, ".yfsym");
+    file_name = strchr(file_name, '/') + 1;
+
+    sym_file_name = yf_strcpy(sym_file_name, "bin/sym/");
+    sym_file_name = yf_strcpy(sym_file_name, file_name);
+    sym_file_name = yf_strcpy(sym_file_name, "sym");
 
     return 0;
 
@@ -219,8 +223,9 @@ int yfd_get_identifier_prefix(
 
     char * original_prefix_loc = prefix;
     
-    /* file name: src/path/to/file.yf
-    * prefix: path.to.file
+    /*
+    file name: src/path/to/file.yf
+    prefix: path.to.file
     */
 
     file_name = strchr(file_name, '/') + 1;

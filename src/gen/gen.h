@@ -7,6 +7,6 @@
 
 #include <api/compilation-data.h>
 
-int yfg_gen(struct yf_file_compilation_data * data);
+int yfg_gen(struct yf_compile_analyse_job * data);
 
 #endif /* GEN_GEN_H */

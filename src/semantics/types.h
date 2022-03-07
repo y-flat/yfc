@@ -29,7 +29,7 @@ enum yfs_conversion_allowedness yfs_is_safe_conversion(
 const char * yfse_get_error_message(enum yfs_conversion_allowedness err);
 
 struct yfs_type * yfse_get_expr_type(
-    struct yfa_expr * expr, struct yf_file_compilation_data * fdata
+    struct yfa_expr * expr, struct yf_compile_analyse_job * udata
 );
 
 /**
@@ -37,7 +37,7 @@ struct yfs_type * yfse_get_expr_type(
  * Return: 0 if OK / warning, 1 if error.
  */
 int yfs_output_diagnostics(
-    struct yfs_type *, struct yfs_type *, struct yf_file_compilation_data *,
+    struct yfs_type *, struct yfs_type *, struct yf_compile_analyse_job *,
     struct yf_location * loc
 );
 

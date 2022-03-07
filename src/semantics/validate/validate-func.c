@@ -25,7 +25,7 @@ int validate_funcdecl(
     }
 
     if ((a->name->fn.rtype = yfv_get_type_t(
-        validator->fdata, c->ret
+        validator->udata, c->ret
     )) == NULL) {
         YF_PRINT_ERROR(
             "%s %d:%d: return type not found",
@@ -51,7 +51,7 @@ int validate_funcdecl(
             return 2;
         if (validate_vardecl(validator, cv, av)) {
             yf_free(av);
-            validator->fdata->error = 1;
+            validator->error = 1;
             return 1;
         }
         yf_list_add(&a->params, av);
@@ -59,7 +59,7 @@ int validate_funcdecl(
     }
 
     /* Validate the return type. */
-    if ((a->ret = yfv_get_type_t(validator->fdata, c->ret)) == NULL) {
+    if ((a->ret = yfv_get_type_t(validator->udata, c->ret)) == NULL) {
         YF_PRINT_ERROR(
             "%s %d:%d: Unknown return type '%s' of function '%s'",
             cin->loc.file,
@@ -151,7 +151,7 @@ int validate_bstmt(
         /* Validate */
         if (validate_node(validator, csub, asub, type, returns)) {
             yf_free(asub);
-            validator->fdata->error = 1;
+            validator->error = 1;
             err = 1;
         } else {
 

@@ -15,7 +15,9 @@ const char
       "--just-semantics: Only verify the code, do not generate it.\n"
       "--benchmark: Print out time taken for each step.\n"
       "--dump-projfiles: Print out all files in a project.\n"
-      "--dump-commands: Show all compiler invocations.\n",
+      "--dump-commands: Show all compiler invocations.\n"
+      "--simulate-run: Like --dump-commands, show all compiler invocations, but don't actually execute any of them.\n"
+      ,
     * HELP_HINT_MSG = "Invalid command. "
       "Use \"-h\" or \"--help\" for a list of possible commands.\n",
     * NO_ARGS_MSG = "yfc: Use \"-h\" or \"--help\" "

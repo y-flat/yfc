@@ -13,4 +13,11 @@
 void * yf_malloc(size_t size);
 void yf_free(void * ptr);
 
+/**
+ * A version of strcpy that returns pointer to the terminating NUL-byte for faster concatenations
+ */
+char * yf_strcpy(char * restrict dst, const char * src);
+
+char * yf_strdup(const char * src);
+
 #endif /* UTIL_ALLOCATOR_H */

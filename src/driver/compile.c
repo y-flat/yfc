@@ -16,25 +16,71 @@
 #include <semantics/symtab.h>
 #include <semantics/validate/validate.h>
 #include <util/allocator.h>
+#include <util/list.h>
 #include <util/yfc-out.h>
 
 /* Forward decls for whole file */
-static int yf_compile_project(struct yf_args *);
-static int yf_compile_files(struct yf_args *);
-static int yf_run_frontend(
-    struct yf_file_compilation_data *,
-    struct yf_args *
+static int yf_compile_project(struct yf_args *, struct yf_compilation_data *);
+static int yf_compile_files(struct yf_args *, struct yf_compilation_data *);
+static int yfc_run_frontend_build_symtable(
+    struct yf_compilation_data *,
+    struct yf_compile_analyse_job *
+);
+static int yfc_validate_compile(
+    struct yf_compilation_data *,
+    struct yf_compile_compile_job *
 );
 static int yf_find_project_files(struct yf_project_compilation_data *);
 static int dump_tokens(struct yf_lexer *);
-static int yf_build_symtab(struct yf_file_compilation_data *);
+static int yf_build_symtab(struct yf_compile_analyse_job *);
 static int yf_validate_ast(
-    struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata,
-    struct yf_args * args
+    struct yf_compilation_data * pdata,
+    struct yf_compile_analyse_job * adata
 );
 static int yf_do_cst_dump(struct yf_parse_node * tree);
-static int yf_cleanup(struct yf_project_compilation_data *);
+static int yf_cleanup(struct yf_compilation_data *);
+
+static inline const char * str_or_null(const char * s) {
+    return s ? s : "(null)";
+}
+
+static void yf_dump_compile_job(struct yf_compile_analyse_job * job, const char * label) {
+    fputs(label, YF_OUTPUT_STREAM);
+    switch (job->stage) {
+        case YF_COMPILE_LEXONLY:
+            fputs(" (DUMP_TOKENS) ", YF_OUTPUT_STREAM);
+            break;
+        case YF_COMPILE_PARSEONLY:
+            fputs(" (DUMP_CST) ", YF_OUTPUT_STREAM);
+            break;
+        case YF_COMPILE_ANALYSEONLY:
+            fputs(" (ANALYSE) ", YF_OUTPUT_STREAM);
+            break;
+        case YF_COMPILE_CODEGEN:
+            fputs(" (COMPILE) ", YF_OUTPUT_STREAM);
+            break;
+    }
+    if (!job->unit_info->parse_anew) {
+        fputs("(cached) ", YF_OUTPUT_STREAM);
+    }
+    fprintf(YF_OUTPUT_STREAM, "file=%s prefix=%s syms=%s out=%s\n",
+        job->unit_info->file_name,
+        str_or_null(job->unit_info->file_prefix),
+        str_or_null(job->unit_info->sym_file),
+        str_or_null(job->unit_info->output_file)
+    );
+}
+
+/**
+ * Create a list of jobs to be done to compile with the given arguments.
+ */
+static int yf_create_compilation_data(struct yf_args * args, struct yf_compilation_data * compilation) {
+    if (args->project) {
+        return yf_compile_project(args, compilation);
+    } else {
+        return yf_compile_files(args, compilation);
+    }
+}
 
 /**
  * This is it. This is the actual compile function for a set of arguments. It
@@ -42,15 +88,134 @@ static int yf_cleanup(struct yf_project_compilation_data *);
  * --project is enabled or not.
  */
 int yf_run_compiler(struct yf_args * args) {
-    
-    if (args->project) {
-        return yf_compile_project(args);
-    } else {
-        return yf_compile_files(args);
+
+    struct yf_compilation_data compilation;
+    struct yf_compilation_job * job;
+    int res = 0;
+
+    res = yf_create_compilation_data(args, &compilation);
+
+    if (res)
+        return res;
+
+    /* Execute jobs */
+    yf_list_reset(&compilation.jobs);
+    while (yf_list_get(&compilation.jobs, (void **)&job) == 0) {
+        switch (job->type) {
+            case YF_COMPILATION_ANALYSE:
+                if (args->dump_commands) {
+                    yf_dump_compile_job((struct yf_compile_analyse_job *)job, "ANALYSE");
+                }
+                if (!args->simulate_run) {
+                    res = yfc_run_frontend_build_symtable(&compilation, (struct yf_compile_analyse_job *)job);
+                }
+                break;
+
+            case YF_COMPILATION_COMPILE:
+                if (args->dump_commands) {
+                    yf_dump_compile_job(((struct yf_compile_compile_job *)job)->unit, "COMPILE");
+                }
+                if (!args->simulate_run) {
+                    res = yfc_validate_compile(&compilation, (struct yf_compile_compile_job *)job);
+                }
+                break;
+
+            case YF_COMPILATION_EXEC:
+                if (args->dump_commands) {
+                    yf_print_command((struct yf_compile_exec_job *)job);
+                }
+                if (!args->simulate_run) {
+                    res = yf_exec_command((struct yf_compile_exec_job *)job);
+                }
+                break;
+
+        }
+
+        if (res)
+            break;
+
+        yf_list_next(&compilation.jobs);
     }
+
+    yf_cleanup(&compilation);
+    yf_free((void *)args->selected_compiler);
+
+    return res;
 
 }
 
+static int yf_create_compiler_jobs(
+    struct yf_compilation_data * compilation,
+    struct yf_project_compilation_data * data,
+    struct yf_args * args
+) {
+
+    int i;
+    struct yf_compilation_unit_info * fdata;
+    struct yf_compile_analyse_job * ujob;
+    struct yf_compile_compile_job * cjob;
+    bool has_compiled_files = false;
+
+    yf_backend_find_compiler(args);
+
+    struct yf_list link_objs;
+    yf_list_init(&link_objs);
+
+    /* Fill project info */
+    compilation->project_name = data->project_name;
+    yf_list_init(&compilation->jobs);
+    compilation->symtables = yfh_new();
+    yf_list_init(&compilation->garbage);
+
+    for (i = 0; i < YFH_BUCKETS; ++i) {
+        fdata = data->files->buckets[i].value;
+        if (!fdata) continue;
+
+        ujob = malloc(sizeof(struct yf_compile_analyse_job));
+        memset(ujob, 0, sizeof(struct yf_compile_analyse_job));
+
+        ujob->job.type = YF_COMPILATION_ANALYSE;
+        ujob->unit_info = fdata;
+
+        ujob->stage =
+            args->tdump          ? YF_COMPILE_LEXONLY     :
+            args->cstdump        ? YF_COMPILE_PARSEONLY   :
+            args->just_semantics ? YF_COMPILE_ANALYSEONLY :
+                YF_COMPILE_CODEGEN;
+
+        data->files->buckets[i].value = ujob; // Set the job for further stages
+        yf_list_add(&compilation->jobs, ujob);
+    }
+
+    for (i = 0; i < YFH_BUCKETS; ++i) {
+        ujob = data->files->buckets[i].value;
+        if (!ujob || ujob->stage < YF_COMPILE_ANALYSEONLY)
+            continue;
+
+        cjob = malloc(sizeof(struct yf_compile_compile_job));
+        cjob->job.type = YF_COMPILATION_COMPILE;
+        cjob->unit = ujob;
+        yf_list_add(&compilation->jobs, cjob);
+
+        if (ujob->stage >= YF_COMPILE_CODEGEN) {
+            char * object_file = yf_backend_add_compile_job(compilation, args, ujob->unit_info);
+            yf_list_add(&link_objs, object_file);
+            has_compiled_files = true;
+        }
+    }
+
+    if (has_compiled_files) {
+        yf_backend_add_link_job(compilation, args, &link_objs);
+    }
+
+    yf_list_merge(&compilation->garbage, &link_objs);
+    yfh_destroy(data->files, NULL);
+
+    return 0;
+
+}
+
+#if 0
 static int yf_run_compiler_on_data(
     struct yf_project_compilation_data * data,
     struct yf_args * args
@@ -152,18 +317,22 @@ static int yf_run_compiler_on_data(
     return err;
 
 }
+#endif
 
-static int yf_compile_project(struct yf_args * args) {
+static int yf_compile_project(struct yf_args * args, struct yf_compilation_data * compilation) {
 
     struct yf_project_compilation_data data;
-    struct yf_file_compilation_data * fdata;
-    int ret, i;
+    struct yf_compilation_unit_info * fdata;
+    int i;
 
     /**
      * Project name is current directory
      */
-    data.project_name = yf_malloc(50);
-    getcwd(data.project_name, 50);
+    data.project_name = yf_malloc(256);
+    if (!getcwd(data.project_name, 256)) {
+        YF_PRINT_ERROR("Couldn't start compilation: path name is too long");
+        return 1;
+    }
 
     data.files = yfh_new();
     if (yf_find_project_files(&data)) {
@@ -177,14 +346,14 @@ static int yf_compile_project(struct yf_args * args) {
             if (!fdata) continue;
             if (fdata->parse_anew) {
                 YF_PRINT_WITH_COLOR(
-                    YF_CODE_GREEN,
+                    YF_CODE_YELLOW,
                     "%s %s\n",
                     fdata->file_name,
                     fdata->file_prefix
                 );
             } else {
                 YF_PRINT_WITH_COLOR(
-                    YF_CODE_YELLOW,
+                    YF_CODE_GREEN,
                     "%s %s\n",
                     fdata->file_name,
                     fdata->file_prefix
@@ -193,48 +362,60 @@ static int yf_compile_project(struct yf_args * args) {
         }
         return 0;
     }
-    
-    ret = yf_run_compiler_on_data(&data, args);
 
-    yf_cleanup(&data);
-
-    return ret;
+    return yf_create_compiler_jobs(compilation, &data, args);
 
 }
 
-static int yf_compile_files(struct yf_args * args) {
+static int yf_compile_files(struct yf_args * args, struct yf_compilation_data * compilation) {
     
     struct yf_project_compilation_data data;
-    int i, ret;
-    struct yf_file_compilation_data * fdata;
+    struct yf_compilation_unit_info * fdata;
+    int i;
 
     /* No project name */
-    data.project_name = yf_malloc(50);
-    strcpy(data.project_name, "");
+    data.project_name = NULL;
 
     data.files = yfh_new();
 
     for (i = 0; i < args->num_files; ++i) {
-        fdata = malloc(sizeof(struct yf_file_compilation_data));
-        memset(fdata, 0, sizeof (struct yf_file_compilation_data));
-        fdata->file_name = args->files[i];
+        fdata = malloc(sizeof(struct yf_compilation_unit_info));
+        memset(fdata, 0, sizeof (struct yf_compilation_unit_info));
+        fdata->file_name = yf_strdup(args->files[i]);
         fdata->parse_anew = 1;
         /* TODO - more data */
         yfh_set(data.files, fdata->file_name, fdata);
     }
 
-    ret = yf_run_compiler_on_data(&data, args);
-    yf_cleanup(&data);
-    return ret;
+    return yf_create_compiler_jobs(compilation, &data, args);
+
+}
+
+static int yfc_validate_compile(
+    struct yf_compilation_data * pdata,
+    struct yf_compile_compile_job * udata
+) {
+
+    struct yf_compile_analyse_job * adata = udata->unit;
+    int retval;
+
+    retval = yf_validate_ast(pdata, adata);
+    if (retval)
+        return retval;
+
+    if (adata->stage >= YF_COMPILE_CODEGEN)
+        retval = yf_backend_generate_code(adata);
+
+    return retval;
 
 }
 
 /**
- * Run the lexing and parsing on one file.
+ * Run the lexing and parsing on one file and build a symtable of the file.
  */
-static int yf_run_frontend(
-    struct yf_file_compilation_data * file,
-    struct yf_args * args
+static int yfc_run_frontend_build_symtable(
+    struct yf_compilation_data * compilation,
+    struct yf_compile_analyse_job * data
 ) {
 
     struct yf_lexer_input input;
@@ -242,6 +423,7 @@ static int yf_run_frontend(
     FILE * file_src;
     char * file_name;
     struct stat file_stat;
+    struct yf_compilation_unit_info * file = data->unit_info;
 
     int retval;
 
@@ -266,20 +448,24 @@ static int yf_run_frontend(
         .ungetc = (int (*)(int, void*)) ungetc,
         .input_name = file_name,
         .close = (int (*) (void*))fclose,
-        .identifier_prefix = args->project ? file->file_prefix : ""
+        .identifier_prefix = file->file_prefix ? file->file_prefix : "" /** TODO: Let user chose file prefix */
     };
 
     yfl_init(&lexer, &input);
 
-    if (args->tdump) {
+    if (data->stage == YF_COMPILE_LEXONLY) {
         return dump_tokens(&lexer);
     } else {
-        if ( (retval = yf_parse(&lexer, &file->parse_tree)) ) {
+        if ( (retval = yf_parse(&lexer, &data->parse_tree)) ) {
             YF_PRINT_ERROR("Error parsing file %s", file->file_name);
             return retval;
         }
-        if (args->cstdump) {
-            retval = yf_do_cst_dump(&file->parse_tree);
+        if (data->stage == YF_COMPILE_PARSEONLY) {
+            retval = yf_do_cst_dump(&data->parse_tree);
+        } else {
+            retval = yf_build_symtab(data);
+            if (!retval && data->unit_info->file_prefix)
+                yfh_set(compilation->symtables, data->unit_info->file_prefix, &data->symtab);
         }
         return retval;
     }
@@ -288,7 +474,7 @@ static int yf_run_frontend(
 
 /**
  * Stuff the project compilation data with all files that need to be compiled.
- * Returns the number of files.
+ * See yfd_find_projfiles for return code.
  */
 static int yf_find_project_files(struct yf_project_compilation_data * data) {
     return yfd_find_projfiles(data);
@@ -332,7 +518,7 @@ static int yf_do_cst_dump(struct yf_parse_node * tree) {
 /**
  * Build a table of all externally visible symbols.
  */
-static int yf_build_symtab(struct yf_file_compilation_data * data) {
+static int yf_build_symtab(struct yf_compile_analyse_job * data) {
     return yfs_build_symtab(data);
 }
 
@@ -341,43 +527,58 @@ static int yf_build_symtab(struct yf_file_compilation_data * data) {
  * combined symbol tables loaded so far.
  */
 static int yf_validate_ast(
-    struct yf_project_compilation_data * pdata,
-    struct yf_file_compilation_data * fdata,
-    struct yf_args * args
+    struct yf_compilation_data * pdata,
+    struct yf_compile_analyse_job * adata
 ) {
 
-    return yfs_validate(fdata, pdata);
+    return yfs_validate(adata, pdata);
 
 }
 
 /**
  * Destroy all objects and whatnot.
  */
-static int yf_cleanup(struct yf_project_compilation_data * data) {
+static int yf_cleanup(struct yf_compilation_data * data) {
 
-    int iter; /* For all iterations needed */
-    struct yf_file_compilation_data * file;
-    
-    for (iter = 0; iter < YFH_BUCKETS; ++iter) {
+    struct yf_compilation_job * job;
 
-        file = data->files->buckets[iter].value;
-        if (!file) continue;
+    for (yf_list_reset(&data->jobs); yf_list_get(&data->jobs, (void **)&job) == 0; yf_list_next(&data->jobs)) {
+        switch (job->type) {
+            case YF_COMPILATION_ANALYSE: {
+                struct yf_compile_analyse_job * adata = (struct yf_compile_analyse_job *)job;
+                struct yf_compilation_unit_info * fdata = adata->unit_info;
 
-        if (file->types.table)
-            yfh_destroy(file->types.table, (int (*)(void *)) yfs_cleanup_type);
-        if (file->symtab.table)
-            yfh_destroy(file->symtab.table, (int (*)(void *)) yfs_cleanup_sym);
-        yf_cleanup_cst(&file->parse_tree);
-        yf_cleanup_ast(&file->ast_tree);
-        yf_free(file->output_file);
-        yf_free(file->file_prefix);
+                if (adata->types.table)
+                    yfh_destroy(adata->types.table, (int (*)(void *)) yfs_cleanup_type);
 
-        yf_free(file);
+                if (adata->symtab.table)
+                    yfh_destroy(adata->symtab.table, (int (*)(void *)) yfs_cleanup_sym);
 
+                // Will be EMPTY if unset
+                yf_cleanup_cst(&adata->parse_tree);
+                yf_cleanup_ast(&adata->ast_tree);
+
+                yf_free(fdata->file_name);
+                yf_free(fdata->file_prefix);
+                yf_free(fdata->sym_file);
+                yf_free(fdata->output_file);
+                yf_free(fdata);
+                break;
+            }
+
+            case YF_COMPILATION_EXEC:
+                yf_free(((struct yf_compile_exec_job *)job)->command);
+                break;
+
+            case YF_COMPILATION_COMPILE:
+                break;
+        }
     }
 
     yf_free(data->project_name);
-    yfh_destroy(data->files, NULL);
+    yf_list_destroy(&data->jobs, true);
+    yfh_destroy(data->symtables, NULL);
+    yf_list_destroy(&data->garbage, true);
 
     return 0;
 

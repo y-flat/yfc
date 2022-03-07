@@ -1,60 +1,66 @@
 #include "validate.h"
+#include "api/compilation-data.h"
 
 #include <semantics/types.h>
 #include <semantics/validate/validate-internal.h>
 
-void add_type(
-    struct yf_file_compilation_data * fdata,
-    char * name, int size, enum yfpt_format fmt) {
+static void add_type(
+    struct yf_compile_analyse_job * udata,
+    char * name, int size, enum yfpt_format fmt
+) {
+
     struct yfs_type * type = yf_malloc(sizeof (struct yfs_type));
     type->primitive.size = size;
     type->kind = YFST_PRIMITIVE;
     type->primitive.type = fmt;
     type->name = name;
-    yfv_add_type(fdata, type);
+    yfv_add_type(udata, type);
+
 }
 
-void yfv_add_builtin_types(struct yf_file_compilation_data * fdata) {
+static void yfv_add_builtin_types(struct yf_compile_analyse_job * udata) {
 
     /* All types are signed for now - unsigned types are not yet supported. */
 
     /* "standard" types. */
-    add_type(fdata, "char",        8, YFS_INT  );
-    add_type(fdata, "short",      16, YFS_INT  );
-    add_type(fdata, "int",        32, YFS_INT  );
-    add_type(fdata, "long",       64, YFS_INT  );
-    add_type(fdata, "void",        0, YFS_NONE );
-    add_type(fdata, "float",      32, YFS_FLOAT);
-    add_type(fdata, "double",     64, YFS_FLOAT);
+    add_type(udata, "char",        8, YFS_INT  );
+    add_type(udata, "short",      16, YFS_INT  );
+    add_type(udata, "int",        32, YFS_INT  );
+    add_type(udata, "long",       64, YFS_INT  );
+    add_type(udata, "void",        0, YFS_NONE );
+    add_type(udata, "float",      32, YFS_FLOAT);
+    add_type(udata, "double",     64, YFS_FLOAT);
 
     /* Convenience types. */
-    add_type(fdata, "i16",        16, YFS_INT  );
-    add_type(fdata, "i32",        32, YFS_INT  );
-    add_type(fdata, "i64",        64, YFS_INT  );
-    add_type(fdata, "f16",        16, YFS_FLOAT);
-    add_type(fdata, "f32",        32, YFS_FLOAT);
-    add_type(fdata, "f64",        64, YFS_FLOAT);
+    add_type(udata, "i16",        16, YFS_INT  );
+    add_type(udata, "i32",        32, YFS_INT  );
+    add_type(udata, "i64",        64, YFS_INT  );
+    add_type(udata, "f16",        16, YFS_FLOAT);
+    add_type(udata, "f32",        32, YFS_FLOAT);
+    add_type(udata, "f64",        64, YFS_FLOAT);
 
     /* We're considering bool to be one bit for conversion purposes. */
-    add_type(fdata, "bool",       1,  YFS_INT  );
+    add_type(udata, "bool",       1,  YFS_INT  );
 
 }
 
 int yfs_validate(
-    struct yf_file_compilation_data * fdata,
-    struct yf_project_compilation_data * pdata
+    struct yf_compile_analyse_job * udata,
+    struct yf_compilation_data * pdata
 ) {
-    fdata->types.table = yfh_new();
-    yfv_add_builtin_types(fdata);
+
+    udata->types.table = yfh_new();
+    yfv_add_builtin_types(udata);
     struct yfv_validator validator = {
         /* Root symbol table is the global scope of the program. */
-        .current_scope = &fdata->symtab,
-        .fdata         = fdata,
+        .current_scope = &udata->symtab,
+        .udata         = udata,
         .pdata         = pdata
     };
     return validate_program(
-        &validator, &fdata->parse_tree, &fdata->ast_tree
+        &validator, &udata->parse_tree, &udata->ast_tree
     );
+
 }
 
 int validate_node(
@@ -63,6 +69,7 @@ int validate_node(
     struct yfs_type * for_bstmt1,
     int * for_bstmt2
 ) {
+
     switch (csub->type) {
     case YFCS_EXPR:
         return validate_expr(validator, csub, asub);
@@ -84,7 +91,8 @@ int validate_node(
     default:
         YF_PRINT_ERROR("internal error: unknown CST node type");
         return 1;
-    } 
+    }
+
 }
 
 int validate_program(
@@ -122,7 +130,7 @@ int validate_program(
         if (validate_node(validator, cnode, anode, NULL, NULL)) {
             yf_free(anode);
             anode = NULL;
-            validator->fdata->error = 1;
+            validator->error = 1;
             err = 1;
             /* No return, keep going to find more errors. */
         }
@@ -156,7 +164,7 @@ int validate_return(
 
     if (c->expr) {
         if (validate_expr(validator, c->expr, a->expr)) {
-            validator->fdata->error = 1;
+            validator->error = 1;
             return 1;
         }
     } else {
@@ -166,15 +174,15 @@ int validate_return(
     if ( (type->primitive.size != 0) ?
             yfs_output_diagnostics(
                 (a->expr != NULL)
-                    ? yfse_get_expr_type(&a->expr->expr, validator->fdata)
-                    : yfv_get_type_s(validator->fdata, "void"),
+                    ? yfse_get_expr_type(&a->expr->expr, validator->udata)
+                    : yfv_get_type_s(validator->udata, "void"),
                 type,
-                validator->fdata,
+                validator->udata,
                 &cin->loc
             )
         :   (a->expr != NULL)
     ) {
-        validator->fdata->error = 1;
+        validator->error = 1;
         return 1;
     }
 

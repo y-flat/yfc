@@ -48,7 +48,7 @@ int find_symbol(
         );
     } else {
         struct yfs_symtab * symtab = yfh_get(
-            validator->pdata->files, name->filepath
+            validator->pdata->symtables, name->filepath
         );
         if (symtab == NULL) {
             YF_PRINT_ERROR("Could not find module: %s", name->filepath);
@@ -93,31 +93,31 @@ void exit_scope(struct yfv_validator * v) {
 }
 
 int yfv_add_type(
-    struct yf_file_compilation_data * fdata,
+    struct yf_compile_analyse_job * udata,
     struct yfs_type * type
 ) {
     /**
      * Set a value in the hashmap.
      */
-    return yfh_set(fdata->types.table, type->name, type);
+    return yfh_set(udata->types.table, type->name, type);
 }
 
 struct yfs_type * yfv_get_type_t(
-    struct yf_file_compilation_data * fdata,
+    struct yf_compile_analyse_job * udata,
     struct yfcs_type type
 ) {
     /**
      * Get a value from the hashmap.
      */
-    return yfv_get_type_s(fdata, type.databuf);
+    return yfv_get_type_s(udata, type.databuf);
 }
 
 struct yfs_type * yfv_get_type_s(
-    struct yf_file_compilation_data * fdata,
+    struct yf_compile_analyse_job * udata,
     char * typestr
 ) {
     /**
      * Get a value from the hashmap.
      */
-    return yfh_get(fdata->types.table, typestr);
+    return yfh_get(udata->types.table, typestr);
 }

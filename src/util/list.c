@@ -27,7 +27,8 @@ int yf_list_get(struct yf_list * list, void ** elem) {
 
 int yf_list_next(struct yf_list * list) {
 
-    if (list->current_index == YF_LIST_BLOCK_SIZE - 1) {
+    ++list->current_index;
+    if (list->current_index >= list->current->numfull) {
         if (list->current->next == NULL) {
             return -1;
         } else {
@@ -35,7 +36,6 @@ int yf_list_next(struct yf_list * list) {
             list->current_index = 0;
         }
     } else {
-        ++list->current_index;
         if (list->current_index > list->current->numfull) {
             return -1;
         }
@@ -56,6 +56,9 @@ int yf_list_add(struct yf_list * list, void * element) {
 
     struct yf_list_block * block = list->first;
 
+    if (block == NULL)
+        yf_list_init(list);
+
     /* Get to the end */
     while (block->next != NULL) {
         block = block->next;
@@ -74,6 +77,21 @@ int yf_list_add(struct yf_list * list, void * element) {
 
     return 0;
 
+}
+
+int yf_list_merge(struct yf_list * dst, struct yf_list * src) {
+    if (dst == src)
+        return -1;
+
+    if (src->first == NULL)
+        return 0;
+
+    struct yf_list_block ** pblock;
+    for (pblock = &dst->first; *pblock; pblock = &(*pblock)->next) {}
+    *pblock = src->first;
+    src->first = src->current = NULL;
+    src->current_index = 0;
+    return 0;
 }
 
 void yf_list_destroy(struct yf_list * list, int free_elements) {

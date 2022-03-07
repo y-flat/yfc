@@ -218,12 +218,12 @@ static void yf_gen_if(struct yfa_if * node, FILE * out) {
     }
 }
 
-int yfg_gen(struct yf_file_compilation_data * data) {
+int yfg_gen(struct yf_compile_analyse_job * data) {
 
     FILE * out;
-    out = fopen(data->output_file, "w");
+    out = fopen(data->unit_info->output_file, "w");
     if (!out) {
-        YF_PRINT_ERROR("could not open output file %s", data->output_file);
+        YF_PRINT_ERROR("could not open output file %s", data->unit_info->output_file);
         return 1;
     }
 

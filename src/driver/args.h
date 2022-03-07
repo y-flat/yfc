@@ -92,6 +92,11 @@ struct yf_args {
      */
     bool dump_commands;
 
+    /**
+     * Should we only print the jobs?
+     */
+    bool simulate_run;
+
 };
 
 /**

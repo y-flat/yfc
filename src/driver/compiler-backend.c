@@ -1,12 +1,13 @@
 #include "compiler-backend.h"
-#include "driver/os.h"
-#include "util/list.h"
 
 #include <string.h>
 
+#include <api/compilation-data.h>
 #include <driver/c-compiler.h>
+#include <driver/os.h>
 #include <gen/gen.h>
 #include <util/allocator.h>
+#include <util/list.h>
 #include <util/yfc-out.h>
 
 static void dump_command(const char * const cmd[]) {
@@ -24,16 +25,45 @@ static void dump_command(const char * const cmd[]) {
     fputc('\n', YF_OUTPUT_STREAM);
 }
 
-int create_output_file_name(
-    struct yf_file_compilation_data * data, struct yf_args * args
+void yf_print_command(
+    struct yf_compile_exec_job * job
+) {
+    dump_command(job->command);
+}
+
+int yf_exec_command(
+    struct yf_compile_exec_job * job
+) {
+
+    static const file_open_descriptor descs[] = {
+        { 0, YF_OS_FILE_DEVNULL },
+        { 1, YF_OS_FILE_DEVNULL },
+        { 2, YF_OS_FILE_DEVNULL },
+        { -1, -1 },
+    };
+
+    /*if (args->dump_commands) {
+        fputs("Compile command: ", YF_OUTPUT_STREAM);
+        dump_command(compile_cmd);
+    }*/
+    if (proc_exec(job->command, descs, 0) != 0) {
+        YF_PRINT_ERROR("Compilation command failed");
+        return 2;
+    }
+
+    return 0;
+}
+
+static int create_output_file_name(
+    struct yf_compilation_unit_info * data, struct yf_args * args
 ) {
 
     const char * namebuf_copyloc;
 
-    data->output_file = yf_malloc(sizeof (char) * 256);
+    data->output_file = yf_malloc(256);
     if (!data->output_file)
         return 1;
-    memset(data->output_file, 0, sizeof (char) * 256);
+    memset(data->output_file, 0, 256);
 
     /* Normal: foo/bar/baz.yf -> foo/bar/baz.c */
     /* with --project: src/foo/bar/baz.yf -> bin/c/foo/bar/baz.c */
@@ -79,19 +109,16 @@ int create_output_file_name(
 /**
  * Generate C code
  */
-int yf_gen_c(struct yf_file_compilation_data * fdata) {
+static int yf_gen_c(struct yf_compile_analyse_job * fdata) {
     return yfg_gen(fdata);
 }
 
 /**
  * Run the C compiler and link the binary.
  */
-int yf_run_c_backend(
-    struct yf_project_compilation_data * data, struct yf_args * args
+int yf_backend_find_compiler(
+    struct yf_args * args
 ) {
-
-    int i;
-    struct yf_file_compilation_data * file;
 
     switch (yf_determine_c_compiler(args)) {
         case YF_COMPILER_OK:
@@ -112,69 +139,82 @@ int yf_run_c_backend(
         return 1;
     }
 
-    static const file_open_descriptor descs[] = {
-        { 0, YF_OS_FILE_DEVNULL },
-        { 1, YF_OS_FILE_DEVNULL },
-        { 2, YF_OS_FILE_DEVNULL },
-        { -1, -1 },
-    };
+    return 0;
+
+}
+
+char * yf_backend_add_compile_job(
+    struct yf_compilation_data * compilation,
+    struct yf_args * args,
+    struct yf_compilation_unit_info * unit
+) {
+
+    create_output_file_name(unit, args);
+
+    struct yf_compile_exec_job * cjob;
+
+    /* Rewite file name foo.c to have foo.o */
+    size_t fname_len = strlen(unit->output_file);
+    char * object_file = yf_malloc(fname_len + 1);
+    memcpy(object_file, unit->output_file, fname_len + 1);
+    object_file[fname_len - 1] = 'o';
+
+    cjob = malloc(sizeof(struct yf_compile_exec_job));
+    cjob->job.type = YF_COMPILATION_EXEC;
 
     /* Where gcc -c foo.c -o foo.o is stored */
-    const char * compile_cmd[] = { args->selected_compiler, "-c", NULL, "-o", NULL, NULL };
+    cjob->command = malloc(sizeof(const char *) * 6);
+    cjob->command[0] = args->selected_compiler;
+    cjob->command[1] = "-c";
+    cjob->command[2] = unit->output_file;
+    cjob->command[3] = "-o";
+    cjob->command[4] = object_file;
+    cjob->command[5] = NULL;
+
+    yf_list_add(&compilation->jobs, cjob);
+
+    return object_file;
+
+}
+
+int yf_backend_add_link_job(
+    struct yf_compilation_data * compilation,
+    struct yf_args * args,
+    struct yf_list * link_objs
+) {
     /* Where gcc foo1.o foo2.o -o foo is stored */
     const char ** link_cmd;
-    struct yf_list link_objs;
-    yf_list_init(&link_objs);
+    struct yf_compile_exec_job * ljob;
 
-    size_t num_objs = 0;
+    size_t num_objs;
+    const char * object_file;
 
-    for (i = 0; i < YFH_BUCKETS; ++i) {
-        file = data->files->buckets[i].value;
-        if (!file) continue;
+    size_t obj_it;
+    const char ** it;
 
-        /* Rewite file name foo.c to have foo.o */
-        size_t fname_len = strlen(file->output_file);
-        char * object_file = yf_malloc(fname_len + 1);
-        memcpy(object_file, file->output_file, fname_len + 1);
-        object_file[fname_len - 1] = 'o';
-
-        /* Run compiler */
-        /* <file-name> */ compile_cmd[2] = file->output_file;
-        /* -o <output-name> */ compile_cmd[4] = object_file;
-
-        if (args->dump_commands) {
-            fputs("Compile command: ", YF_OUTPUT_STREAM);
-            dump_command(compile_cmd);
-        }
-        if (proc_exec(compile_cmd, descs, 0) != 0) {
-            YF_PRINT_ERROR("Compilation of generated C of file %s failed", file->file_name);
-            return 2;
-        }
-
-        /*
-        Also append name to linker command.
-        File name will be automatically freed on list destroy.
-        */
-        yf_list_add(&link_objs, object_file);
+    yf_list_reset(link_objs);
+    num_objs = 0;
+    while (yf_list_get(link_objs, (void **)&object_file) == 0) {
+        yf_list_next(link_objs);
         ++num_objs;
     }
 
     /* <compiler> <objects...> -o <executable> */
     link_cmd = yf_malloc((4 + num_objs) * sizeof(const char *));
-
     link_cmd[0] = args->selected_compiler;
-    const char ** it = link_cmd + 1;
-    size_t obj_it;
+
+    it = link_cmd + 1;
+    yf_list_reset(link_objs);
     for (obj_it = 0; obj_it < num_objs; ++obj_it) {
-        yf_list_get(&link_objs, (void **)it);
-        yf_list_next(&link_objs);
+        yf_list_get(link_objs, (void **)it);
+        yf_list_next(link_objs);
         ++it;
     }
 
     /* Finally, add -o output_file */
     *it++ = "-o";
-    if (args->project) {
-        *it++ = data->project_name;
+    if (compilation->project_name) {
+        *it++ = compilation->project_name;
     } else {
         *it++ = "a.out";
     }
@@ -182,49 +222,18 @@ int yf_run_c_backend(
     /* Finish argument list */
     *it = NULL;
 
-    /* Return value */
-    int ret = 0;
+    ljob = yf_malloc(sizeof(struct yf_compile_exec_job));
+    ljob->job.type = YF_COMPILATION_EXEC;
+    ljob->command = link_cmd;
 
-    if (args->dump_commands) {
-        fputs("Link command: ", YF_OUTPUT_STREAM);
-        dump_command(link_cmd);
-    }
-    if (proc_exec(link_cmd, descs, 0) != 0) {
-        YF_PRINT_ERROR("Linking of project failed");
-        ret = 2;
-    }
+    yf_list_add(&compilation->jobs, ljob);
 
-    yf_free(link_cmd);
-    yf_list_destroy(&link_objs, true);
-
-    return ret;
+    return 0;
 
 }
 
-/**
- * Generate C code, run the C compiler, and link the resulting binary.
- */
-int yf_run_backend(
-    struct yf_project_compilation_data * data, struct yf_args * args
+int yf_backend_generate_code(
+    struct yf_compile_analyse_job * data
 ) {
-    
-    int i, err = 0;
-    struct yf_file_compilation_data * file;
-
-    for (i = 0; i < YFH_BUCKETS; ++i) {
-        file = data->files->buckets[i].value;
-        if (!file) continue;
-        if (file->error) {
-            err = 1;
-            continue;
-        }
-        create_output_file_name(file, args);
-        yf_gen_c(file);
-    }
-
-    if (!err)
-        err = yf_run_c_backend(data, args);
-
-    return err;
-
+    return yf_gen_c(data);
 }

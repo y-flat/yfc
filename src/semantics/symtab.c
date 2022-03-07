@@ -7,7 +7,7 @@
 static int yfs_add_var(struct yf_hashmap * symtab, struct yf_parse_node *);
 static int yfs_add_fn(struct yf_hashmap * symtab, struct yf_parse_node *);
 
-int yfs_build_symtab(struct yf_file_compilation_data * data) {
+int yfs_build_symtab(struct yf_compile_analyse_job * data) {
 
     struct yf_parse_node * node;
     int ret;

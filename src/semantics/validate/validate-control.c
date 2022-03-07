@@ -23,19 +23,19 @@ int validate_if(
         return 2;
 
     if (validate_expr(validator, c->cond, a->cond)) {
-        validator->fdata->error = 1;
+        validator->error = 1;
         return 1;
     }
     
     if ( (t = yfse_get_expr_type(
-        &a->cond->expr, validator->fdata
-    )) != yfv_get_type_s(validator->fdata, "bool")) {
+        &a->cond->expr, validator->udata
+    )) != yfv_get_type_s(validator->udata, "bool")) {
         YF_PRINT_ERROR(
             "%s %d: %d: if condition must be of type bool, was %s",
             cin->loc.file, cin->loc.line, cin->loc.column,
             t->name
         );
-        validator->fdata->error = 1;
+        validator->error = 1;
         return 1;
     }
 
@@ -44,7 +44,7 @@ int validate_if(
         c->code, a->code,
         type, &if_always_returns
     )) {
-        validator->fdata->error = 1;
+        validator->error = 1;
         yf_free(a->code);
         a->code = NULL;
         return 1;
@@ -59,7 +59,7 @@ int validate_if(
             c->elsebranch, a->elsebranch,
             type, &else_always_returns
         )) {
-            validator->fdata->error = 1;
+            validator->error = 1;
             return 1;
         }
     } else {

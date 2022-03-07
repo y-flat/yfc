@@ -42,7 +42,7 @@ const char * yfse_get_error_message(enum yfs_conversion_allowedness err) {
 }
 
 struct yfs_type * yfse_get_expr_type(
-    struct yfa_expr * expr, struct yf_file_compilation_data * fdata
+    struct yfa_expr * expr, struct yf_compile_analyse_job * fdata
 ) {
 
     /* This function is super hacky and whatnot. */
@@ -101,7 +101,7 @@ struct yfs_type * yfse_get_expr_type(
 int yfs_output_diagnostics(
     struct yfs_type * from,
     struct yfs_type * to,
-    struct yf_file_compilation_data * fdata,
+    struct yf_compile_analyse_job * fdata,
     struct yf_location * loc
 ) {
 

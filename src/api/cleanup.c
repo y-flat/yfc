@@ -56,13 +56,9 @@ void yf_cleanup_aexpr(struct yfa_expr * node) {
         yf_free(node->as.binary.right);
         break;
     case YFA_FUNCCALL:
-        yf_list_reset(&node->as.call.args);
-        for (;;) {
-            if (yf_list_get(&node->as.call.args, (void **) &anode) == -1)
-                break;
+        YF_LIST_FOREACH(node->as.call.args, anode) {
             if (anode)
                 yf_cleanup_anode(anode, 1);
-            yf_list_next(&node->as.call.args);
         }
         yf_list_destroy(&node->as.call.args, 0);
     }
@@ -75,12 +71,8 @@ void yf_cleanup_avardecl(struct yfa_vardecl * node) {
 
 void yf_cleanup_afuncdecl(struct yfa_funcdecl * node) {
     struct yf_ast_node * vardecl;
-    yf_list_reset(&node->params);
-    for (;;) {
-        if (yf_list_get(&node->params, (void **) &vardecl) == -1)
-            break;
+    YF_LIST_FOREACH(node->params, vardecl) {
         yf_cleanup_anode(vardecl, 1);
-        yf_list_next(&node->params);
     }
     yf_list_destroy(&node->params, 0);
     if (node->body)
@@ -91,26 +83,18 @@ void yf_cleanup_afuncdecl(struct yfa_funcdecl * node) {
 
 void yf_cleanup_aprogram(struct yfa_program * node) {
     struct yf_ast_node * decl;
-    yf_list_reset(&node->decls);
-    for (;;) {
-        if (yf_list_get(&node->decls, (void **) &decl) == -1)
-            break;
+    YF_LIST_FOREACH(node->decls, decl) {
         if (decl)
             yf_cleanup_anode(decl, 1);
-        yf_list_next(&node->decls);
     }
     yf_list_destroy(&node->decls, 0);
 }
 
 void yf_cleanup_abstmt(struct yfa_bstmt * node) {
     struct yf_ast_node * stmt;
-    yf_list_reset(&node->stmts);
-    for (;;) {
-        if (yf_list_get(&node->stmts, (void **) &stmt) == -1)
-            break;
+    YF_LIST_FOREACH(node->stmts, stmt) {
         if (stmt)
             yf_cleanup_anode(stmt, 1);
-        yf_list_next(&node->stmts);
     }
     yf_list_destroy(&node->stmts, 0);
     yfh_destroy(
@@ -185,13 +169,9 @@ void yf_cleanup_cexpr(struct yfcs_expr * node) {
         yf_cleanup_cnode(node->binary.right, 1);
         break;
     case YFA_FUNCCALL:
-        yf_list_reset(&node->call.args);
-        for (;;) {
-            if (yf_list_get(&node->call.args, (void **) &cnode) == -1)
-                break;
+        YF_LIST_FOREACH(node->call.args, cnode) {
             if (cnode)
                 yf_cleanup_cnode(cnode, 1);
-            yf_list_next(&node->call.args);
         }
         yf_list_destroy(&node->call.args, 0);
     }
@@ -204,12 +184,8 @@ void yf_cleanup_cvardecl(struct yfcs_vardecl * node) {
 
 void yf_cleanup_cfuncdecl(struct yfcs_funcdecl * node) {
     struct yf_parse_node * vardecl;
-    yf_list_reset(&node->params);
-    for (;;) {
-        if (yf_list_get(&node->params, (void **) &vardecl) == -1)
-            break;
+    YF_LIST_FOREACH(node->params, vardecl) {
         yf_cleanup_cnode(vardecl, 1);
-        yf_list_next(&node->params);
     }
     yf_list_destroy(&node->params, 0);
     if (node->body)
@@ -218,26 +194,18 @@ void yf_cleanup_cfuncdecl(struct yfcs_funcdecl * node) {
 
 void yf_cleanup_cprogram(struct yfcs_program * node) {
     struct yf_parse_node * decl;
-    yf_list_reset(&node->decls);
-    for (;;) {
-        if (yf_list_get(&node->decls, (void **) &decl) == -1)
-            break;
+    YF_LIST_FOREACH(node->decls, decl) {
         if (decl)
             yf_cleanup_cnode(decl, 1);
-        yf_list_next(&node->decls);
     }
     yf_list_destroy(&node->decls, 0);
 }
 
 void yf_cleanup_cbstmt(struct yfcs_bstmt * node) {
     struct yf_parse_node * stmt;
-    yf_list_reset(&node->stmts);
-    for (;;) {
-        if (yf_list_get(&node->stmts, (void **) &stmt) == -1)
-            break;
+    YF_LIST_FOREACH(node->stmts, stmt) {
         if (stmt)
             yf_cleanup_cnode(stmt, 1);
-        yf_list_next(&node->stmts);
     }
     yf_list_destroy(&node->stmts, 0);
 }

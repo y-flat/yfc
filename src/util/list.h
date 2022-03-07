@@ -74,4 +74,12 @@ int yf_list_merge(struct yf_list * dst, struct yf_list * src);
  */
 void yf_list_destroy(struct yf_list * list, int free_elements);
 
+
+/**
+ * @param list must be an lvalue that is safe to evaluate multiple times (like a variable)
+ * @param out an lvalue denoting the element
+ */
+#define YF_LIST_FOREACH(list, out) \
+    for (yf_list_reset(&(list)); yf_list_get(&(list), (void **)&(out)) == 0; yf_list_next(&(list)))
+
 #endif /* UTIL_LIST_H */

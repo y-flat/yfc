@@ -192,10 +192,8 @@ int yf_backend_add_link_job(
     size_t obj_it;
     const char ** it;
 
-    yf_list_reset(link_objs);
     num_objs = 0;
-    while (yf_list_get(link_objs, (void **)&object_file) == 0) {
-        yf_list_next(link_objs);
+    YF_LIST_FOREACH(*link_objs, object_file) {
         ++num_objs;
     }
 

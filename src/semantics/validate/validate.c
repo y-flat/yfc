@@ -111,16 +111,10 @@ int validate_program(
     ain->type = YFA_PROGRAM;
 
     yf_list_init(&aprog->decls);
-    yf_list_reset(&cprog->decls);
     
     /* Iterate through all decls, construct abstract instances of them, and move
     them into the abstract list. */
-    for (;;) {
-
-        /* Get element */
-        if (yf_list_get(&cprog->decls, (void **) &cnode) == -1) break;
-        if (!cnode) break;
-        
+    YF_LIST_FOREACH(cprog->decls, cnode) {
         /* Construct abstract instance */
         anode = yf_malloc(sizeof (struct yf_ast_node));
         if (!anode)
@@ -138,10 +132,6 @@ int validate_program(
         /* Move to abstract list */
         if (anode)
             yf_list_add(&aprog->decls, anode);
-
-        /* Keep going */
-        yf_list_next(&cprog->decls);
-
     }
 
     return err;

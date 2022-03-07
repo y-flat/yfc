@@ -18,17 +18,9 @@ int yfs_build_symtab(struct yf_compile_analyse_job * data) {
         YF_PRINT_ERROR("symtab: failed to allocate table");
         return 3; /* Memory error */
     }
-
-    /* Get to beginning of list traversal */
-    yf_list_reset(&data->parse_tree.program.decls);
     
     ret = 0;
-    for (;;) {
-        if (yf_list_get(
-            &data->parse_tree.program.decls,
-            (void **) &node
-        ) == -1)
-            return ret;
+    YF_LIST_FOREACH(data->parse_tree.program.decls, node) {
         switch (node->type) {
             case YFCS_VARDECL:
                 if (yfs_add_var(data->symtab.table, node))
@@ -42,7 +34,6 @@ int yfs_build_symtab(struct yf_compile_analyse_job * data) {
                 YF_PRINT_ERROR("symtab: panic: unrecognized global node type");
                 return 2; /* Internal error */
         }
-        yf_list_next(&data->parse_tree.program.decls);
     }
 
     return ret;
@@ -96,16 +87,9 @@ static int yfs_add_fn(struct yf_hashmap * symtab, struct yf_parse_node * f) {
     fsym->fn.name = fn->name.name;
 
     yf_list_init(&fsym->fn.params);
-    yf_list_reset(&fn->params);
 
     /* Adding parameters to symbol */
-    for (;;) {
-
-        if (yf_list_get(
-            &fn->params,
-            (void **) &narg
-        ) == -1)
-            break;
+    YF_LIST_FOREACH(fn->params, narg) {
 
         arg = &narg->vardecl;
         
@@ -115,8 +99,6 @@ static int yfs_add_fn(struct yf_hashmap * symtab, struct yf_parse_node * f) {
         param->name = arg->name.name;
         param->type = arg->type.databuf;
         yf_list_add(&fsym->fn.params, param);
-
-        yf_list_next(&fn->params);
 
     }
 

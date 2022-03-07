@@ -22,11 +22,11 @@
 /* Forward decls for whole file */
 static int yf_compile_project(struct yf_args *, struct yf_compilation_data *);
 static int yf_compile_files(struct yf_args *, struct yf_compilation_data *);
-static int yfc_analyse(
+static int yfc_run_frontend_build_symtable(
     struct yf_compilation_data *,
     struct yf_compile_analyse_job *
 );
-static int yfc_compile(
+static int yfc_validate_compile(
     struct yf_compilation_data *,
     struct yf_compile_compile_job *
 );
@@ -93,7 +93,7 @@ int yf_run_compiler(struct yf_args * args) {
     struct yf_compilation_job * job;
     int res = 0;
 
-    yf_create_compilation_data(args, &compilation);
+    res = yf_create_compilation_data(args, &compilation);
 
     if (res)
         return res;
@@ -107,7 +107,7 @@ int yf_run_compiler(struct yf_args * args) {
                     yf_dump_compile_job((struct yf_compile_analyse_job *)job, "ANALYSE");
                 }
                 if (!args->simulate_run) {
-                    res = yfc_analyse(&compilation, (struct yf_compile_analyse_job *)job);
+                    res = yfc_run_frontend_build_symtable(&compilation, (struct yf_compile_analyse_job *)job);
                 }
                 break;
 
@@ -116,7 +116,7 @@ int yf_run_compiler(struct yf_args * args) {
                     yf_dump_compile_job(((struct yf_compile_compile_job *)job)->unit, "COMPILE");
                 }
                 if (!args->simulate_run) {
-                    res = yfc_compile(&compilation, (struct yf_compile_compile_job *)job);
+                    res = yfc_validate_compile(&compilation, (struct yf_compile_compile_job *)job);
                 }
                 break;
 
@@ -391,7 +391,7 @@ static int yf_compile_files(struct yf_args * args, struct yf_compilation_data * 
 
 }
 
-static int yfc_compile(
+static int yfc_validate_compile(
     struct yf_compilation_data * pdata,
     struct yf_compile_compile_job * udata
 ) {
@@ -411,9 +411,9 @@ static int yfc_compile(
 }
 
 /**
- * Run the lexing and parsing on one file.
+ * Run the lexing and parsing on one file and build a symtable of the file.
  */
-static int yfc_analyse(
+static int yfc_run_frontend_build_symtable(
     struct yf_compilation_data * compilation,
     struct yf_compile_analyse_job * data
 ) {

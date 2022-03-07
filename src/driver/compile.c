@@ -99,8 +99,7 @@ int yf_run_compiler(struct yf_args * args) {
         return res;
 
     /* Execute jobs */
-    yf_list_reset(&compilation.jobs);
-    while (yf_list_get(&compilation.jobs, (void **)&job) == 0) {
+    YF_LIST_FOREACH(compilation.jobs, job) {
         switch (job->type) {
             case YF_COMPILATION_ANALYSE:
                 if (args->dump_commands) {
@@ -133,8 +132,6 @@ int yf_run_compiler(struct yf_args * args) {
 
         if (res)
             break;
-
-        yf_list_next(&compilation.jobs);
     }
 
     yf_cleanup(&compilation);
@@ -542,7 +539,7 @@ static int yf_cleanup(struct yf_compilation_data * data) {
 
     struct yf_compilation_job * job;
 
-    for (yf_list_reset(&data->jobs); yf_list_get(&data->jobs, (void **)&job) == 0; yf_list_next(&data->jobs)) {
+    YF_LIST_FOREACH(data->jobs, job) {
         switch (job->type) {
             case YF_COMPILATION_ANALYSE: {
                 struct yf_compile_analyse_job * adata = (struct yf_compile_analyse_job *)job;

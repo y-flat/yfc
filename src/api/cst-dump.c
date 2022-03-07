@@ -89,15 +89,10 @@ static void yf_dump_program(struct yfcs_program * node, FILE *out) {
 
     yf_print_line(out, "program");
     indent();
-    for (;;) {
-        if (yf_list_get(&node->decls, (void **) &child) == -1) break;
-        if (!child) break;
+    YF_LIST_FOREACH(node->decls, child) {
         yf_dump_cst(child, out);
-        yf_list_next(&node->decls);
     }
     dedent();
-
-    yf_list_reset(&node->decls);
 
     yf_print_line(out, "end program");
 
@@ -129,11 +124,8 @@ static void yf_dump_funcdecl(struct yfcs_funcdecl * node, FILE * out) {
     yf_print_line(out, "params");
     indent();
     struct yf_parse_node * param;
-    for (;;) {
-        if (yf_list_get(&node->params, (void **) &param) == -1) break;
-        if (!param) break;
+    YF_LIST_FOREACH(node->params, param) {
         yf_dump_cst(param, out);
-        yf_list_next(&node->params);
     }
     dedent();
     yf_print_line(out, "end params");
@@ -181,11 +173,8 @@ static void yf_dump_expr(struct yfcs_expr * node, FILE * out) {
         );
         yf_print_line(out, "arguments:");
         indent();
-        for (;;) {
-            if (yf_list_get(&node->call.args, (void **) &arg) == -1) break;
-            if (!arg) break;
+        YF_LIST_FOREACH(node->call.args, arg) {
             yf_dump_cst(arg, out);
-            yf_list_next(&node->call.args);
         }
         dedent();
         yf_print_line(out, "end arguments");
@@ -201,11 +190,8 @@ static void yf_dump_bstmt(struct yfcs_bstmt * node, FILE * out) {
     struct yf_parse_node * child;
     yf_print_line(out, "block statement");
     indent();
-    for (;;) {
-        if (yf_list_get(&node->stmts, (void **) &child) == -1) break;
-        if (!child) break;
+    YF_LIST_FOREACH(node->stmts, child) {
         yf_dump_cst(child, out);
-        yf_list_next(&node->stmts);
     }
     dedent();
     yf_print_line(out, "end block statement");

@@ -41,11 +41,8 @@ int validate_funcdecl(
     enter_scope(validator, &a->param_scope);
 
     /* Add the arguments to the scope. */
-    yf_list_reset(&c->params);
     yf_list_init(&a->params);
-    for (;;) {
-        if (yf_list_get(&c->params, (void**) &cv) == -1)
-            break;
+    YF_LIST_FOREACH(c->params, cv) {
         av = yf_malloc(sizeof (struct yf_ast_node));
         if (!av)
             return 2;
@@ -55,7 +52,6 @@ int validate_funcdecl(
             return 1;
         }
         yf_list_add(&a->params, av);
-        yf_list_next(&c->params);
     }
 
     /* Validate the return type. */
@@ -121,16 +117,11 @@ int validate_bstmt(
     enter_scope(validator, &a->symtab);
 
     /* Validate each statement */
-    yf_list_reset(&c->stmts);
     yf_list_init(&a->stmts);
 
     *returns = 0;
 
-    for (;;) {
-
-        /* Get element */
-        if (yf_list_get(&c->stmts, (void **) &csub) == -1) break;
-        if (!csub) break;
+    YF_LIST_FOREACH(c->stmts, csub) {
 
         /* If this comes after a return, none of it will be executed. */
         if (*returns && !ret_warning_reported) {
@@ -165,9 +156,6 @@ int validate_bstmt(
             
         }
 
-        /* Keep going */
-        yf_list_next(&c->stmts);
-        
     }
 
     exit_scope(validator);

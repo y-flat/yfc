@@ -69,18 +69,13 @@ static void yf_gen_program(struct yfa_program * node, FILE *out) {
 
     struct yf_ast_node * child;
 
-    for (;;) {
-        if (yf_list_get(&node->decls, (void **) &child) == -1) break;
-        if (!child) break;
+    YF_LIST_FOREACH(node->decls, child) {
         yf_gen_node(child, out);
         if (child->type == YFA_VARDECL)
             yfg_print_line(out, ";");
         else
             yfg_print_line(out, "");
-        yf_list_next(&node->decls);
     }
-
-    yf_list_reset(&node->decls);
 
 }
 
@@ -116,15 +111,11 @@ static void yf_gen_funcdecl(struct yfa_funcdecl * node, FILE * out) {
 
     /* Generate param list */
 
-    yf_list_reset(&node->params);
-
-    for (;;) {
-        if (yf_list_get(&node->params, (void **) &child) == -1) break;
+    YF_LIST_FOREACH(node->params, child) {
         if (argct)
             fprintf(out, ", ");
         if (!child) break;
         yf_gen_node(child, out);
-        yf_list_next(&node->params);
         ++argct;
     }
 
@@ -161,15 +152,12 @@ static void yf_gen_expr(struct yfa_expr * node, FILE * out) {
             break;
         case YFA_FUNCCALL:
             fprintf(out, "%s(", node->as.call.name->fn.name);
-            yf_list_reset(&node->as.call.args);
             argct = 0;
-            for (;;) {
-                if (yf_list_get(&node->as.call.args, (void **) &call_arg) == -1) break;
+            YF_LIST_FOREACH(node->as.call.args, call_arg) {
                 if (argct)
                     fprintf(out, ", ");
                 if (!call_arg) break;
                 yf_gen_node(call_arg, out);
-                yf_list_next(&node->as.call.args);
                 ++argct;
             }
             fprintf(out, ")");
@@ -184,13 +172,10 @@ static void yf_gen_bstmt(struct yfa_bstmt * node, FILE * out) {
     struct yf_ast_node * child;
     fprintf(out, "{");
     indent();
-    for (;;) {
-        if (yf_list_get(&node->stmts, (void **) &child) == -1) break;
-        if (!child) break;
+    YF_LIST_FOREACH(node->stmts, child) {
         yfg_print_line(out, "");
         yf_gen_node(child, out);
         fprintf(out, ";");
-        yf_list_next(&node->stmts);
     }
     dedent();
     yfg_print_line(out, "");

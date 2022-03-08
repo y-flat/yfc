@@ -1,4 +1,4 @@
-# yfc ![cmake](https://img.shields.io/github/workflow/status/y-flat/yfc/cmake) <img src="https://img.shields.io/tokei/lines/github/adamhutchings/yfc"> <img src="https://img.shields.io/github/languages/code-size/adamhutchings/yfc">
+# yfc ![cmake](https://img.shields.io/github/workflow/status/y-flat/yfc/cmake) [![tests](https://github.com/y-flat/yfc/actions/workflows/tests.yml/badge.svg)](https://github.com/y-flat/yfc/actions/workflows/tests.yml) <img src="https://img.shields.io/tokei/lines/github/adamhutchings/yfc"> <img src="https://img.shields.io/github/languages/code-size/adamhutchings/yfc">
 
 ## Overview
 Compiler for the Y-flat programming language. This is part of the wider Y-flat

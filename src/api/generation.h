@@ -7,7 +7,8 @@
 
 struct yf_gen_info {
 
-    char * prefix; /* For the prefix of generated identifiers. */
+    char * yf_prefix; /* The prefix in Y-flat, like path.to.foo */
+    char gen_prefix[256]; /* The prefix in generated code, like path$to$foo */
     int tab_depth; /* For the indentation level and proper formatting. */
 
 };

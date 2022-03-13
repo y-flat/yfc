@@ -82,9 +82,10 @@ static void yf_gen_vardecl(
     char typebuf[256];
     yfg_ctype(256, typebuf, node->name->var.dtype);
     fprintf(
-        out, "%s /* %s */ %s",
+        out, "%s /* %s */ %s$$%s",
         typebuf,
         node->name->var.dtype->name,
+        i->gen_prefix,
         node->name->var.name
     );
     if (node->expr) {
@@ -102,9 +103,10 @@ static void yf_gen_funcdecl(
     yfg_ctype(256, typebuf, node->name->fn.rtype);
 
     fprintf(
-        out, "%s /* %s */ %s",
+        out, "%s /* %s */ %s$$%s",
         typebuf,
         node->name->fn.rtype->name,
+        i->gen_prefix,
         node->name->fn.name
     );
     fprintf(out, "(");
@@ -142,7 +144,11 @@ static void yf_gen_expr(
                     fprintf(out, "%d", node->as.value.as.literal.val);
                     break;
                 case YFA_IDENT:
-                    fprintf(out, "%s", node->as.value.as.identifier->var.name);
+                    fprintf(
+                        out, "%s$$%s",
+                        i->gen_prefix,
+                        node->as.value.as.identifier->var.name
+                    );
                     break;
             }
             break;
@@ -152,7 +158,10 @@ static void yf_gen_expr(
             yf_gen_expr(node->as.binary.right, out, i);
             break;
         case YFA_FUNCCALL:
-            fprintf(out, "%s(", node->as.call.name->fn.name);
+            fprintf(
+                out, "%s$$%s(",
+                i->gen_prefix, node->as.call.name->fn.name
+            );
             argct = 0;
             YF_LIST_FOREACH(node->as.call.args, call_arg) {
                 if (argct)

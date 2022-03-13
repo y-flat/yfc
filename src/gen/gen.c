@@ -16,19 +16,16 @@ static void yf_gen_bstmt(struct yfa_bstmt * node, FILE * out, struct yf_gen_info
 static void yf_gen_return(struct yfa_return * node, FILE * out, struct yf_gen_info * i);
 static void yf_gen_if(struct yfa_if * node, FILE * out, struct yf_gen_info * i);
 
-/* TODO - non-static this, maybe by putting in a struct or something. */
-static int yf_dump_indent = 0;
-
 static void indent(struct yf_gen_info * i) { ++i->tab_depth; }
 static void dedent(struct yf_gen_info * i) { --i->tab_depth; }
 
 static void yfg_print_line(FILE * out, char * data, struct yf_gen_info * i , ...) {
-    int i;
+    int it;
     va_list args;
-    va_start(args, data);
+    va_start(args, i);
     vfprintf(out, data, args);
     fprintf(out, "\n");
-    for (i = 0; i < i->tab_depth; i++) {
+    for (it = 0; it < i->tab_depth; it++) {
         fprintf(out, "\t");
     }
     va_end(args);

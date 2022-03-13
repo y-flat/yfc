@@ -110,8 +110,9 @@ static int create_output_file_name(
 /**
  * Generate C code
  */
-static int yf_gen_c(struct yf_compile_analyse_job * fdata) {
-    return yfg_gen(fdata);
+static int yf_gen_c(
+    struct yf_compile_analyse_job * fdata, struct yf_gen_info * info) {
+    return yfg_gen(fdata, info);
 }
 
 /**
@@ -268,5 +269,5 @@ int yf_backend_generate_code(
     create_formatted_prefix(
         ginfo.yf_prefix, ginfo.gen_prefix, 256
     );
-    return yf_gen_c(data, ginfo);
+    return yf_gen_c(data, &ginfo);
 }

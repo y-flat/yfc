@@ -19,16 +19,16 @@ static void yf_gen_if(struct yfa_if * node, FILE * out, struct yf_gen_info * i);
 /* TODO - non-static this, maybe by putting in a struct or something. */
 static int yf_dump_indent = 0;
 
-static void indent() { ++yf_dump_indent; }
-static void dedent() { --yf_dump_indent; }
+static void indent(struct yf_gen_info * i) { ++i->tab_depth; }
+static void dedent(struct yf_gen_info * i) { --i->tab_depth; }
 
-static void yfg_print_line(FILE * out, char * data, ...) {
+static void yfg_print_line(FILE * out, char * data, struct yf_gen_info * i , ...) {
     int i;
     va_list args;
     va_start(args, data);
     vfprintf(out, data, args);
     fprintf(out, "\n");
-    for (i = 0; i < yf_dump_indent; i++) {
+    for (i = 0; i < i->tab_depth; i++) {
         fprintf(out, "\t");
     }
     va_end(args);
@@ -73,9 +73,9 @@ static void yf_gen_program(
     YF_LIST_FOREACH(node->decls, child) {
         yf_gen_node(child, out, i);
         if (child->type == YFA_VARDECL)
-            yfg_print_line(out, ";");
+            yfg_print_line(out, ";", i);
         else
-            yfg_print_line(out, "");
+            yfg_print_line(out, "", i);
     }
 
 }
@@ -176,14 +176,14 @@ static void yf_gen_bstmt(
     struct yfa_bstmt * node, FILE * out, struct yf_gen_info * i) {
     struct yf_ast_node * child;
     fprintf(out, "{");
-    indent();
+    indent(i);
     YF_LIST_FOREACH(node->stmts, child) {
-        yfg_print_line(out, "");
+        yfg_print_line(out, "", i);
         yf_gen_node(child, out, i);
         fprintf(out, ";");
     }
-    dedent();
-    yfg_print_line(out, "");
+    dedent(i);
+    yfg_print_line(out, "", i);
     fprintf(out, "}");
 }
 
@@ -198,14 +198,14 @@ static void yf_gen_if(
     struct yfa_if * node, FILE * out, struct yf_gen_info * i) {
     fprintf(out, "if (");
     yf_gen_node(node->cond, out, i);
-    yfg_print_line(out, ") {");
+    yfg_print_line(out, ") {", i);
         yf_gen_node(node->code, out, i);
-    yfg_print_line(out, ";");
+    yfg_print_line(out, ";", i);
     fprintf(out, "}");
     if (node->elsebranch) {
-        yfg_print_line(out, " else {");
+        yfg_print_line(out, " else {", i);
         yf_gen_node(node->elsebranch, out, i);
-        yfg_print_line(out, ";");
+        yfg_print_line(out, ";", i);
         fprintf(out, "}");
     }
 }

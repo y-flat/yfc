@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include <api/compilation-data.h>
+#include <api/generation.h>
 #include <driver/c-compiler.h>
 #include <driver/os.h>
 #include <gen/gen.h>
@@ -109,8 +110,9 @@ static int create_output_file_name(
 /**
  * Generate C code
  */
-static int yf_gen_c(struct yf_compile_analyse_job * fdata) {
-    return yfg_gen(fdata);
+static int yf_gen_c(
+    struct yf_compile_analyse_job * fdata, struct yf_gen_info * info) {
+    return yfg_gen(fdata, info);
 }
 
 /**
@@ -230,8 +232,42 @@ int yf_backend_add_link_job(
 
 }
 
+/**
+ * Turn path.to.foo into path$to$foo for code generation.
+ * y_prefix - the buf with path.to.foo
+ * c_prefix - the buf to fill with path$to$foo
+ * cpen - the length of the buf
+ */
+static int create_formatted_prefix(
+    char * y_prefix, char * c_prefix, int cplen
+) {
+
+    int i;
+    for (i = 0; c_prefix[i]; ++i) {
+        if (y_prefix[i] == '.') {
+            c_prefix[i] = '$';
+        } else {
+            c_prefix[i] = y_prefix[i];
+        }
+        if (i == cplen) {
+            /* We've been cut off */
+            return 1;
+        }
+    }
+
+    return 0;
+
+}
+
 int yf_backend_generate_code(
     struct yf_compile_analyse_job * data
 ) {
-    return yf_gen_c(data);
+    struct yf_gen_info ginfo = {
+        .yf_prefix = data->unit_info->file_prefix,
+        .tab_depth = 0,
+    };
+    create_formatted_prefix(
+        ginfo.yf_prefix, ginfo.gen_prefix, 256
+    );
+    return yf_gen_c(data, &ginfo);
 }

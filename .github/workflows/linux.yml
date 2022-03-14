@@ -43,7 +43,7 @@ jobs:
       
       - name: Valgrind
         run: |
-          sudo valgrind --track-origins=yes --error-exitcode=1 --leak-check=full ./cmake/yfc tests/sem/funcs-pass.yf --just-semantics
+          sudo valgrind --track-origins=yes --error-exitcode=1 --leak-check=full ./build_${{matrix.build_type}}/yfc tests/sem/funcs-pass.yf --just-semantics
       
       - name: Test
         run: |

@@ -32,6 +32,7 @@ jobs:
             cmake \
             ninja-build \
             python3 \
+            valgrind \
             ${{matrix.cc}}
       
       - name: Configure

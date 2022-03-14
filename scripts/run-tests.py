@@ -3,6 +3,9 @@
 """
 Run tests.
 Each test file is paired with a value of whether it should pass or not.
+
+The path to yfc should be provided as command-line argument, else, 
+`./cmake/yfc` will be used.
 """
 
 import json
@@ -15,7 +18,7 @@ tests = []
 def add_test(test, flags, pass_):
     tests.append( (test, flags, pass_) )
 
-yfc_path = "./cmake/yfc"
+yfc_path = sys.argv[1] if len(sys.argv) > 1 else "./cmake/yfc"
 def run_tests():
 
     total = passed = failed = 0

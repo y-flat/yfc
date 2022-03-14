@@ -36,7 +36,7 @@ jobs:
             ${{matrix.cc}}
       
       - name: Configure
-        run: cmake -S . -B build_${{matrix.build_type}} -G Ninja
+        run: cmake -S . -B build_${{matrix.build_type}} -D CMAKE_C_COMPILER=${{matrix.cc}} -G Ninja
       
       - name: Build
         run: cmake --build build_${{matrix.build_type}} --config ${{matrix.build_type}}

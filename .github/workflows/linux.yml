@@ -1,0 +1,49 @@
+name: Linux
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+    
+jobs:
+  build-linux:
+    defaults:
+      run:
+        shell: bash
+        
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        cc: [clang, gcc]
+        build_type: [Release, Debug]
+    
+    name: ubuntu-${{matrix.cc}}-${{matrix.build_type}}
+    
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Setup Dependencies
+        run: |
+          sudo apt-get update
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
+            build-essential \
+            cmake \
+            ninja-build \
+            python3 \
+            ${{matrix.cc}}
+      
+      - name: Configure
+        run: cmake -S . -B build_${{matrix.build_type}} -G Ninja
+      
+      - name: Build
+        run: cmake --build build_${{matrix.build_type}} --config ${{matrix.build_type}}
+      
+      - name: Valgrind
+        run: |
+          sudo valgrind --track-origins=yes --error-exitcode=1 --leak-check=full ./cmake/yfc tests/sem/funcs-pass.yf --just-semantics
+      
+      - name: Test
+        run: |
+          python3 scripts/run-tests.py

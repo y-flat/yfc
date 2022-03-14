@@ -27,4 +27,4 @@ jobs:
 
       - name: Test
         run: |
-          python3 scripts/run-tests.py
+          python3 scripts/run-tests.py build_${{matrix.build_type}}/yfc

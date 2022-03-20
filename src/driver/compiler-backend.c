@@ -259,6 +259,31 @@ static int create_formatted_prefix(
 
 }
 
+int yf_ensure_entry_point(
+    struct yf_compilation_data * pdata
+) {
+
+    /* Iteration data */
+    struct yfs_symtab * fsymtab;
+    int i, total_entries = 0;
+
+    for (i = 0; i < YFH_BUCKETS; ++i) {
+
+        /* Iteration boilerplate */
+        fsymtab = pdata->symtables->buckets[i].value;
+        if (!fsymtab) continue;
+
+        /* If a lookup for "main" succeeds, that's another entry point. */
+        if (yfh_get(fsymtab->table, "main")) {
+            ++total_entries;
+        }
+
+    }
+
+    return total_entries == 1;
+
+}
+
 int yf_backend_generate_code(
     struct yf_compile_analyse_job * data
 ) {

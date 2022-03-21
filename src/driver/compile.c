@@ -400,6 +400,12 @@ static int yfc_validate_compile(
     if (retval)
         return retval;
 
+    if (yf_ensure_entry_point(pdata)) {
+        /* TODO - a more helpful error messsage */
+        YF_PRINT_ERROR("Expected exactly 1 'main' function.");
+        return 1;
+    }
+
     if (adata->stage >= YF_COMPILE_CODEGEN)
         retval = yf_backend_generate_code(adata);
 

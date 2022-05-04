@@ -450,7 +450,7 @@ static int yfc_run_frontend_build_symtable(
         .getc = (int (*)(void*)) getc,
         .ungetc = (int (*)(int, void*)) ungetc,
         .input_name = file_name,
-        .close = (int (*) (void*))fclose,
+        .close = (int (*) (void*)) fclose,
         .identifier_prefix = file->file_prefix ? file->file_prefix : "" /** TODO: Let user chose file prefix */
     };
 

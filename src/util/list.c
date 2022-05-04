@@ -99,3 +99,7 @@ void yf_list_destroy(struct yf_list * list, int free_elements) {
     }
 
 }
+
+/* External inline function definitions */
+extern inline int yf_list_get(struct yf_list_cursor * cur, void ** elem);
+extern inline void yf_list_reset_cursor(struct yf_list_cursor * cur, struct yf_list * list);

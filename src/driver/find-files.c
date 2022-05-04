@@ -157,7 +157,7 @@ int yfd_add_file(
         file->parse_anew = 0;
     }
 
-    if (yfh_set(data->files, file_name, file)) {
+    if (yfh_set(&data->files, file_name, file)) {
         YF_PRINT_ERROR("Internal error: could not add file %s", file_name);
         return 4;
     }

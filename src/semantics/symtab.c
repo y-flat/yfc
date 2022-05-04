@@ -12,9 +12,9 @@ int yfs_build_symtab(struct yf_compile_analyse_job * data) {
     struct yf_parse_node * node;
     int ret;
 
-    data->symtab.table = yfh_new();
+    yfh_init(&data->symtab.table);
     data->symtab.parent = NULL;
-    if (!data->symtab.table) {
+    if (!data->symtab.table.buckets) {
         YF_PRINT_ERROR("symtab: failed to allocate table");
         return 3; /* Memory error */
     }
@@ -23,11 +23,11 @@ int yfs_build_symtab(struct yf_compile_analyse_job * data) {
     YF_LIST_FOREACH(data->parse_tree.program.decls, node) {
         switch (node->type) {
             case YFCS_VARDECL:
-                if (yfs_add_var(data->symtab.table, node))
+                if (yfs_add_var(&data->symtab.table, node))
                     ret = 1;
                 break;
             case YFCS_FUNCDECL:
-                if (yfs_add_fn(data->symtab.table, node))
+                if (yfs_add_fn(&data->symtab.table, node))
                     ret = 1;
                 break;
             default:
@@ -53,7 +53,7 @@ static int yfs_add_var(struct yf_hashmap * symtab, struct yf_parse_node * n) {
     
     vsym->var.name = v->name.name;
 
-    if ( (dupl = yfh_get(symtab, vsym->var.name)) != NULL) {
+    if (yfh_get(symtab, vsym->var.name, (void **)&dupl) == 0) {
         YF_PRINT_ERROR(
             "symtab: duplicate variable declaration '%s' (lines %d and %d)",
             v->name.name, dupl->loc.line, vsym->loc.line

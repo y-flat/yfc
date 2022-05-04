@@ -46,7 +46,7 @@ struct yfs_type {
 /**
  * Free up a type.
  */
-int yfs_cleanup_type(struct yfs_type * type);
+void yfs_cleanup_type(struct yfs_type * type);
 
 struct yfs_var {
 
@@ -88,11 +88,11 @@ struct yf_sym {
 
 };
 
-int yfs_cleanup_sym(struct yf_sym * sym);
+void yfs_cleanup_sym(struct yf_sym * sym);
 
 struct yfs_symtab {
 
-    struct yf_hashmap * table;
+    struct yf_hashmap table;
 
     /* Also, a pointer to the "parent" symtab. For top-level decls, this is the
      * file symtab, and for file symtabs this is NULL. */
@@ -102,7 +102,7 @@ struct yfs_symtab {
 
 struct yfs_type_table {
 
-    struct yf_hashmap * table;
+    struct yf_hashmap table;
 
 };
 

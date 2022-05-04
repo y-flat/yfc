@@ -55,12 +55,13 @@ void yf_cleanup_aexpr(struct yfa_expr * node) {
         yf_cleanup_aexpr(node->as.binary.right);
         yf_free(node->as.binary.right);
         break;
-    case YFA_FUNCCALL:
+    case YFA_FUNCCALL: {
         YF_LIST_FOREACH(node->as.call.args, anode) {
             if (anode)
                 yf_cleanup_anode(anode, 1);
         }
         yf_list_destroy(&node->as.call.args, 0);
+    }
     }
 }
 
@@ -77,7 +78,7 @@ void yf_cleanup_afuncdecl(struct yfa_funcdecl * node) {
     yf_list_destroy(&node->params, 0);
     if (node->body)
         yf_cleanup_anode(node->body, 1);
-    yfh_destroy(node->param_scope->table, (int(*)(void*)) yfs_cleanup_sym);
+    yfh_destroy(&node->param_scope->table, (void (*)(void *)) yfs_cleanup_sym);
     yf_free(node->param_scope);
 }
 
@@ -98,9 +99,9 @@ void yf_cleanup_abstmt(struct yfa_bstmt * node) {
     }
     yf_list_destroy(&node->stmts, 0);
     yfh_destroy(
-        node->symtab->table,
+        &node->symtab->table,
         /* Sigh ... */
-        (int (*)(void *)) yfs_cleanup_sym
+        (void (*)(void *)) yfs_cleanup_sym
     );
     yf_free(node->symtab);
 }
@@ -168,12 +169,13 @@ void yf_cleanup_cexpr(struct yfcs_expr * node) {
         yf_cleanup_cnode(node->binary.left, 1);
         yf_cleanup_cnode(node->binary.right, 1);
         break;
-    case YFA_FUNCCALL:
+    case YFA_FUNCCALL: {
         YF_LIST_FOREACH(node->call.args, cnode) {
             if (cnode)
                 yf_cleanup_cnode(cnode, 1);
         }
         yf_list_destroy(&node->call.args, 0);
+    }
     }
 }
 
@@ -226,12 +228,11 @@ void yf_cleanup_cst(struct yf_parse_node * node) {
     yf_cleanup_cnode(node, 0);
 }
 
-int yfs_cleanup_type(struct yfs_type * type) {
+void yfs_cleanup_type(struct yfs_type * type) {
     yf_free(type);
-    return 0;
 }
 
-int yfs_cleanup_sym(struct yf_sym * sym) {
+void yfs_cleanup_sym(struct yf_sym * sym) {
     switch (sym->type) {
     case YFS_VAR:
         break;
@@ -240,5 +241,4 @@ int yfs_cleanup_sym(struct yf_sym * sym) {
         break;
     }
     yf_free(sym);
-    return 0;
 }

@@ -119,6 +119,18 @@ inline int yfh_cursor_get(struct yfh_cursor * cur, const char ** key, void ** va
 }
 
 /**
+ * Set value at the entry pointed to by cur.
+ * Returns 0 on success, 1 on failure.
+ */
+inline int yfh_cursor_set(struct yfh_cursor * cur, void * value) {
+    if (cur->current == NULL)
+        return 1;
+
+    cur->current->value = value;
+    return 0;
+}
+
+/**
  * Tries to find next element. Returns 1 if reached the end, 2 on other error 0 otherwise.
  */
 int yfh_cursor_next(struct yfh_cursor * cur);

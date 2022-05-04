@@ -105,7 +105,7 @@ struct yf_compilation_data {
      * Will contain pointers to translation_units' symbol tables as they are analysed
      * @item_type yfs_symtab
      */
-    struct yf_hashmap * symtables;
+    struct yf_hashmap symtables;
 
     /**
      * Holds additional references that will be cleaned

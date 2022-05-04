@@ -58,7 +58,7 @@ void yfh_destroy(struct yf_hashmap * hm, void (*cleanup)(void *)) {
 }
 
 /** TODO: Not implemented yet */
-int yfh_rehash(struct yf_hashmap *, unsigned hint) {
+int yfh_rehash(struct yf_hashmap * hm, unsigned hint) {
     return 1;
 }
 
@@ -77,6 +77,7 @@ int yfh_set(struct yf_hashmap * hm, const char * key, void * value) {
     *cursor.position = bucket;
     bucket->key = yf_strdup(key);
     bucket->value = value;
+    bucket->next = NULL;
     return 0;
 
 }
@@ -205,3 +206,10 @@ static unsigned long hash(const char * key) {
     return hash;
 
 }
+
+/* External inline function definitions */
+extern inline void yfh_init(struct yf_hashmap * map);
+extern inline void yfh_cursor_init(struct yfh_cursor * cur, struct yf_hashmap * hashmap);
+extern inline int yfh_cursor_get(struct yfh_cursor * cur, const char ** key, void ** value);
+extern inline int yfh_cursor_set(struct yfh_cursor * cur, void * value);
+extern inline int yfh_cursor_recalibrate(struct yfh_cursor * cur);

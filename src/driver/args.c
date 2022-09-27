@@ -218,7 +218,8 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
 
     }
 
-    if (args->wanted_output == YF_NONE && !has_input_file) {
+    if (args->wanted_output == YF_NONE && (!has_input_file && !(args->project))) {
+        printf("Whoops!\n");
         args->error = 1;
         args->wanted_output = YF_ERROR_NO_ARGS;
     }

@@ -49,7 +49,7 @@ int yfs_validate(
     struct yf_compilation_data * pdata
 ) {
 
-    udata->types.table = yfh_new();
+    yfh_init(&udata->types.table);
     yfv_add_builtin_types(udata);
     struct yfv_validator validator = {
         /* Root symbol table is the global scope of the program. */

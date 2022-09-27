@@ -22,7 +22,7 @@ static int find_symbol_from_scope(
 ) {
     int depth = 0;
     while (symtab != NULL) {
-        if ( (*sym = yfh_get(symtab->table, name)) != NULL) {
+        if (yfh_get(&symtab->table, name, (void **)sym) == 0) {
             return depth;
         }
         depth++;
@@ -47,10 +47,10 @@ int find_symbol(
             name->name
         );
     } else {
-        struct yfs_symtab * symtab = yfh_get(
-            validator->pdata->symtables, name->filepath
-        );
-        if (symtab == NULL) {
+        struct yfs_symtab * symtab;
+        if (yfh_get(
+            &validator->pdata->symtables, name->filepath, (void **)&symtab
+        )) {
             YF_PRINT_ERROR("Could not find module: %s", name->filepath);
             return -1;
         }
@@ -71,8 +71,8 @@ int enter_scope(struct yfv_validator * v, struct yfs_symtab ** stuff) {
     if (!new_symtab) {
         return 1;
     }
-    new_symtab->table = yfh_new();
-    if (!new_symtab->table) {
+    yfh_init(&new_symtab->table);
+    if (!new_symtab->table.buckets) {
         free(new_symtab);
         return 1;
     }
@@ -99,7 +99,7 @@ int yfv_add_type(
     /**
      * Set a value in the hashmap.
      */
-    return yfh_set(udata->types.table, type->name, type);
+    return yfh_set(&udata->types.table, type->name, type);
 }
 
 struct yfs_type * yfv_get_type_t(
@@ -119,5 +119,7 @@ struct yfs_type * yfv_get_type_s(
     /**
      * Get a value from the hashmap.
      */
-    return yfh_get(udata->types.table, typestr);
+    struct yfs_type * result = NULL;
+    yfh_get(&udata->types.table, typestr, (void **)&result);
+    return result;
 }

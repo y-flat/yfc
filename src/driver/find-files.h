@@ -18,7 +18,7 @@ struct yf_project_compilation_data {
      * with 5 files does not take up as much space as a project with 1000.
      * @item_type yf_compilation_unit_info
      */
-    struct yf_hashmap * files;
+    struct yf_hashmap files;
 
 };
 

@@ -17,6 +17,18 @@ void * yf_malloc(size_t size) {
 
 }
 
+void * yf_calloc(size_t num_elems, size_t size) {
+
+    void * ret;
+    ret = calloc(num_elems, size);
+
+    if (ret == NULL) {
+        YF_PRINT_ERROR("Allocation of %zu %zu-byte sized elements failed", num_elems, size);
+    }
+
+    return ret;
+}
+
 void yf_free(void * ptr) {
     free(ptr);
 }

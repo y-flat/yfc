@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include <string.h>
 
+#include <util/list.h>
 #include <api/abstract-tree.h>
 #include <semantics/types.h>
 
@@ -163,6 +164,9 @@ static int validate_funccall(
     struct yfsn_param    * param;
     struct yfs_type      * paramtype;
 
+    struct yf_list_cursor param_cursor;
+    struct yf_list_cursor arg_cursor;
+
     int lgres;
 
     /* Make sure the function exists. */
@@ -196,8 +200,8 @@ static int validate_funccall(
         * matches.
         */
     yf_list_init(&a->args);
-    yf_list_reset(&a->name->fn.params);
-    yf_list_reset(&c->args);
+    yf_list_reset_cursor(&param_cursor, &a->name->fn.params);
+    yf_list_reset_cursor(&arg_cursor, &c->args);
     for (;;) {
 
         aarg = yf_malloc(sizeof (struct yf_ast_node));
@@ -205,8 +209,8 @@ static int validate_funccall(
             return 2;
 
         if (
-            yf_list_get(&a->name->fn.params, (void **) &param) !=
-            (lgres = yf_list_get(&c->args, (void **) &carg))
+            yf_list_get(&param_cursor, (void **) &param) !=
+            (lgres = yf_list_get(&arg_cursor, (void **) &carg))
         ) {
             YF_PRINT_ERROR(
                 "%s %d:%d: too %s arguments in function call",
@@ -253,8 +257,8 @@ static int validate_funccall(
         }
 
         yf_list_add(&a->args, aarg);
-        yf_list_next(&c->args);
-        yf_list_next(&a->name->fn.params);
+        yf_list_next(&arg_cursor);
+        yf_list_next(&param_cursor);
 
     }
 

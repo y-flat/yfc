@@ -11,6 +11,8 @@
 #include <stdlib.h>
 
 void * yf_malloc(size_t size);
+/* Allocates an array of num_elems elements of a given size and zeroes the memory */
+void * yf_calloc(size_t num_elems, size_t size);
 void yf_free(void * ptr);
 
 /**

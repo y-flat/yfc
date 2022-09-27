@@ -5,6 +5,8 @@
 #ifndef UTIL_LIST_H
 #define UTIL_LIST_H
 
+#include <stddef.h>
+
 /**
  * How it works - each linked list is theoretically a list of nodes with a
  * pointer to the next one. But that's kind of slow in practice, and a waste of
@@ -26,10 +28,15 @@ struct yf_list_block {
 struct yf_list {
 
     struct yf_list_block * first;
+    struct yf_list_block * last;
 
-    /* Current view */
-    struct yf_list_block * current;
-    int current_index;
+};
+
+struct yf_list_cursor {
+
+    struct yf_list * list;
+    struct yf_list_block * block;
+    int list_index, block_index;
 
 };
 
@@ -46,17 +53,37 @@ int yf_list_init(struct yf_list * list);
  * Get the currently pointed-to element. Returns -1 if we've passed the end, or
  * 0 otherwise.
  */
-int yf_list_get(struct yf_list * list, void ** elem);
+inline int yf_list_get(struct yf_list_cursor * cur, void ** elem) {
+
+    if (cur->block_index >= cur->block->numfull) {
+        return -1;
+    }
+
+    *elem = cur->block->data[cur->block_index];
+    return 0;
+
+}
 
 /**
  * Move to the next element. Return -1 if we've passed the end, or 0.
  */
-int yf_list_next(struct yf_list * list);
+int yf_list_next(struct yf_list_cursor * cur);
 
 /**
  * Reset to the beginning.
+ * If list is NULL, uses the last used list in cursor, it is undefined behaviour if the cursor hasn't been used before.
  */
-void yf_list_reset(struct yf_list * list);
+inline void yf_list_reset_cursor(struct yf_list_cursor * cur, struct yf_list * list) {
+
+    if (list != NULL) {
+        cur->list = list;
+    }
+
+    cur->block = cur->list->first;
+    cur->block_index = 0;
+    cur->list_index = 0;
+
+}
 
 /**
  * Add an element. Returns -1 if we've run out of memory, or 0 otherwise.
@@ -76,10 +103,20 @@ void yf_list_destroy(struct yf_list * list, int free_elements);
 
 
 /**
+ * WARNING! This macro introduces a variable into outer scope and may thus be incompatible with constructs as if ... else ... without block scope.
  * @param list must be an lvalue that is safe to evaluate multiple times (like a variable)
  * @param out an lvalue denoting the element
  */
 #define YF_LIST_FOREACH(list, out) \
-    for (yf_list_reset(&(list)); yf_list_get(&(list), (void **)&(out)) == 0; yf_list_next(&(list)))
+    struct yf_list_cursor YF_LIST_CURSOR; \
+    YF_LIST_FOREACH_CUR(YF_LIST_CURSOR, list, out)
+
+/**
+ * @param cur cursor variable/lvalue to use
+ * @param list must be an lvalue that is safe to evaluate multiple times (like a variable)
+ * @param out an lvalue denoting the element
+ */
+#define YF_LIST_FOREACH_CUR(cur, list, out) \
+    for (yf_list_reset_cursor(&(cur), &(list)); yf_list_get(&(cur), (void **)&(out)) == 0; yf_list_next(&(cur)))
 
 #endif /* UTIL_LIST_H */

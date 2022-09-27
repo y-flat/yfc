@@ -9,6 +9,7 @@
 #include <gen/gen.h>
 #include <util/allocator.h>
 #include <util/list.h>
+#include <util/hashmap.h>
 #include <util/yfc-out.h>
 
 static void dump_command(const char * const cmd[]) {
@@ -204,10 +205,11 @@ int yf_backend_add_link_job(
     link_cmd[0] = args->selected_compiler;
 
     it = link_cmd + 1;
-    yf_list_reset(link_objs);
+    struct yf_list_cursor link_objs_cur;
+    yf_list_reset_cursor(&link_objs_cur, link_objs);
     for (obj_it = 0; obj_it < num_objs; ++obj_it) {
-        yf_list_get(link_objs, (void **)it);
-        yf_list_next(link_objs);
+        yf_list_get(&link_objs_cur, (void **)it);
+        yf_list_next(&link_objs_cur);
         ++it;
     }
 
@@ -265,16 +267,16 @@ int yf_ensure_entry_point(
 
     /* Iteration data */
     struct yfs_symtab * fsymtab;
-    int i, total_entries = 0;
+    int total_entries = 0;
+    void * dummy;
 
-    for (i = 0; i < YFH_BUCKETS; ++i) {
+    struct yfh_cursor cursor;
+    for (yfh_cursor_init(&cursor, &pdata->symtables); !yfh_cursor_next(&cursor); ) {
 
-        /* Iteration boilerplate */
-        fsymtab = pdata->symtables->buckets[i].value;
-        if (!fsymtab) continue;
+        yfh_cursor_get(&cursor, NULL, (void **)&fsymtab);
 
         /* If a lookup for "main" succeeds, that's another entry point. */
-        if (yfh_get(fsymtab->table, "main")) {
+        if (yfh_get(&fsymtab->table, "main", &dummy) == 0) {
             ++total_entries;
         }
 

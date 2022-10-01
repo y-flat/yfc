@@ -93,7 +93,7 @@ int validate_vardecl(
 
     /* Variables can't have type "void" */
     if (
-        a->name->var.dtype->kind == YFST_PRIMITIVE
+        a->name->var.dtype->kind == YFS_T_PRIMITIVE
         && a->name->var.dtype->primitive.size == 0
     ) {
         YF_PRINT_ERROR(

@@ -103,7 +103,7 @@ int yfh_remove(struct yf_hashmap * hm, const char * key, void (*cleanup)(void *)
 
 int yfh_remove_at(struct yfh_cursor * cur, void (*cleanup)(void *)) {
 
-    /* We have to backtrack a little because we need to update the previouse pointer */
+    /* We have to backtrack a little because we need to update the previous pointer */
     struct yfh_bucket ** before_ptr;
     struct yfh_bucket * bucket;
 

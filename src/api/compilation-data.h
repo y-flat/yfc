@@ -111,7 +111,7 @@ struct yf_compilation_data {
      * Holds additional references that will be cleaned
      * @item_type ?
      */
-     struct yf_list garbage;
+    struct yf_list garbage;
 
 };
 

@@ -6,13 +6,13 @@
 
 int yfg_ctype(int len, char * buf, struct yfs_type * type) {
 
-    if (type->kind != YFST_PRIMITIVE) {
+    if (type->kind != YFS_T_PRIMITIVE) {
         return -1; /* No can do */
     }
 
     if (type->primitive.size >= 8) {
         /* Because stdint is #include'd, we can just print int[blank]_t. */
-        if (type->primitive.type == YFS_INT) {
+        if (type->primitive.type == YFS_F_INT) {
             snprintf(
                 buf, len, "int%d_t",
                 type->primitive.size

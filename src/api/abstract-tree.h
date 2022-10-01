@@ -25,8 +25,8 @@ struct yfa_value {
      * (like 2 or 57).
      */
     enum yfav_type {
-        YFA_IDENT,
-        YFA_LITERAL,
+        YFA_V_IDENT,
+        YFA_V_LITERAL,
     } type;
 
     /**
@@ -39,8 +39,8 @@ struct yfa_value {
         struct yf_sym * identifier;
         struct {
             enum yfa_lit_type {
-                YFAL_NUM,
-                YFAL_BOOL,
+                YFA_L_NUM,
+                YFA_L_BOOL,
             } type;
             union {
                 int val;
@@ -75,9 +75,9 @@ struct yfa_expr {
     } as;
 
     enum {
-        YFA_VALUE,
-        YFA_BINARY,
-        YFA_FUNCCALL,
+        YFA_E_VALUE,
+        YFA_E_BINARY,
+        YFA_E_FUNCCALL,
     } type;
     
 };

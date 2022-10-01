@@ -46,8 +46,8 @@ struct yfcs_literal {
 struct yfcs_value {
 
     enum {
-        YFCS_IDENT,
-        YFCS_LITERAL,
+        YFCS_V_IDENT,
+        YFCS_V_LITERAL,
     } type;
 
     union {
@@ -85,9 +85,9 @@ struct yfcs_expr {
     };
 
     enum {
-        YFCS_VALUE,
-        YFCS_BINARY,
-        YFCS_FUNCCALL,
+        YFCS_E_VALUE,
+        YFCS_E_BINARY,
+        YFCS_E_FUNCCALL,
     } type;
     
 };

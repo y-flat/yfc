@@ -147,8 +147,8 @@ static void yf_dump_expr(struct yfcs_expr * node, FILE * out) {
     indent();
 
     switch (node->type) {
-    case YFCS_VALUE:
-        if (node->value.type != YFCS_IDENT)
+    case YFCS_E_VALUE:
+        if (node->value.type != YFCS_V_IDENT)
             yf_print_line(out, "value: %s",
                 node->value.literal.value
             );
@@ -157,7 +157,7 @@ static void yf_dump_expr(struct yfcs_expr * node, FILE * out) {
                 node->value.identifier.filepath, node->value.identifier.name
             );
         break;
-    case YFCS_BINARY:
+    case YFCS_E_BINARY:
         yf_print_line(out,
             "operator: %s", get_op_string(node->binary.op)
         );
@@ -166,7 +166,7 @@ static void yf_dump_expr(struct yfcs_expr * node, FILE * out) {
         yf_print_line(out, "right:");
         yf_dump_expr(&node->binary.right->expr, out);
         break;
-    case YFCS_FUNCCALL:
+    case YFCS_E_FUNCCALL:
         yf_print_line(
             out, "function name: %s::%s",
             node->call.name.filepath, node->call.name.name

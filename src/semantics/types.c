@@ -14,7 +14,7 @@ enum yfs_conversion_allowedness yfs_is_safe_conversion(
 
     /* User-defined types don't exist yet, and once they do, conversion won't
     exist (for now). */
-    if (from->kind != YFST_PRIMITIVE)
+    if (from->kind != YFS_T_PRIMITIVE)
         return YFS_CONVERSION_INVALID;
 
     f = &from->primitive;
@@ -52,7 +52,7 @@ struct yfs_type * yfse_get_expr_type(
     struct yfa_value * v;
 
     switch (expr->type) {
-    case YFA_BINARY:
+    case YFA_E_BINARY:
 
         ltype = yfse_get_expr_type(expr->as.binary.left, fdata);
         rtype = yfse_get_expr_type(expr->as.binary.right, fdata);
@@ -76,15 +76,15 @@ struct yfs_type * yfse_get_expr_type(
         }
         break;
 
-    case YFA_VALUE:
+    case YFA_E_VALUE:
         v = &expr->as.value;
-        if (v->type == YFA_IDENT) {
+        if (v->type == YFA_V_IDENT) {
             return v->as.identifier->var.dtype;
         } else {
             switch (v->as.literal.type) {
-            case YFAL_NUM:
+            case YFA_L_NUM:
                 return yfv_get_type_s(fdata, "int");
-            case YFAL_BOOL:
+            case YFA_L_BOOL:
                 return yfv_get_type_s(fdata, "bool");
             default:
                 YF_PRINT_ERROR("panic: Unknown literal type");
@@ -92,7 +92,7 @@ struct yfs_type * yfse_get_expr_type(
             }
         }
         break;
-    case YFA_FUNCCALL:
+    case YFA_E_FUNCCALL:
         return expr->as.call.name->fn.rtype;
     }
 

@@ -138,12 +138,12 @@ static void yf_gen_expr(
     fprintf(out, "(");
 
     switch (node->type) {
-        case YFA_VALUE:
+        case YFA_E_VALUE:
             switch (node->as.value.type) {
-                case YFA_LITERAL:
+                case YFA_V_LITERAL:
                     fprintf(out, "%d", node->as.value.as.literal.val);
                     break;
-                case YFA_IDENT:
+                case YFA_V_IDENT:
                     fprintf(
                         out, "%s$$%s",
                         i->gen_prefix,
@@ -152,12 +152,12 @@ static void yf_gen_expr(
                     break;
             }
             break;
-        case YFA_BINARY:
+        case YFA_E_BINARY:
             yf_gen_expr(node->as.binary.left, out, i);
             fprintf(out, " %s ", get_op_string(node->as.binary.op));
             yf_gen_expr(node->as.binary.right, out, i);
             break;
-        case YFA_FUNCCALL:
+        case YFA_E_FUNCCALL:
             fprintf(
                 out, "%s$$%s(",
                 i->gen_prefix, node->as.call.name->fn.name

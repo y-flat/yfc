@@ -7,12 +7,12 @@ int validate_if(
     struct yfs_type * type,
     int * returns
 ) {
-    
+
     struct yfcs_if * c = &cin->ifstmt;
     struct yfa_if  * a = &ain->ifstmt;
     int if_always_returns = 0, else_always_returns = 0;
     struct yfs_type * t;
-    
+
     ain->type = YFA_IF;
 
     a->cond = yf_malloc(sizeof (struct yf_ast_node));

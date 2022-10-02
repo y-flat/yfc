@@ -47,15 +47,15 @@ void yf_cleanup_anode(struct yf_ast_node * node, int free_node) {
 void yf_cleanup_aexpr(struct yfa_expr * node) {
     struct yf_ast_node * anode;
     switch (node->type) {
-    case YFA_VALUE:
+    case YFA_E_VALUE:
         break;
-    case YFA_BINARY:
+    case YFA_E_BINARY:
         yf_cleanup_aexpr(node->as.binary.left);
         yf_free(node->as.binary.left);
         yf_cleanup_aexpr(node->as.binary.right);
         yf_free(node->as.binary.right);
         break;
-    case YFA_FUNCCALL: {
+    case YFA_E_FUNCCALL: {
         YF_LIST_FOREACH(node->as.call.args, anode) {
             if (anode)
                 yf_cleanup_anode(anode, 1);
@@ -163,13 +163,13 @@ void yf_cleanup_cnode(struct yf_parse_node * node, int free_node) {
 void yf_cleanup_cexpr(struct yfcs_expr * node) {
     struct yf_parse_node * cnode;
     switch (node->type) {
-    case YFCS_VALUE:
+    case YFCS_E_VALUE:
         break;
-    case YFCS_BINARY:
+    case YFCS_E_BINARY:
         yf_cleanup_cnode(node->binary.left, 1);
         yf_cleanup_cnode(node->binary.right, 1);
         break;
-    case YFA_FUNCCALL: {
+    case YFCS_E_FUNCCALL: {
         YF_LIST_FOREACH(node->call.args, cnode) {
             if (cnode)
                 yf_cleanup_cnode(cnode, 1);

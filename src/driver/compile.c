@@ -364,7 +364,7 @@ static int yf_compile_project(struct yf_args * args, struct yf_compilation_data 
 }
 
 static int yf_compile_files(struct yf_args * args, struct yf_compilation_data * compilation) {
-    
+
     struct yf_project_compilation_data data;
     struct yf_compilation_unit_info * fdata;
     int i;

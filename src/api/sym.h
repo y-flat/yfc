@@ -17,9 +17,9 @@
  * What 'kind' of number does a primitive type represent?
  */
 enum yfpt_format {
-    YFS_INT, /* NOT just "int", but a whole number. */
-    YFS_FLOAT, /* ANY number with a decimal part. */
-    YFS_NONE,
+    YFS_F_INT, /* NOT just "int", but a whole number. */
+    YFS_F_FLOAT, /* ANY number with a decimal part. */
+    YFS_F_NONE,
 };
 
 struct yfs_primitive_type {
@@ -36,7 +36,7 @@ struct yfs_type {
     };
 
     enum {
-        YFST_PRIMITIVE,
+        YFS_T_PRIMITIVE,
     } kind;
 
     char * name; /* Name of the type */

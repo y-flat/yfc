@@ -11,7 +11,7 @@ static void add_type(
 
     struct yfs_type * type = yf_malloc(sizeof (struct yfs_type));
     type->primitive.size = size;
-    type->kind = YFST_PRIMITIVE;
+    type->kind = YFS_T_PRIMITIVE;
     type->primitive.type = fmt;
     type->name = name;
     yfv_add_type(udata, type);
@@ -23,24 +23,24 @@ static void yfv_add_builtin_types(struct yf_compile_analyse_job * udata) {
     /* All types are signed for now - unsigned types are not yet supported. */
 
     /* "standard" types. */
-    add_type(udata, "char",        8, YFS_INT  );
-    add_type(udata, "short",      16, YFS_INT  );
-    add_type(udata, "int",        32, YFS_INT  );
-    add_type(udata, "long",       64, YFS_INT  );
-    add_type(udata, "void",        0, YFS_NONE );
-    add_type(udata, "float",      32, YFS_FLOAT);
-    add_type(udata, "double",     64, YFS_FLOAT);
+    add_type(udata, "char",        8, YFS_F_INT  );
+    add_type(udata, "short",      16, YFS_F_INT  );
+    add_type(udata, "int",        32, YFS_F_INT  );
+    add_type(udata, "long",       64, YFS_F_INT  );
+    add_type(udata, "void",        0, YFS_F_NONE );
+    add_type(udata, "float",      32, YFS_F_FLOAT);
+    add_type(udata, "double",     64, YFS_F_FLOAT);
 
     /* Convenience types. */
-    add_type(udata, "i16",        16, YFS_INT  );
-    add_type(udata, "i32",        32, YFS_INT  );
-    add_type(udata, "i64",        64, YFS_INT  );
-    add_type(udata, "f16",        16, YFS_FLOAT);
-    add_type(udata, "f32",        32, YFS_FLOAT);
-    add_type(udata, "f64",        64, YFS_FLOAT);
+    add_type(udata, "i16",        16, YFS_F_INT  );
+    add_type(udata, "i32",        32, YFS_F_INT  );
+    add_type(udata, "i64",        64, YFS_F_INT  );
+    add_type(udata, "f16",        16, YFS_F_FLOAT);
+    add_type(udata, "f32",        32, YFS_F_FLOAT);
+    add_type(udata, "f64",        64, YFS_F_FLOAT);
 
     /* We're considering bool to be one bit for conversion purposes. */
-    add_type(udata, "bool",       1,  YFS_INT  );
+    add_type(udata, "bool",       1,  YFS_F_INT  );
 
 }
 

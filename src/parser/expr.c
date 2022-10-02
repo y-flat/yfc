@@ -40,7 +40,7 @@ int yfp_atomic_expr(struct yf_parse_node * node, struct yf_lexer * lexer) {
         /* If it's an opening paren, we have a funccall: [identifier] "(" [...
          * ... */
         if (tok.type == YFT_OPAREN) {
-            node->expr.type = YFCS_FUNCCALL;
+            node->expr.type = YFCS_E_FUNCCALL;
             memcpy(
                 &node->expr.call.name,
                 &ident,
@@ -49,8 +49,8 @@ int yfp_atomic_expr(struct yf_parse_node * node, struct yf_lexer * lexer) {
             return yfp_funccall(node, lexer);
         } else {
             /* No we don't. */
-            node->expr.type = YFCS_VALUE;
-            node->expr.value.type = YFCS_IDENT;
+            node->expr.type = YFCS_E_VALUE;
+            node->expr.value.type = YFCS_V_IDENT;
             memcpy(
                 &node->expr.value.identifier,
                 &ident,
@@ -59,11 +59,11 @@ int yfp_atomic_expr(struct yf_parse_node * node, struct yf_lexer * lexer) {
         }
         break;
     case YFT_LITERAL:
-    node->expr.type = YFCS_VALUE;
+    node->expr.type = YFCS_E_VALUE;
         strcpy(
             node->expr.value.literal.value, tok.data
         );
-        node->expr.value.type = YFCS_LITERAL;
+        node->expr.value.type = YFCS_V_LITERAL;
         break;
     case YFT_OPAREN:
         if (yfp_expr(node, lexer, 0, NULL))
@@ -180,7 +180,7 @@ static int yfp_sort_expr_tree(
         return 0;
     }
     if (num_nodes == 2) {
-        node->type = YFCS_BINARY;
+        node->type = YFCS_E_BINARY;
         node->binary.op = operators[0];
         node->binary.left = yf_malloc(sizeof(struct yf_parse_node));
         node->binary.right = yf_malloc(sizeof(struct yf_parse_node));
@@ -213,7 +213,7 @@ static int yfp_sort_expr_tree(
     n_node->loc = operator_lines[index];
 
     /* Now that we have our splitting location, we recurse. */
-    node->type = YFCS_BINARY;
+    node->type = YFCS_E_BINARY;
     node->binary.left = yf_malloc(sizeof(struct yf_parse_node));
     node->binary.right = yf_malloc(sizeof(struct yf_parse_node));
     if (!node->binary.left || !node->binary.right) {

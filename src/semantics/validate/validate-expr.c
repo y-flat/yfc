@@ -27,7 +27,7 @@ static int validate_value(
     char dig;
 
     /* If an identifier, make sure it actually exists. */
-    if (c->type == YFCS_IDENT) {
+    if (c->type == YFCS_V_IDENT) {
         if (find_symbol(
             validator,
             &a->as.identifier,
@@ -43,15 +43,15 @@ static int validate_value(
             );
             return 1;
         }
-        a->type = YFA_IDENT;
+        a->type = YFA_V_IDENT;
     } else {
 
-        a->type = YFA_LITERAL;
+        a->type = YFA_V_LITERAL;
 
         if (isdigit(c->literal.value[0])) {
 
             /* Parse integer literal */
-            a->as.literal.type = YFAL_NUM;
+            a->as.literal.type = YFA_L_NUM;
             a->as.literal.val = 0;
 
             for (intparse = c->literal.value; *intparse; ++intparse) {
@@ -75,12 +75,12 @@ static int validate_value(
 
         /* Check for 'true' or 'false' */
         if (strcmp(c->literal.value, "true") == 0) {
-            a->as.literal.type = YFAL_BOOL;
+            a->as.literal.type = YFA_L_BOOL;
             a->as.literal.val = 1;
             return 0;
         }
         if (strcmp(c->literal.value, "false") == 0) {
-            a->as.literal.type = YFAL_BOOL;
+            a->as.literal.type = YFA_L_BOOL;
             a->as.literal.val = 0;
             return 0;
         }
@@ -98,14 +98,14 @@ static int validate_binary(
 ) {
     /* First, if it's an assignment, the left side is a variable. */
     if (yfo_is_assign(c->op)) {
-        if (c->left->type != YFCS_VALUE) {
+        if (c->left->expr.type != YFCS_E_VALUE) {
             YF_PRINT_ERROR(
                 "%s %d:%d: Left side of assignment must not be compound",
                 loc->file, loc->line, loc->column
             );
             return 1;
         }
-        if (c->left->expr.value.type != YFCS_IDENT) {
+        if (c->left->expr.value.type != YFCS_V_IDENT) {
             YF_PRINT_ERROR(
                 "%s %d:%d: Left side of assignment must be an identifier",
                 loc->file, loc->line, loc->column
@@ -278,16 +278,16 @@ static int validate_expr_e(
     /* If this is unary - (just a value), ... */
     switch (c->type) {
 
-    case YFCS_VALUE:
-        a->type = YFA_VALUE;
+    case YFCS_E_VALUE:
+        a->type = YFA_E_VALUE;
         return validate_value(validator, &c->value, &a->as.value, loc);
 
-    case YFCS_BINARY:
-        a->type = YFA_BINARY;
+    case YFCS_E_BINARY:
+        a->type = YFA_E_BINARY;
         return validate_binary(validator, &c->binary, &a->as.binary, loc);
 
-    case YFCS_FUNCCALL:
-        a->type = YFA_FUNCCALL;
+    case YFCS_E_FUNCCALL:
+        a->type = YFA_E_FUNCCALL;
         return validate_funccall(validator, &c->call, &a->as.call, loc);
     }
 

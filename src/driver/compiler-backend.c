@@ -152,7 +152,8 @@ char * yf_backend_add_compile_job(
     struct yf_compilation_unit_info * unit
 ) {
 
-    create_output_file_name(unit, args);
+    if (!unit->output_file || strlen(unit->output_file) == 0)
+        create_output_file_name(unit, args);
 
     struct yf_compile_exec_job * cjob;
 
@@ -282,7 +283,10 @@ int yf_ensure_entry_point(
 
     }
 
-    return total_entries == 1;
+    if (total_entries != 1)
+        YF_PRINT_ERROR("total 'main' functions found: %d\n", total_entries);
+
+    return total_entries != 1;
 
 }
 

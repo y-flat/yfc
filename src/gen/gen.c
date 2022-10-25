@@ -2,6 +2,7 @@
 
 #include <stdarg.h>
 #include <stdio.h>
+#include <string.h> /* strcmp */
 
 #include <api/abstract-tree.h>
 #include <api/operator.h>
@@ -102,14 +103,27 @@ static void yf_gen_funcdecl(
     char typebuf[256];
     yfg_ctype(256, typebuf, node->name->fn.rtype);
 
-    fprintf(
-        out, "%s /* %s */ %s$$%s",
-        typebuf,
-        node->name->fn.rtype->name,
-        i->gen_prefix,
-        node->name->fn.name
-    );
-    fprintf(out, "(");
+    /* Hacky fix -- but it should work. */
+    /* We need to check if the function is called "main" because the C compiler
+    expects a main function called 'main', not the "normal" compiler output form
+    along the lines of "path$to$file$$main". */
+
+    /* TODO -- generate the correct cmdargs for this function. */
+    /* TODO -- (elsewhere) check the args for main in Y-flat */
+
+    if (strcmp(node->name->fn.name, "main")) {
+        fprintf(
+            out, "%s /* %s */ %s$$%s",
+            typebuf,
+            node->name->fn.rtype->name,
+            i->gen_prefix,
+            node->name->fn.name
+        );
+    } else {
+        fprintf(out, "int main");
+    }
+
+        fprintf(out, "(");
 
     /* Generate param list */
 

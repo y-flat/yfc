@@ -73,10 +73,11 @@ static int create_output_file_name(
         strcpy(data->output_file, "bin/c/");
         namebuf_copyloc = data->file_name + strlen("src/");
         strcat(data->output_file, namebuf_copyloc);
+        int len = strlen(data->file_name);
         /* Change .yf to .c */
         /* FIRST, check for .yf ending */
-        if (strlen(data->output_file) > 3 &&
-            strcmp(data->output_file + strlen(data->output_file) - 3, ".yf") == 0) {
+        if (len < 3 ||
+            strcmp(data->file_name + len - 3, ".yf") != 0) {
             /* Simply tack on .c */
             /* But no .yf is bad */
             strcat(data->output_file, ".c");
@@ -84,7 +85,7 @@ static int create_output_file_name(
                 "file %s does not end with .yf", data->output_file
             );
         } else {
-            strcpy(data->output_file + strlen(namebuf_copyloc) - 2, "c");
+            strcpy(data->output_file + len, "c");
         }
     } else {
         /* Replace .yf with .c */

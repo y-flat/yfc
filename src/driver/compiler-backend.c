@@ -168,13 +168,14 @@ char * yf_backend_add_compile_job(
     cjob->job.type = YF_COMPILATION_EXEC;
 
     /* Where gcc -c foo.c -o foo.o is stored */
-    cjob->command = malloc(sizeof(const char *) * 6);
+    cjob->command = malloc(sizeof(const char *) * 7);
     cjob->command[0] = args->selected_compiler;
     cjob->command[1] = "-c";
     cjob->command[2] = unit->output_file;
     cjob->command[3] = "-o";
     cjob->command[4] = object_file;
-    cjob->command[5] = NULL;
+    cjob->command[5] = "-fdollars-in-identifiers";
+    cjob->command[6] = NULL;
 
     yf_list_add(&compilation->jobs, cjob);
 

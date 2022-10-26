@@ -104,7 +104,7 @@ static int create_output_file_name(
                 "file %s does not end with .yf", data->output_file
             );
         } else {
-            strcpy(data->output_file + len, "c");
+            strcpy(data->output_file + len - 2, "c");
         }
     }
 

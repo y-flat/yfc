@@ -25,7 +25,8 @@ enum yf_compilation_stage {
     YF_COMPILE_LEXONLY,
     YF_COMPILE_PARSEONLY,
     YF_COMPILE_ANALYSEONLY,
-    YF_COMPILE_CODEGEN,
+    YF_COMPILE_CODEGENONLY,
+    YF_COMPILE_FULL,
 };
 
 struct yf_compilation_job {

@@ -57,7 +57,10 @@ static void yf_dump_compile_job(struct yf_compile_analyse_job * job, const char 
         case YF_COMPILE_ANALYSEONLY:
             fputs(" (ANALYSE) ", YF_OUTPUT_STREAM);
             break;
-        case YF_COMPILE_CODEGEN:
+        case YF_COMPILE_CODEGENONLY:
+            fputs(" (OUTPUT) ", YF_OUTPUT_STREAM);
+            break;
+        case YF_COMPILE_FULL:
             fputs(" (COMPILE) ", YF_OUTPUT_STREAM);
             break;
     }
@@ -121,6 +124,9 @@ int yf_run_compiler(struct yf_args * args) {
                 break;
 
             case YF_COMPILATION_EXEC:
+                /* Extra sanity check. */
+                if (!args->run_c_comp)
+                    break;
                 if (args->dump_commands) {
                     yf_print_command((struct yf_compile_exec_job *)job);
                 }
@@ -178,7 +184,8 @@ static int yf_create_compiler_jobs(
             args->tdump          ? YF_COMPILE_LEXONLY     :
             args->cstdump        ? YF_COMPILE_PARSEONLY   :
             args->just_semantics ? YF_COMPILE_ANALYSEONLY :
-                YF_COMPILE_CODEGEN;
+           !args->run_c_comp     ? YF_COMPILE_CODEGENONLY :
+                                   YF_COMPILE_FULL;
 
         yfh_cursor_set(&cursor, ujob); // Set the job for further stages
         yf_list_add(&compilation->jobs, ujob);
@@ -194,14 +201,14 @@ static int yf_create_compiler_jobs(
         cjob->unit = ujob;
         yf_list_add(&compilation->jobs, cjob);
 
-        if (ujob->stage >= YF_COMPILE_CODEGEN && args->run_c_comp) {
+        if (ujob->stage >= YF_COMPILE_CODEGENONLY && args->run_c_comp) {
             char * object_file = yf_backend_add_compile_job(compilation, args, ujob->unit_info);
             yf_list_add(&link_objs, object_file);
             has_compiled_files = true;
         }
     }
 
-    if (has_compiled_files) {
+    if (has_compiled_files && ujob->stage >= YF_COMPILE_FULL) {
         yf_backend_add_link_job(compilation, args, &link_objs);
     }
 
@@ -411,14 +418,9 @@ static int yfc_validate_compile(
     if (retval)
         return retval;
 
-    if (yf_ensure_entry_point(pdata)) {
-        /* TODO - a more helpful error messsage */
-        YF_PRINT_ERROR("Expected exactly 1 'main' function.");
-        return 1;
-    }
-
-    if (adata->stage >= YF_COMPILE_CODEGEN)
+    if (adata->stage >= YF_COMPILE_CODEGENONLY) {
         retval = yf_backend_generate_code(adata);
+    }
 
     return retval;
 

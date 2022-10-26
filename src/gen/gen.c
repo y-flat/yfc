@@ -242,10 +242,8 @@ int yfg_gen(struct yf_compile_analyse_job * data, struct yf_gen_info * info) {
      * all slashes from left to right, and do this recursively.
      */
     char * slashloc = data->unit_info->output_file;
-    while (1) {
+    while (slashloc) {
         slashloc = strchr(slashloc, '/');
-        if (!slashloc)
-            break;
         *slashloc = '\0';
         mkdir(data->unit_info->output_file, 0755);
         /* Now, we move the loc one forward, and search for the new slash. */

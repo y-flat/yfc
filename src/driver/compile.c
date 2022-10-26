@@ -137,6 +137,7 @@ int yf_run_compiler(struct yf_args * args) {
 
     yf_cleanup(&compilation);
     yf_free((void *)args->selected_compiler);
+    yf_list_destroy(&args->files, false);
 
     return res;
 

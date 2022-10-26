@@ -201,7 +201,7 @@ static int yf_create_compiler_jobs(
         cjob->unit = ujob;
         yf_list_add(&compilation->jobs, cjob);
 
-        if (ujob->stage >= YF_COMPILE_CODEGENONLY && args->run_c_comp) {
+        if (ujob->stage >= YF_COMPILE_CODEGENONLY) {
             char * object_file = yf_backend_add_compile_job(compilation, args, ujob->unit_info);
             yf_list_add(&link_objs, object_file);
             has_compiled_files = true;

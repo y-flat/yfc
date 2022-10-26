@@ -323,7 +323,7 @@ static int yf_compile_project(struct yf_args * args, struct yf_compilation_data 
 
     /**
      * Project name is the current directory, PLUS its own name. So the project
-     * in ~/yflat/project/ compiles to ~/yflat/project .
+     * in ~/yflat/project/ compiles to ~/yflat/project/project .
      * TODO -- give user control over the name
      * TODO -- make less OS-specific
      */

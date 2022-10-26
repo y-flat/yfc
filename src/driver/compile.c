@@ -322,13 +322,25 @@ static int yf_compile_project(struct yf_args * args, struct yf_compilation_data 
     struct yf_compilation_unit_info * fdata;
 
     /**
-     * Project name is current directory
+     * Project name is the current directory, PLUS its own name. So the project
+     * in ~/yflat/project/ compiles to ~/yflat/project .
+     * TODO -- give user control over the name
+     * TODO -- make less OS-specific
      */
     data.project_name = yf_malloc(256);
     if (!getcwd(data.project_name, 256)) {
         YF_PRINT_ERROR("Couldn't start compilation: path name is too long");
         return 1;
     }
+    /* TODO -- consider that getcwd might return a name ending with a slash? */
+    char * copyloc = strrchr(data.project_name, '/');
+    if (copyloc == NULL) {
+        YF_PRINT_ERROR("The current working directory is invalid");
+        return 1;
+    }
+    /* TODO -- overflow check */
+    int end = strlen(data.project_name);
+    memmove(data.project_name + end, copyloc, strlen(copyloc) + 1);
 
     yfh_init(&data.files);
     if (yf_find_project_files(&data)) {

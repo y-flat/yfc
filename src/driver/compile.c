@@ -356,7 +356,6 @@ static int yf_compile_project(struct yf_args * args, struct yf_compilation_data 
                 );
             }
         }
-        return 0;
     }
 
     return yf_create_compiler_jobs(compilation, &data, args);
@@ -367,17 +366,17 @@ static int yf_compile_files(struct yf_args * args, struct yf_compilation_data * 
 
     struct yf_project_compilation_data data;
     struct yf_compilation_unit_info * fdata;
-    int i;
+    char * fname;
 
     /* No project name */
     data.project_name = NULL;
 
     yfh_init(&data.files);
 
-    for (i = 0; i < args->num_files; ++i) {
+    YF_LIST_FOREACH(args->files, fname) {
         fdata = malloc(sizeof(struct yf_compilation_unit_info));
         memset(fdata, 0, sizeof (struct yf_compilation_unit_info));
-        fdata->file_name = yf_strdup(args->files[i]);
+        fdata->file_name = yf_strdup(fname);
         fdata->parse_anew = 1;
         /* TODO - more data */
         yfh_set(&data.files, fdata->file_name, fdata);

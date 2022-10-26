@@ -7,6 +7,8 @@
 
 #include <stdbool.h>
 
+#include <util/list.h>
+
 /**
  * Any of the possible outputs wanted.
  */
@@ -51,10 +53,10 @@ struct yf_args {
     enum yf_compiler_class compiler_class;
 
     /**
-     * The indiviidual files to compile, as well as how many files.
+     * The indiviidual files to compile.
+     * @item_type char *
      */
-    char * files[16];
-    int num_files;
+    struct yf_list files;
 
     /**
      * Project flag, for if we're doing project setup and compiling all files in

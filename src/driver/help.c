@@ -13,6 +13,7 @@ const char
       "--dump-tokens: Test lexer by printing out all tokens.\n"
       "--dump-cst: Test parser by printing out the CST.\n"
       "--just-semantics: Only verify the code, do not generate it.\n"
+      "--just-gen: Generate the code but don't compile the C.\n"
       "--benchmark: Print out time taken for each step.\n"
       "--dump-projfiles: Print out all files in a project.\n"
       "--dump-commands: Show all compiler invocations.\n"

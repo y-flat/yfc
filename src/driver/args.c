@@ -108,7 +108,7 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
         if (arg[0] == '-') {
             ++arg;
             if (!arg[1]) {
-                if (arg[0] == 'h') {
+                if (arg[0] == 'h' || arg[0] == '?') {
                     yf_check_action(args, YF_HELP);
                     continue;
                 }

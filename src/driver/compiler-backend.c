@@ -92,16 +92,19 @@ static int create_output_file_name(
         /* TODO - reduce code copying from above */
         namebuf_copyloc = data->file_name;
         strcat(data->output_file, namebuf_copyloc);
-        if (strlen(data->output_file) > 3 &&
-            strcmp(data->output_file + strlen(data->output_file) - 3, ".yf")) {
+        int len = strlen(data->file_name);
+        /* Change .yf to .c */
+        /* FIRST, check for .yf ending */
+        if (len < 3 ||
+            strcmp(data->file_name + len - 3, ".yf") != 0) {
             /* Simply tack on .c */
             /* But no .yf is bad */
+            strcat(data->output_file, ".c");
             YF_PRINT_WARNING(
                 "file %s does not end with .yf", data->output_file
             );
-            strcat(data->output_file, ".c");
         } else {
-            strcpy(data->output_file + strlen(namebuf_copyloc) - 2, "c");
+            strcpy(data->output_file + len, "c");
         }
     }
 

@@ -416,6 +416,9 @@ static int yfc_validate_compile(
         return retval;
 
     if (adata->stage >= YF_COMPILE_CODEGENONLY) {
+        if (yf_ensure_entry_point(pdata)) {
+            return 1;
+        }
         retval = yf_backend_generate_code(adata);
     }
 

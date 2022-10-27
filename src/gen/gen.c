@@ -239,7 +239,7 @@ static void yf_gen_if(
  * However, we have to create ALL enclosing folders first, so we need to get
  * all slashes from left to right, and do this recursively.
  */
-int create_all_parent_dirs(char * path) {
+static int create_all_parent_dirs(char * path) {
     char * slashloc = path;
     while (slashloc) {
         slashloc = strchr(slashloc, '/');

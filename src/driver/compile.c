@@ -416,6 +416,8 @@ static int yfc_validate_compile(
         return retval;
 
     if (adata->stage >= YF_COMPILE_CODEGENONLY) {
+        /* This check must go inside and return, or else we get errors about it
+        once for every file. */
         if (yf_ensure_entry_point(pdata)) {
             return 1;
         }

@@ -231,27 +231,32 @@ static void yf_gen_if(
     }
 }
 
-int yfg_gen(struct yf_compile_analyse_job * data, struct yf_gen_info * info) {
-
-    /**
-     * Because we create the output file in the form of 'bin/c/foo/bar/baz.yf',
-     * we need to first mkdir() the enclosing directory, if it doesn't already
-     * exist. To do that, we would replace the last slash with a \0, mkdir() the
-     * path, and set it back.
-     * However, we have to create ALL enclosing folders first, so we need to get
-     * all slashes from left to right, and do this recursively.
-     */
-    char * slashloc = data->unit_info->output_file;
+/**
+ * Because we create the output file in the form of 'bin/c/foo/bar/baz.yf',
+ * we need to first mkdir() the enclosing directory, if it doesn't already
+ * exist. To do that, we would replace the last slash with a \0, mkdir() the
+ * path, and set it back.
+ * However, we have to create ALL enclosing folders first, so we need to get
+ * all slashes from left to right, and do this recursively.
+ */
+int create_all_parent_dirs(char * path) {
+    char * slashloc = path;
     while (slashloc) {
         slashloc = strchr(slashloc, '/');
         if (!slashloc)
             break;
         *slashloc = '\0';
-        mkdir(data->unit_info->output_file, 0755);
+        mkdir(path, 0755);
         /* Now, we move the loc one forward, and search for the new slash. */
         *slashloc = '/';
         ++slashloc;
     }
+    return 0;
+}
+
+int yfg_gen(struct yf_compile_analyse_job * data, struct yf_gen_info * info) {
+
+    create_all_parent_dirs(data->unit_info->output_file);
 
     FILE * out;
     out = fopen(data->unit_info->output_file, "w");

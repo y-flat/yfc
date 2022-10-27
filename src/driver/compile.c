@@ -124,9 +124,6 @@ int yf_run_compiler(struct yf_args * args) {
                 break;
 
             case YF_COMPILATION_EXEC:
-                /* Extra sanity check. */
-                if (!args->run_c_comp)
-                    break;
                 if (args->dump_commands) {
                     yf_print_command((struct yf_compile_exec_job *)job);
                 }

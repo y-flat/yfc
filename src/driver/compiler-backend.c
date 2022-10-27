@@ -80,10 +80,10 @@ static int create_output_file_name(
             strcmp(data->file_name + len - 3, ".yf") != 0) {
             /* Simply tack on .c */
             /* But no .yf is bad */
-            strcat(data->output_file, ".c");
             YF_PRINT_WARNING(
                 "file %s does not end with .yf", data->output_file
             );
+            strcat(data->output_file, ".c");
         } else {
             strcpy(data->output_file + len, "c");
         }
@@ -99,10 +99,10 @@ static int create_output_file_name(
             strcmp(data->file_name + len - 3, ".yf") != 0) {
             /* Simply tack on .c */
             /* But no .yf is bad */
-            strcat(data->output_file, ".c");
             YF_PRINT_WARNING(
                 "file %s does not end with .yf", data->output_file
             );
+            strcat(data->output_file, ".c");
         } else {
             strcpy(data->output_file + len - 2, "c");
         }

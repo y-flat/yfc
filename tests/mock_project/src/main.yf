@@ -1,0 +1,5 @@
+~~ Test project: multiple files ~~
+
+main() {
+    x: int = path.to.file::foo();
+}

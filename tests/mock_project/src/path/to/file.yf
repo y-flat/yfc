@@ -1,0 +1,5 @@
+~~ Simple function import test ~~
+
+foo(): int {
+    return 5;
+}

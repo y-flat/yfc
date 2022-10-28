@@ -13,6 +13,7 @@ const char
       "--dump-tokens: Print out all tokens and exit.\n"
       "--dump-cst: Print out the CST and exit.\n"
       "--just-semantics: Only verify the program, do not run generation.\n"
+      "--just-gen: Generate the code but don't compile the C.\n"
       "--benchmark: Print out time taken for each step.\n"
       "--dump-projfiles: Print out all files in a project.\n"
       "--dump-commands: Print all compiler invocations.\n"

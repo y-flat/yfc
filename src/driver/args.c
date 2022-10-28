@@ -64,6 +64,7 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
     /* Zero the args structure. */
     memset(args, 0, sizeof *args);
     args->wanted_output = YF_NONE;
+    args->run_c_comp = true;
     yf_list_init(&args->files);
 
     /* Start at 1 - avoid program name */
@@ -158,6 +159,11 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
                     yf_set_error(args);
                     return;
                 }
+                continue;
+            }
+
+            if (STREQ(arg, "just-gen")) {
+                args->run_c_comp = false;
                 continue;
             }
 

@@ -57,7 +57,10 @@ static void yf_dump_compile_job(struct yf_compile_analyse_job * job, const char 
         case YF_COMPILE_ANALYSEONLY:
             fputs(" (ANALYSE) ", YF_OUTPUT_STREAM);
             break;
-        case YF_COMPILE_CODEGEN:
+        case YF_COMPILE_CODEGENONLY:
+            fputs(" (OUTPUT) ", YF_OUTPUT_STREAM);
+            break;
+        case YF_COMPILE_FULL:
             fputs(" (COMPILE) ", YF_OUTPUT_STREAM);
             break;
     }
@@ -178,7 +181,8 @@ static int yf_create_compiler_jobs(
             args->tdump          ? YF_COMPILE_LEXONLY     :
             args->cstdump        ? YF_COMPILE_PARSEONLY   :
             args->just_semantics ? YF_COMPILE_ANALYSEONLY :
-                YF_COMPILE_CODEGEN;
+           !args->run_c_comp     ? YF_COMPILE_CODEGENONLY :
+                                   YF_COMPILE_FULL;
 
         yfh_cursor_set(&cursor, ujob); // Set the job for further stages
         yf_list_add(&compilation->jobs, ujob);
@@ -194,14 +198,14 @@ static int yf_create_compiler_jobs(
         cjob->unit = ujob;
         yf_list_add(&compilation->jobs, cjob);
 
-        if (ujob->stage >= YF_COMPILE_CODEGEN) {
+        if (ujob->stage >= YF_COMPILE_CODEGENONLY) {
             char * object_file = yf_backend_add_compile_job(compilation, args, ujob->unit_info);
             yf_list_add(&link_objs, object_file);
             has_compiled_files = true;
         }
     }
 
-    if (has_compiled_files) {
+    if (has_compiled_files && ujob->stage >= YF_COMPILE_FULL) {
         yf_backend_add_link_job(compilation, args, &link_objs);
     }
 
@@ -322,13 +326,25 @@ static int yf_compile_project(struct yf_args * args, struct yf_compilation_data 
     struct yf_compilation_unit_info * fdata;
 
     /**
-     * Project name is current directory
+     * Project name is the current directory, PLUS its own name. So the project
+     * in ~/yflat/project/ compiles to ~/yflat/project/project .
+     * TODO -- give user control over the name
+     * TODO -- make less OS-specific
      */
     data.project_name = yf_malloc(256);
     if (!getcwd(data.project_name, 256)) {
         YF_PRINT_ERROR("Couldn't start compilation: path name is too long");
         return 1;
     }
+    /* TODO -- consider that getcwd might return a name ending with a slash? */
+    char * copyloc = strrchr(data.project_name, '/');
+    if (copyloc == NULL) {
+        YF_PRINT_ERROR("The current working directory is invalid");
+        return 1;
+    }
+    /* TODO -- overflow check */
+    int end = strlen(data.project_name);
+    memmove(data.project_name + end, copyloc, strlen(copyloc) + 1);
 
     yfh_init(&data.files);
     if (yf_find_project_files(&data)) {
@@ -399,14 +415,14 @@ static int yfc_validate_compile(
     if (retval)
         return retval;
 
-    if (yf_ensure_entry_point(pdata)) {
-        /* TODO - a more helpful error messsage */
-        YF_PRINT_ERROR("Expected exactly 1 'main' function.");
-        return 1;
-    }
-
-    if (adata->stage >= YF_COMPILE_CODEGEN)
+    if (adata->stage >= YF_COMPILE_CODEGENONLY) {
+        /* This check must go inside and return, or else we get errors about it
+        once for every file. */
+        if (yf_ensure_entry_point(pdata)) {
+            return 1;
+        }
         retval = yf_backend_generate_code(adata);
+    }
 
     return retval;
 

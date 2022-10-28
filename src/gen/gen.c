@@ -2,6 +2,8 @@
 
 #include <stdarg.h>
 #include <stdio.h>
+#include <string.h> /* strcmp */
+#include <sys/stat.h>
 
 #include <api/abstract-tree.h>
 #include <api/operator.h>
@@ -102,14 +104,27 @@ static void yf_gen_funcdecl(
     char typebuf[256];
     yfg_ctype(256, typebuf, node->name->fn.rtype);
 
-    fprintf(
-        out, "%s /* %s */ %s$$%s",
-        typebuf,
-        node->name->fn.rtype->name,
-        i->gen_prefix,
-        node->name->fn.name
-    );
-    fprintf(out, "(");
+    /* Hacky fix -- but it should work. */
+    /* We need to check if the function is called "main" because the C compiler
+    expects a main function called 'main', not the "normal" compiler output form
+    along the lines of "path$to$file$$main". */
+
+    /* TODO -- generate the correct cmdargs for this function. */
+    /* TODO -- (elsewhere) check the args for main in Y-flat */
+
+    if (strcmp(node->name->fn.name, "main")) {
+        fprintf(
+            out, "%s /* %s */ %s$$%s",
+            typebuf,
+            node->name->fn.rtype->name,
+            i->gen_prefix,
+            node->name->fn.name
+        );
+    } else {
+        fprintf(out, "int main");
+    }
+
+        fprintf(out, "(");
 
     /* Generate param list */
 
@@ -216,7 +231,32 @@ static void yf_gen_if(
     }
 }
 
+/**
+ * Because we create the output file in the form of 'bin/c/foo/bar/baz.yf',
+ * we need to first mkdir() the enclosing directory, if it doesn't already
+ * exist. To do that, we would replace the last slash with a \0, mkdir() the
+ * path, and set it back.
+ * However, we have to create ALL enclosing folders first, so we need to get
+ * all slashes from left to right, and do this recursively.
+ */
+static int create_all_parent_dirs(char * path) {
+    char * slashloc = path;
+    while (slashloc) {
+        slashloc = strchr(slashloc, '/');
+        if (!slashloc)
+            break;
+        *slashloc = '\0';
+        mkdir(path, 0755);
+        /* Now, we move the loc one forward, and search for the new slash. */
+        *slashloc = '/';
+        ++slashloc;
+    }
+    return 0;
+}
+
 int yfg_gen(struct yf_compile_analyse_job * data, struct yf_gen_info * info) {
+
+    create_all_parent_dirs(data->unit_info->output_file);
 
     FILE * out;
     out = fopen(data->unit_info->output_file, "w");

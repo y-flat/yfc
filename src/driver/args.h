@@ -78,6 +78,11 @@ struct yf_args {
     bool just_semantics;
 
     /**
+     * Finally, do we compile the generated code?
+     */
+    bool run_c_comp;
+
+    /**
      * Should we be profiling how long it takes?
      */
     bool profile;

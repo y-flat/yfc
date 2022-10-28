@@ -71,6 +71,8 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
     memset(args, 0, sizeof *args);
     args->wanted_output = YF_NONE;
 
+    args->run_c_comp = true;
+
     /* Start at 1 - avoid program name */
     for (i = 1; i < argc; ++i) {
 
@@ -149,6 +151,11 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
             continue;
         }
 
+        if (STREQ(arg, "--just-gen")) {
+            args->run_c_comp = false;
+            continue;
+        }
+
         if (STREQ(arg, "--dump-tokens")) {
             if (args->cstdump || args->just_semantics) {
                 yf_set_error(args);
@@ -218,7 +225,7 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
 
     }
 
-    if (args->wanted_output == YF_NONE && !has_input_file) {
+    if (args->wanted_output == YF_NONE && (!has_input_file && !(args->project))) {
         args->error = 1;
         args->wanted_output = YF_ERROR_NO_ARGS;
     }

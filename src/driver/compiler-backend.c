@@ -73,26 +73,30 @@ static int create_output_file_name(
         strcpy(data->output_file, "bin/c/");
         namebuf_copyloc = data->file_name + strlen("src/");
         strcat(data->output_file, namebuf_copyloc);
+        int len = strlen(data->file_name);
         /* Change .yf to .c */
         /* FIRST, check for .yf ending */
-        if (strlen(data->output_file) > 3 &&
-            strcmp(data->output_file + strlen(data->output_file) - 3, ".yf") == 0) {
+        if (len < 3 ||
+            strcmp(data->file_name + len - 3, ".yf") != 0) {
             /* Simply tack on .c */
             /* But no .yf is bad */
-            strcat(data->output_file, ".c");
             YF_PRINT_WARNING(
                 "file %s does not end with .yf", data->output_file
             );
+            strcat(data->output_file, ".c");
         } else {
-            strcpy(data->output_file + strlen(namebuf_copyloc) - 2, "c");
+            strcpy(data->output_file + len, "c");
         }
     } else {
         /* Replace .yf with .c */
         /* TODO - reduce code copying from above */
         namebuf_copyloc = data->file_name;
         strcat(data->output_file, namebuf_copyloc);
-        if (strlen(data->output_file) > 3 &&
-            strcmp(data->output_file + strlen(data->output_file) - 3, ".yf")) {
+        int len = strlen(data->file_name);
+        /* Change .yf to .c */
+        /* FIRST, check for .yf ending */
+        if (len < 3 ||
+            strcmp(data->file_name + len - 3, ".yf") != 0) {
             /* Simply tack on .c */
             /* But no .yf is bad */
             YF_PRINT_WARNING(
@@ -100,7 +104,7 @@ static int create_output_file_name(
             );
             strcat(data->output_file, ".c");
         } else {
-            strcpy(data->output_file + strlen(namebuf_copyloc) - 2, "c");
+            strcpy(data->output_file + len - 2, "c");
         }
     }
 
@@ -152,7 +156,8 @@ char * yf_backend_add_compile_job(
     struct yf_compilation_unit_info * unit
 ) {
 
-    create_output_file_name(unit, args);
+    if (!unit->output_file || strlen(unit->output_file) == 0)
+        create_output_file_name(unit, args);
 
     struct yf_compile_exec_job * cjob;
 
@@ -166,13 +171,14 @@ char * yf_backend_add_compile_job(
     cjob->job.type = YF_COMPILATION_EXEC;
 
     /* Where gcc -c foo.c -o foo.o is stored */
-    cjob->command = malloc(sizeof(const char *) * 6);
+    cjob->command = malloc(sizeof(const char *) * 7);
     cjob->command[0] = args->selected_compiler;
     cjob->command[1] = "-c";
     cjob->command[2] = unit->output_file;
     cjob->command[3] = "-o";
     cjob->command[4] = object_file;
-    cjob->command[5] = NULL;
+    cjob->command[5] = "-fdollars-in-identifiers";
+    cjob->command[6] = NULL;
 
     yf_list_add(&compilation->jobs, cjob);
 
@@ -282,7 +288,10 @@ int yf_ensure_entry_point(
 
     }
 
-    return total_entries == 1;
+    if (total_entries != 1)
+        YF_PRINT_ERROR("total 'main' functions found: %d\n", total_entries);
+
+    return total_entries != 1;
 
 }
 

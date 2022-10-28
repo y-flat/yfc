@@ -6,6 +6,7 @@
 #define UTIL_LIST_H
 
 #include <stddef.h>
+#include <stdbool.h>
 
 /**
  * How it works - each linked list is theoretically a list of nodes with a
@@ -101,6 +102,30 @@ int yf_list_merge(struct yf_list * dst, struct yf_list * src);
  */
 void yf_list_destroy(struct yf_list * list, int free_elements);
 
+/**
+ * Fast check if list is empty.
+ */
+inline bool yf_list_is_empty(struct yf_list * list) {
+    if (list->first == NULL)
+        return true;
+
+    return list->first->numfull == 0;
+}
+
+/**
+ * Gets the total element count of the list
+ */
+inline size_t yf_list_get_count(struct yf_list * list) {
+    struct yf_list_cursor cur;
+    size_t cnt = 0;
+
+    if (list->first == NULL || list->first->numfull == 0)
+        return 0;
+
+    yf_list_reset_cursor(&cur, list);
+    do ++cnt; while (yf_list_next(&cur) == 0);
+    return cnt;
+}
 
 /**
  * WARNING! This macro introduces a variable into outer scope and may thus be incompatible with constructs as if ... else ... without block scope.

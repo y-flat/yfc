@@ -289,7 +289,7 @@ int yf_ensure_entry_point(
     }
 
     if (total_entries != 1)
-        YF_PRINT_ERROR("total 'main' functions found: %d\n", total_entries);
+        YF_PRINT_ERROR("total 'main' functions found: %d", total_entries);
 
     return total_entries != 1;
 

@@ -254,7 +254,10 @@ static int create_all_parent_dirs(char * path) {
     return 0;
 }
 
-int yfg_gen(struct yf_compile_analyse_job * data, struct yf_gen_info * info) {
+int yfg_gen(
+    struct yf_compilation_data * cdata,
+    struct yf_compile_analyse_job * data, struct yf_gen_info * info
+) {
 
     create_all_parent_dirs(data->unit_info->output_file);
 

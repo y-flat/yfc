@@ -116,8 +116,9 @@ static int create_output_file_name(
  * Generate C code
  */
 static int yf_gen_c(
+    struct yf_compilation_data * data,
     struct yf_compile_analyse_job * fdata, struct yf_gen_info * info) {
-    return yfg_gen(fdata, info);
+    return yfg_gen(data, fdata, info);
 }
 
 /**
@@ -296,7 +297,7 @@ int yf_ensure_entry_point(
 }
 
 int yf_backend_generate_code(
-    struct yf_compile_analyse_job * data
+    struct yf_compilation_data * cdata, struct yf_compile_analyse_job * data
 ) {
     struct yf_gen_info ginfo = {
         .yf_prefix = data->unit_info->file_prefix,
@@ -305,5 +306,5 @@ int yf_backend_generate_code(
     create_formatted_prefix(
         ginfo.yf_prefix, ginfo.gen_prefix, 256
     );
-    return yf_gen_c(data, &ginfo);
+    return yf_gen_c(cdata, data, &ginfo);
 }

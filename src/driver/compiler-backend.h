@@ -34,7 +34,7 @@ int yf_backend_add_link_job(
 );
 
 int yf_backend_generate_code(
-    struct yf_compile_analyse_job *
+    struct yf_compilation_data*, struct yf_compile_analyse_job *
 );
 
 /**

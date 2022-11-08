@@ -421,7 +421,7 @@ static int yfc_validate_compile(
         if (yf_ensure_entry_point(pdata)) {
             return 1;
         }
-        retval = yf_backend_generate_code(adata);
+        retval = yf_backend_generate_code(pdata, adata);
     }
 
     return retval;

@@ -102,7 +102,7 @@ static void yf_gen_funcdecl(
     struct yf_ast_node * child;
     int argct = 0;
     char typebuf[256];
-    yfg_ctype(256, typebuf, node->name->fn.rtype);
+    yfg_ctype(256, typebuf, &node->name->fn.rtype);
 
     /* Hacky fix -- but it should work. */
     /* We need to check if the function is called "main" because the C compiler
@@ -116,7 +116,7 @@ static void yf_gen_funcdecl(
         fprintf(
             out, "%s /* %s */ %s$$%s",
             typebuf,
-            node->name->fn.rtype->name,
+            node->name->fn.rtype.name,
             i->gen_prefix,
             node->name->fn.name
         );

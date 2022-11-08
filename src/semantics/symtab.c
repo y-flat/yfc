@@ -109,8 +109,8 @@ static int yfs_add_fn(struct yf_hashmap * symtab, struct yf_parse_node * f) {
     }
 
     /* TODO -- actually look up custom types once those exist. */
-    fsym->fn.rtype->kind = YFS_T_PRIMITIVE;
-    strcpy(fsym->fn.rtype->name, fn->ret.databuf);
+    fsym->fn.rtype.kind = YFS_T_PRIMITIVE;
+    fsym->fn.rtype.name = fn->ret.databuf;
 
     yfh_set(symtab, fsym->fn.name, fsym);
 

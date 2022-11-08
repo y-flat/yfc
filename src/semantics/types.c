@@ -133,7 +133,7 @@ struct yfs_type * yfse_get_expr_type(
         }
         break;
     case YFA_E_FUNCCALL:
-        return expr->as.call.name->fn.rtype;
+        return &expr->as.call.name->fn.rtype;
     }
 
 }

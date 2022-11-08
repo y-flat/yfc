@@ -1,6 +1,9 @@
 #include "symtab.h"
 
+#include <string.h>
+
 #include <api/sym.h>
+#include <semantics/types.h>
 #include <util/allocator.h>
 #include <util/yfc-out.h>
 
@@ -18,6 +21,9 @@ int yfs_build_symtab(struct yf_compile_analyse_job * data) {
         YF_PRINT_ERROR("symtab: failed to allocate table");
         return 3; /* Memory error */
     }
+
+    yfh_init(&data->types.table);
+    yfv_add_builtin_types(data);
     
     ret = 0;
     YF_LIST_FOREACH(data->parse_tree.program.decls, node) {
@@ -101,6 +107,10 @@ static int yfs_add_fn(struct yf_hashmap * symtab, struct yf_parse_node * f) {
         yf_list_add(&fsym->fn.params, param);
 
     }
+
+    /* TODO -- actually look up custom types once those exist. */
+    fsym->fn.rtype->kind = YFS_T_PRIMITIVE;
+    strcpy(fsym->fn.rtype->name, fn->ret.databuf);
 
     yfh_set(symtab, fsym->fn.name, fsym);
 

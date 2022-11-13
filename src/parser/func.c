@@ -88,6 +88,17 @@ int yfp_funcdecl(struct yf_parse_node * node, struct yf_lexer * lexer) {
 
 bodyp:
     node->type = YFCS_FUNCDECL;
+
+    struct yf_token sctest; /* semicolon test */
+    yfl_lex(lexer, &sctest);
+    if (sctest.type == YFT_SEMICOLON) {
+        /* No body for function. */
+        node->funcdecl.body = NULL;
+        return 0;
+    } else {
+        yfl_unlex(lexer, &sctest);
+    }
+
     node->funcdecl.body = yf_malloc(sizeof (struct yf_parse_node));
     return yfp_bstmt(node->funcdecl.body, lexer);
 

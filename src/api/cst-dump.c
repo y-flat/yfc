@@ -132,7 +132,11 @@ static void yf_dump_funcdecl(struct yfcs_funcdecl * node, FILE * out) {
     yf_print_line(out, "return type: %s", node->ret.databuf);
     yf_print_line(out, "function body");
     indent();
-    yf_dump_cst(node->body, out);
+    if (node->body) {
+        yf_dump_cst(node->body, out);
+    } else {
+        yf_print_line(out, "[no body]");
+    }
     dedent();
     yf_print_line(out, "end function body");
     dedent();

@@ -139,7 +139,10 @@ static void yf_gen_funcdecl(
 
     fprintf(out, ") ");
 
-    yf_gen_node(node->body, out, i);
+    if (node->body == NULL)
+        fprintf(out, ";");
+    else
+        yf_gen_node(node->body, out, i);
 
 }
 

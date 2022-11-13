@@ -67,29 +67,36 @@ int validate_funcdecl(
         return 1;
     }
 
-    a->body = yf_malloc(sizeof (struct yf_ast_node));
-    if (!a->body)
-        return 2;
-
-    /* Now, validate the body. */
-    if (validate_bstmt(validator, c->body, a->body, a->ret, &returns)) {
-        yf_free(a->body);
+    if (c->body == NULL) {
         a->body = NULL;
-        return 1;
+    } else {
+        a->body = yf_malloc(sizeof (struct yf_ast_node));
+        if (!a->body)
+            return 2;
+
+        /* Now, validate the body. */
+        if (validate_bstmt(validator, c->body, a->body, a->ret, &returns)) {
+            yf_free(a->body);
+            a->body = NULL;
+            return 1;
+        }
     }
+
 
     /* Close the scope. */
     exit_scope(validator);
 
-    if (returns == 0 && a->ret->primitive.size != 0) {
-        YF_PRINT_ERROR(
-            "%s %d:%d: Function '%s' does not always return a value",
-            cin->loc.file,
-            cin->loc.line,
-            cin->loc.column,
-            c->name.name
-        );
-        return 1;
+    if (a->body != NULL) {
+        if (returns == 0 && a->ret->primitive.size != 0) {
+            YF_PRINT_ERROR(
+                "%s %d:%d: Function '%s' does not always return a value",
+                cin->loc.file,
+                cin->loc.line,
+                cin->loc.column,
+                c->name.name
+            );
+            return 1;
+        }
     }
 
     return 0;

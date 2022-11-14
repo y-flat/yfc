@@ -1,0 +1,6 @@
+a::b.x(a1: int, a2: int): int {
+
+}
+
+y: int = x(1); ~~ Too fed args ~ııııııııııııııııııııı
+y: int = x(1 arg

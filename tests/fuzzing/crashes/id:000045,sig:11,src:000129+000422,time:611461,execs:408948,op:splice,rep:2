@@ -1,0 +1,6 @@
+x(a1: int, a2: int): int{
+
+}
+
+y: int = x(1); ~~s ~~
+z: int = x(1* 2, 3); ~~ Tonÿm}ny args ~~

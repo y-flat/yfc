@@ -101,7 +101,7 @@ int validate_funcdecl(
 
     a->extc = c->extc;
     /* extc functions cannot have bodies */
-    if (a->body != NULL) {
+    if (a->extc && a->body != NULL) {
         YF_PRINT_ERROR("extc function '%s' may not have a body", c->name.name);
         return 1;
     }

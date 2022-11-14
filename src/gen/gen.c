@@ -113,13 +113,17 @@ static void yf_gen_funcdecl(
     /* TODO -- (elsewhere) check the args for main in Y-flat */
 
     if (strcmp(node->name->fn.name, "main")) {
-        fprintf(
-            out, "%s /* %s */ %s$$%s",
-            typebuf,
-            node->name->fn.rtype->name,
-            i->gen_prefix,
-            node->name->fn.name
-        );
+        if (node->extc) {
+            fprintf(out, "%s", node->name->fn.name);
+        } else {
+            fprintf(
+                out, "%s /* %s */ %s$$%s",
+                typebuf,
+                node->name->fn.rtype->name,
+                i->gen_prefix,
+                node->name->fn.name
+            );
+        }
     } else {
         fprintf(out, "int main");
     }

@@ -104,7 +104,8 @@ semicolon:
             goto semicolon;
         } else {
             YF_TOKERR(sctest, "body or semicolon");
-            YF_PRINT_ERROR("note: only one `extc` modifier is allowed.");
+            /* TODO -- be able to print this message. The above call returns. */
+            /* YF_PRINT_ERROR("note: only one `extc` modifier is allowed."); */
         }
     case YFT_SEMICOLON:
         /* No body for function. */

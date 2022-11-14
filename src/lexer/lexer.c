@@ -391,7 +391,9 @@ const char * yf_get_toktype(enum yf_token_type type) {
         "<return>",
         "<if>",
         "<else>",
+        "<extc>",
         "namespace",
+        "<dot>",
         "[TOO LARGE]",
     };
     

@@ -112,6 +112,7 @@ struct yfcs_funcdecl {
     /* All parameters are stored as parse_node. expr WILL be null for these. */
     struct yf_list params;
     struct yf_parse_node * body; /* The function body */
+    bool extc; /* Whether the function is an extc one */
 };
 
 struct yfcs_if {

@@ -15,6 +15,9 @@ int yfp_funcdecl(struct yf_parse_node * node, struct yf_lexer * lexer) {
 
     int lex_err;
 
+    /* No extc -- yet. */
+    node->funcdecl.extc = false;
+
     /* Start arg list for writing */
     yf_list_init(&node->funcdecl.params);
     argct = 0;
@@ -90,12 +93,24 @@ bodyp:
     node->type = YFCS_FUNCDECL;
 
     struct yf_token sctest; /* semicolon test */
+semicolon:
     yfl_lex(lexer, &sctest);
-    if (sctest.type == YFT_SEMICOLON) {
+    switch (sctest.type) {
+    case YFT_EXTC:
+        if (!node->funcdecl.extc) {
+            node->funcdecl.extc = true;
+            /* We need to continue parsing like before, checking for ';' and all. So ... */
+            /* This is why the check below exists at all. */
+            goto semicolon;
+        } else {
+            YF_TOKERR(sctest, "body or semicolon");
+            YF_PRINT_ERROR("note: only one `extc` modifier is allowed.");
+        }
+    case YFT_SEMICOLON:
         /* No body for function. */
         node->funcdecl.body = NULL;
         return 0;
-    } else {
+    default:
         yfl_unlex(lexer, &sctest);
     }
 

@@ -1,0 +1,5 @@
+x(a1: int, a2: int): int; ~~s~ To {
+
+}
+
+y: int = x(1); ~~s~ Too many args ~~

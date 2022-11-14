@@ -1,0 +1,9 @@
+a::bfoo(): ift {
+    return 5;}
+
+bar() {
+
+}
+
+baz() {
+    return

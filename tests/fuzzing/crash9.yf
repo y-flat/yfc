@@ -1,0 +1,6 @@
+~~ A w?r for the var€able shadowing. ~~
+
+x: int;
+
+y() {;;;;;;n`;
+}

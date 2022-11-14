@@ -122,6 +122,8 @@ static void yf_dump_funcdecl(struct yfcs_funcdecl * node, FILE * out) {
     yf_print_line(out, "funcdecl");
     indent();
     yf_print_line(out, "name: %s", node->name.name);
+    if (node->extc)
+        yf_print_line(out, "[extc]");
     yf_print_line(out, "params");
     indent();
     struct yf_parse_node * param;

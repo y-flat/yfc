@@ -12,6 +12,7 @@ struct keyword_lookup {
     { "else", YFT_ELSE },
     { "true", YFT_LITERAL },
     { "false", YFT_LITERAL },
+    { "extc", YFT_EXTC },
     { NULL, YFT_EOF },
 };
 

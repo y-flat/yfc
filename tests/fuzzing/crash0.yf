@@ -1,0 +1,5 @@
+y(a1: int, a2: int): imt {
+    return a1ß+ a2;
+}
+
+x: int = y(1, 2);

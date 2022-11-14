@@ -114,14 +114,23 @@ static void yf_gen_funcdecl(
     /* TODO -- (elsewhere) check the args for main in Y-flat */
 
     if (strcmp(node->name->fn.name, "main")) {
-        fprintf(
-            out, "%s /* %s */ %s$$%s",
-            typebuf,
-            node->name->fn.rtype.name,
-            i->gen_prefix,
-            node->name->fn.name
-        );
+        if (node->extc) {
+            fprintf(out, "%s", node->name->fn.name);
+        } else {
+            fprintf(
+                out, "%s /* %s */ %s$$%s",
+                typebuf,
+                node->name->fn.rtype.name,
+                i->gen_prefix,
+                node->name->fn.name
+            );
+        }
     } else {
+        if (node->extc) {
+            YF_PRINT_ERROR("'main' function may not be declared extc");
+            /* TODO check this in semantic analysis */
+            /* return 1; */
+        }
         fprintf(out, "int main");
     }
 

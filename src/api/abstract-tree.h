@@ -113,6 +113,7 @@ struct yfa_funcdecl {
     struct yf_ast_node * body; /* The function body */
     /* The parameter scope */
     struct yfs_symtab * param_scope;
+    bool extc; /* Whether the function declaration is extc */
 };
 
 /**

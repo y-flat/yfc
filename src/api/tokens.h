@@ -27,6 +27,7 @@ enum yf_token_type {
     YFT_RETURN, /* return */
     YFT_IF,
     YFT_ELSE,
+    YFT_EXTC,
     YFT_NAMESPACE, /* :: */
     YFT_DOT,
     YFT_TOO_LARGE, /* A token was too large */

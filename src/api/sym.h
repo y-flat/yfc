@@ -67,7 +67,7 @@ struct yfsn_param {
 struct yfs_fn {
 
     char * name;
-    struct yfs_type * rtype; /* "return type" */
+    struct yfs_type   rtype; /* "return type" */
     struct yf_list    params; /* list of param */
 
 };

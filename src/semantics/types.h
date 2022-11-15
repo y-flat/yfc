@@ -11,6 +11,13 @@
 #include <api/loc.h>
 #include <semantics/validate/validate-internal.h>
 
+void yft_add_type(
+    struct yf_compile_analyse_job * udata,
+    char * name, int size, enum yfpt_format fmt
+);
+
+void yfv_add_builtin_types(struct yf_compile_analyse_job * udata);
+
 enum yfs_conversion_allowedness {
     YFS_CONVERSION_OK,
     YFS_CONVERSION_LOSSY, /* like i64 -> bool */

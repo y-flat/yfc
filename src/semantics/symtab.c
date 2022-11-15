@@ -1,11 +1,16 @@
 #include "symtab.h"
 
+#include <string.h>
+
 #include <api/sym.h>
+#include <semantics/types.h>
 #include <util/allocator.h>
 #include <util/yfc-out.h>
 
-static int yfs_add_var(struct yf_hashmap * symtab, struct yf_parse_node *);
-static int yfs_add_fn(struct yf_hashmap * symtab, struct yf_parse_node *);
+static int yfs_add_var(struct yf_compile_analyse_job *,
+struct yf_hashmap * symtab, struct yf_parse_node *);
+static int yfs_add_fn(struct yf_compile_analyse_job *,
+struct yf_hashmap * symtab, struct yf_parse_node *);
 
 int yfs_build_symtab(struct yf_compile_analyse_job * data) {
 
@@ -18,16 +23,19 @@ int yfs_build_symtab(struct yf_compile_analyse_job * data) {
         YF_PRINT_ERROR("symtab: failed to allocate table");
         return 3; /* Memory error */
     }
+
+    yfh_init(&data->types.table);
+    yfv_add_builtin_types(data);
     
     ret = 0;
     YF_LIST_FOREACH(data->parse_tree.program.decls, node) {
         switch (node->type) {
             case YFCS_VARDECL:
-                if (yfs_add_var(&data->symtab.table, node))
+                if (yfs_add_var(data, &data->symtab.table, node))
                     ret = 1;
                 break;
             case YFCS_FUNCDECL:
-                if (yfs_add_fn(&data->symtab.table, node))
+                if (yfs_add_fn(data, &data->symtab.table, node))
                     ret = 1;
                 break;
             default:
@@ -40,7 +48,10 @@ int yfs_build_symtab(struct yf_compile_analyse_job * data) {
 
 }
 
-static int yfs_add_var(struct yf_hashmap * symtab, struct yf_parse_node * n) {
+static int yfs_add_var(
+    struct yf_compile_analyse_job * data,
+    struct yf_hashmap * symtab, struct yf_parse_node * n
+) {
 
     struct yfcs_vardecl * v = &n->vardecl;
     struct yf_sym * vsym, * dupl;
@@ -68,7 +79,10 @@ static int yfs_add_var(struct yf_hashmap * symtab, struct yf_parse_node * n) {
 
 }
 
-static int yfs_add_fn(struct yf_hashmap * symtab, struct yf_parse_node * f) {
+static int yfs_add_fn(
+    struct yf_compile_analyse_job * udata, struct yf_hashmap * symtab,
+    struct yf_parse_node * f
+) {
     
     struct yfcs_funcdecl * fn = &f->funcdecl;
 
@@ -101,6 +115,9 @@ static int yfs_add_fn(struct yf_hashmap * symtab, struct yf_parse_node * f) {
         yf_list_add(&fsym->fn.params, param);
 
     }
+
+    /* TODO -- actually look up custom types once those exist. */
+    fsym->fn.rtype = *yfv_get_type_s(udata, fn->ret.databuf);
 
     yfh_set(symtab, fsym->fn.name, fsym);
 

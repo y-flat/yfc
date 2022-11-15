@@ -4,53 +4,11 @@
 #include <semantics/types.h>
 #include <semantics/validate/validate-internal.h>
 
-static void add_type(
-    struct yf_compile_analyse_job * udata,
-    char * name, int size, enum yfpt_format fmt
-) {
-
-    struct yfs_type * type = yf_malloc(sizeof (struct yfs_type));
-    type->primitive.size = size;
-    type->kind = YFS_T_PRIMITIVE;
-    type->primitive.type = fmt;
-    type->name = name;
-    yfv_add_type(udata, type);
-
-}
-
-static void yfv_add_builtin_types(struct yf_compile_analyse_job * udata) {
-
-    /* All types are signed for now - unsigned types are not yet supported. */
-
-    /* "standard" types. */
-    add_type(udata, "char",        8, YFS_F_INT  );
-    add_type(udata, "short",      16, YFS_F_INT  );
-    add_type(udata, "int",        32, YFS_F_INT  );
-    add_type(udata, "long",       64, YFS_F_INT  );
-    add_type(udata, "void",        0, YFS_F_NONE );
-    add_type(udata, "float",      32, YFS_F_FLOAT);
-    add_type(udata, "double",     64, YFS_F_FLOAT);
-
-    /* Convenience types. */
-    add_type(udata, "i16",        16, YFS_F_INT  );
-    add_type(udata, "i32",        32, YFS_F_INT  );
-    add_type(udata, "i64",        64, YFS_F_INT  );
-    add_type(udata, "f16",        16, YFS_F_FLOAT);
-    add_type(udata, "f32",        32, YFS_F_FLOAT);
-    add_type(udata, "f64",        64, YFS_F_FLOAT);
-
-    /* We're considering bool to be one bit for conversion purposes. */
-    add_type(udata, "bool",       1,  YFS_F_INT  );
-
-}
-
 int yfs_validate(
     struct yf_compile_analyse_job * udata,
     struct yf_compilation_data * pdata
 ) {
 
-    yfh_init(&udata->types.table);
-    yfv_add_builtin_types(udata);
     struct yfv_validator validator = {
         /* Root symbol table is the global scope of the program. */
         .current_scope = &udata->symtab,

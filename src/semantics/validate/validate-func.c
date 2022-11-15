@@ -24,7 +24,9 @@ int validate_funcdecl(
         return 2;
     }
 
-    if ((a->name->fn.rtype = yfv_get_type_t(
+    struct yfs_type * ty;
+
+    if ((ty = yfv_get_type_t(
         validator->udata, c->ret
     )) == NULL) {
         YF_PRINT_ERROR(
@@ -35,6 +37,8 @@ int validate_funcdecl(
         );
         return 2;
     }
+
+    a->name->fn.rtype = *ty;
 
     /* Now, validate the argument list. */
     /* Also, open a new scope for arguments. */

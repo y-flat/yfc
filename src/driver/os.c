@@ -32,12 +32,11 @@ int proc_open(process_handle * proc, const char * const argv[], const file_open_
     } else if (child_pid == 0) {
         int* descriptors = NULL;
         size_t descriptors_sz = 0;
-        int nullfd = -1, maxfd = 0, max_used_fd;
+        int nullfd = -1, maxfd = 0;
         for (const file_open_descriptor * descriptor = descs; descriptor->target_fd != -1; ++descriptor) {
             if (descriptor->target_fd > maxfd)
                 maxfd = descriptor->target_fd;
         }
-        max_used_fd = maxfd;
         for (const file_open_descriptor * descriptor = descs; descriptor->target_fd != -1; ++descriptor) {
             if (descriptor->target_fd >= (int)descriptors_sz) {
                 descriptors = realloc(descriptors, (descriptor->target_fd + 1) * sizeof(int));

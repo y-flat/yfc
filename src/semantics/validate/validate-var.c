@@ -62,7 +62,8 @@ int validate_vardecl(
     /* The global scope symtab is already set up. */
     if (!global) {
         a->name->var.name = c->name.name;
-        yfh_set(&validator->current_scope->table, c->name.name, a->name);
+        if (yfh_set(&validator->current_scope->table, c->name.name, a->name) != YF_OK)
+            abort();
     } else {
         /* Free the name, since it was only needed for type checking. */
         free(a->name);

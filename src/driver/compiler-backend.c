@@ -277,7 +277,7 @@ int yf_ensure_entry_point(
     void * dummy;
 
     struct yfh_cursor cursor;
-    for (yfh_cursor_init(&cursor, &pdata->symtables); !yfh_cursor_next(&cursor); ) {
+    for (yfh_cursor_init(&cursor, &pdata->symtables); yfh_cursor_next(&cursor) == YF_OK; ) {
 
         yfh_cursor_get(&cursor, NULL, (void **)&fsymtab);
 

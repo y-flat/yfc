@@ -62,7 +62,8 @@ static int yfs_add_var(struct yf_hashmap * symtab, struct yf_parse_node * n) {
         return 1;
     }
 
-    yfh_set(symtab, v->name.name, vsym);
+    if (yfh_set(symtab, v->name.name, vsym) != YF_OK)
+        abort();
 
     return 0;
 
@@ -102,7 +103,8 @@ static int yfs_add_fn(struct yf_hashmap * symtab, struct yf_parse_node * f) {
 
     }
 
-    yfh_set(symtab, fsym->fn.name, fsym);
+    if (yfh_set(symtab, fsym->fn.name, fsym) != YF_OK)
+        abort();
 
     return 0;
 

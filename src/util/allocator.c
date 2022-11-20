@@ -10,6 +10,7 @@ void * yf_malloc(size_t size) {
 
     if (ret == NULL) {
         YF_PRINT_ERROR("Allocation of %zu bytes failed", size);
+        abort();
     }
 
     /* Return anyway, the error will be printed out before. */
@@ -24,6 +25,7 @@ void * yf_calloc(size_t num_elems, size_t size) {
 
     if (ret == NULL) {
         YF_PRINT_ERROR("Allocation of %zu %zu-byte sized elements failed", num_elems, size);
+        abort();
     }
 
     return ret;

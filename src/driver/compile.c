@@ -169,7 +169,7 @@ static int yf_create_compiler_jobs(
     yf_list_init(&compilation->garbage);
 
     struct yfh_cursor cursor;
-    for (yfh_cursor_init(&cursor, &data->files); !yfh_cursor_next(&cursor); ) {
+    for (yfh_cursor_init(&cursor, &data->files); yfh_cursor_next(&cursor) == YF_OK; ) {
         yfh_cursor_get(&cursor, NULL, (void **)&fdata);
 
         ujob = malloc(sizeof(struct yf_compile_analyse_job));
@@ -189,7 +189,7 @@ static int yf_create_compiler_jobs(
         yf_list_add(&compilation->jobs, ujob);
     }
 
-    for (yfh_cursor_init(&cursor, &data->files); !yfh_cursor_next(&cursor); ) {
+    for (yfh_cursor_init(&cursor, &data->files); yfh_cursor_next(&cursor) == YF_OK; ) {
         yfh_cursor_get(&cursor, NULL, (void **)&ujob);
         if (ujob->stage < YF_COMPILE_ANALYSEONLY)
             continue;
@@ -355,7 +355,7 @@ static int yf_compile_project(struct yf_args * args, struct yf_compilation_data 
     if (args->dump_projfiles) {
         YF_PRINT_DEFAULT("Project files: (green = needs to be recompiled):");    
         struct yfh_cursor cursor;
-        for (yfh_cursor_init(&cursor, &data.files); !yfh_cursor_next(&cursor); ) {
+        for (yfh_cursor_init(&cursor, &data.files); yfh_cursor_next(&cursor) == YF_OK; ) {
             yfh_cursor_get(&cursor, NULL, (void **)&fdata);
             if (fdata->parse_anew) {
                 YF_PRINT_WITH_COLOR(
@@ -396,7 +396,8 @@ static int yf_compile_files(struct yf_args * args, struct yf_compilation_data * 
         fdata->file_name = yf_strdup(fname);
         fdata->parse_anew = 1;
         /* TODO - more data */
-        yfh_set(&data.files, fdata->file_name, fdata);
+        if (yfh_set(&data.files, fdata->file_name, fdata) != YF_OK)
+            abort();
     }
 
     return yf_create_compiler_jobs(compilation, &data, args);
@@ -482,8 +483,10 @@ static int yfc_run_frontend_build_symtable(
             retval = yf_do_cst_dump(&data->parse_tree);
         } else {
             retval = yf_build_symtab(data);
-            if (!retval && data->unit_info->file_prefix)
-                yfh_set(&compilation->symtables, data->unit_info->file_prefix, &data->symtab);
+            if (!retval && data->unit_info->file_prefix) {
+                if (yfh_set(&compilation->symtables, data->unit_info->file_prefix, &data->symtab) != YF_OK)
+                    abort();
+            }
         }
         return retval;
     }

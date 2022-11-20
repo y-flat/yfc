@@ -13,11 +13,11 @@
  * Any of the possible outputs wanted.
  */
 enum yf_info_output {
-    YF_NONE,
-    YF_VERSION,
-    YF_HELP,
-    YF_ERROR,
-    YF_ERROR_NO_ARGS, /* SPECIFICALLY if no arguments are given. */
+    YF_INFO_NONE,
+    YF_INFO_VERSION,
+    YF_INFO_HELP,
+    YF_INFO_ERROR,
+    YF_INFO_ERROR_NO_ARGS, /* SPECIFICALLY if no arguments are given. */
 };
 
 enum yf_compiler_class {

@@ -110,8 +110,9 @@ int validate_program(
     aprog = &ain->program;
     ain->type = YFA_PROGRAM;
 
-    yf_list_init(&aprog->decls);
-    
+    if (yf_list_init(&aprog->decls) != YF_OK)
+        abort();
+
     /* Iterate through all decls, construct abstract instances of them, and move
     them into the abstract list. */
     YF_LIST_FOREACH(cprog->decls, cnode) {
@@ -130,8 +131,10 @@ int validate_program(
         }
 
         /* Move to abstract list */
-        if (anode)
-            yf_list_add(&aprog->decls, anode);
+        if (anode) {
+            if (yf_list_add(&aprog->decls, anode) != YF_OK)
+                abort();
+        }
     }
 
     return err;

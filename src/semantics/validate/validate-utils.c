@@ -120,6 +120,8 @@ struct yfs_type * yfv_get_type_s(
      * Get a value from the hashmap.
      */
     struct yfs_type * result = NULL;
-    yfh_get(&udata->types.table, typestr, (void **)&result);
+    if (yfh_get(&udata->types.table, typestr, (void **)&result) != YF_OK) {
+        /* result is null */
+    }
     return result;
 }

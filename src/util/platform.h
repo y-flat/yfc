@@ -32,4 +32,22 @@
 #define YF_SUBPLATFORM YF_PLATFORMID_UNKNOWN
 #endif
 
+#if defined(__has_attribute)
+#define __yf_has_attribute __has_attribute
+#else
+#define __yf_has_attribute(name) 0
+#endif
+
+#if __yf_has_attribute(warn_unused_result)
+#define yf_nodiscard __attribute__((warn_unused_result))
+#else
+#define yf_nodiscard
+#endif
+
+#if __yf_has_attribute(always_inline)
+#define yf_always_inline __attribute__((always_inline)) inline
+#else
+#define yf_always_inline static inline
+#endif
+
 #endif /* UTIL_SYSTEM_H */

@@ -6,15 +6,6 @@
 
 #define MAX_STEPS 10
 
-/**
- * Hashmap cursor used internally by the hashmap functions.
- */
-struct yfh_internal_cursor {
-    struct yf_hashmap * hashmap;
-    struct yfh_bucket ** bucket;
-    struct yfh_bucket ** position;
-};
-
 static unsigned long hash(const char * key);
 
 /**
@@ -23,13 +14,13 @@ static unsigned long hash(const char * key);
  * Returns true if the key has been found, false otherwise.
  * Note: this is a reverse of the conventions used by other functions of this kind.
  */
-static bool yfh_cursor_find_before(struct yfh_internal_cursor * cur, const char * key) {
+static bool yfh_cursor_find_before(struct yfh_cursor * cur, const char * key) {
 
     unsigned long bucket = hash(key) % cur->hashmap->num_buckets;
 
     cur->bucket = cur->hashmap->buckets + bucket;
-    for (cur->position = cur->bucket; *cur->position; cur->position = &(*cur->position)->next) {
-        if (!strcmp(key, (*cur->position)->key))
+    for (cur->current = cur->bucket; *cur->current; cur->current = &(*cur->current)->next) {
+        if (!strcmp(key, (*cur->current)->key))
             return true;
     }
 
@@ -58,139 +49,127 @@ void yfh_destroy(struct yf_hashmap * hm, void (*cleanup)(void *)) {
 }
 
 /** TODO: Not implemented yet */
-int yfh_rehash(struct yf_hashmap * hm, unsigned hint) {
-    return 1;
+yf_result yfh_rehash(struct yf_hashmap * hm, unsigned hint) {
+    return YF_ERROR;
 }
 
-int yfh_set(struct yf_hashmap * hm, const char * key, void * value) {
+yf_result yfh_set(struct yf_hashmap * hm, const char * key, void * value) {
 
-    struct yfh_internal_cursor cursor;
+    struct yfh_cursor cursor;
     struct yfh_bucket * bucket;
     cursor.hashmap = hm;
 
     if (yfh_cursor_find_before(&cursor, key)) {
-        (*cursor.position)->value = value;
-        return 0;
+        (*cursor.current)->value = value;
+        return YF_OK;
     }
 
     bucket = yf_malloc(sizeof(struct yfh_bucket));
-    *cursor.position = bucket;
+    *cursor.current = bucket;
     bucket->key = yf_strdup(key);
     bucket->value = value;
     bucket->next = NULL;
-    return 0;
+    return YF_OK;
 
 }
 
-int yfh_remove(struct yf_hashmap * hm, const char * key, void (*cleanup)(void *)) {
+yf_result yfh_remove(struct yf_hashmap * hm, const char * key, void (*cleanup)(void *)) {
 
-    struct yfh_internal_cursor cursor;
+    struct yfh_cursor cursor;
     struct yfh_bucket * bucket;
     cursor.hashmap = hm;
 
     if (!yfh_cursor_find_before(&cursor, key))
-        return 1;
+        return YF_ERROR;
 
-    bucket = *cursor.position;
+    bucket = *cursor.current;
     if (cleanup)
         cleanup(bucket->value);
-    *cursor.position = bucket->next;
+    *cursor.current = bucket->next;
     free(bucket->key);
     free(bucket);
-    return 0;
+    return YF_OK;
 
 }
 
-int yfh_remove_at(struct yfh_cursor * cur, void (*cleanup)(void *)) {
+yf_result yfh_remove_at(struct yfh_cursor * cur, void (*cleanup)(void *)) {
 
     /* We have to backtrack a little because we need to update the previous pointer */
-    struct yfh_bucket ** before_ptr;
     struct yfh_bucket * bucket;
 
-    if (cur->bucket == NULL || cur->current == NULL)
-        return 1;
+    if (cur->bucket == NULL || cur->current == NULL || *cur->current == NULL)
+        return YF_ERROR;
 
-    for (before_ptr = cur->bucket; *before_ptr; before_ptr = &(*before_ptr)->next) {
-        if (*before_ptr == cur->current)
-            break;
-    }
-
-    bucket = *before_ptr;
+    bucket = *cur->current;
 
     if (cleanup)
         cleanup(bucket->value);
-    *before_ptr = bucket->next;
-    cur->current = *before_ptr;
+    *cur->current = bucket->next;
     free(bucket->key);
     free(bucket);
-    return 0;
+    return YF_OK;
 }
 
-int yfh_get(struct yf_hashmap * hm, const char * key, void ** value) {
+yf_result yfh_get(struct yf_hashmap * hm, const char * key, void ** value) {
 
-    struct yfh_internal_cursor cursor;
+    struct yfh_cursor cursor;
     cursor.hashmap = hm;
 
     if (!yfh_cursor_find_before(&cursor, key))
-        return 1;
+        return YF_ERROR;
 
-    *value = (*cursor.position)->value;
-    return 0;
+    *value = (*cursor.current)->value;
+    return YF_OK;
 
 }
 
-int yfh_cursor_next(struct yfh_cursor * cur) {
+yf_result yfh_cursor_next(struct yfh_cursor * cur) {
 
     if (cur->hashmap == NULL)
-        return 2;
+        return YF_ERROR;
 
     /* When a cursor is initialised, bucket is null */
     if (cur->bucket == NULL) {
         cur->bucket = cur->hashmap->buckets;
-        cur->current = *cur->bucket;
-        if (cur->current != NULL)
-            return 0;
+        cur->current = cur->bucket;
+        if (*cur->current != NULL)
+            return YF_OK;
     }
 
     /* If we're pointing at an entry, move to the next one */
-    if (cur->current != NULL) {
-        cur->current = cur->current->next;
+    if (*cur->current != NULL) {
+        cur->current = &(**cur->current).next;
     }
 
     /* When a cursor points past a bucket list (or an empty bucket), advance to the next bucket */
-    while (cur->current == NULL) {
+    while (*cur->current == NULL) {
         ++cur->bucket;
         /* Check if we reached an end */
         if (cur->bucket - cur->hashmap->buckets >= cur->hashmap->num_buckets) {
             cur->bucket = NULL;
-            return 1;
+            return YF_REACHED_END;
         }
 
-        cur->current = *cur->bucket;
+        cur->current = cur->bucket;
     }
 
-    return 0;
+    return YF_OK;
 
 }
 
-int yfh_cursor_find(struct yfh_cursor * cur, const char * key, void ** value) {
-
-    /* We're gonna cheat a little bit */
-    struct yfh_internal_cursor * internal_cur = (struct yfh_internal_cursor*)cur;
+yf_result yfh_cursor_find(struct yfh_cursor * cur, const char * key, void ** value) {
 
     if (cur->hashmap == NULL)
-        return 1;
+        return YF_ERROR;
 
-    if (!yfh_cursor_find_before(internal_cur, key)) {
+    if (!yfh_cursor_find_before(cur, key)) {
         cur->current = NULL;
-        return 1;
+        return YF_ERROR;
     }
 
-    /* Fixup cursor pointer to point to the actual entry */
-    cur->current = *internal_cur->position;
     if (value)
-        *value = cur->current->value;
-    return 0;
+        *value = (**cur->current).value;
+    return YF_ERROR;
 
 }
 
@@ -206,10 +185,3 @@ static unsigned long hash(const char * key) {
     return hash;
 
 }
-
-/* External inline function definitions */
-extern inline void yfh_init(struct yf_hashmap * map);
-extern inline void yfh_cursor_init(struct yfh_cursor * cur, struct yf_hashmap * hashmap);
-extern inline int yfh_cursor_get(struct yfh_cursor * cur, const char ** key, void ** value);
-extern inline int yfh_cursor_set(struct yfh_cursor * cur, void * value);
-extern inline int yfh_cursor_recalibrate(struct yfh_cursor * cur);

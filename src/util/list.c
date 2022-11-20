@@ -5,41 +5,43 @@
 
 #include <util/allocator.h>
 
-int yf_list_init(struct yf_list * list) {
+yf_result yf_list_init(struct yf_list * list) {
     list->first = yf_malloc(sizeof(struct yf_list_block));
     list->first->numfull = 0;
     list->first->next = NULL;
     list->last = list->first;
-    return 0;
+    return YF_OK;
 }
 
-int yf_list_next(struct yf_list_cursor * cur) {
+yf_result yf_list_next(struct yf_list_cursor * cur) {
 
     ++cur->list_index;
     ++cur->block_index;
     if (cur->block_index >= cur->block->numfull) {
         if (cur->block->next == NULL) {
-            return -1;
+            return YF_REACHED_END;
         } else {
             cur->block = cur->block->next;
             cur->block_index = 0;
         }
     } else {
         if (cur->block_index > cur->block->numfull) {
-            return -1;
+            return YF_REACHED_END;
         }
     }
 
-    return 0;
+    return YF_OK;
 
 }
 
-int yf_list_add(struct yf_list * list, void * element) {
+yf_result yf_list_add(struct yf_list * list, void * element) {
 
     struct yf_list_block * block = list->last;
+    yf_result res;
 
     if (block == NULL) {
-        yf_list_init(list);
+        if ((res = yf_list_init(list)) != YF_OK)
+            return res;
         block = list->last;
     }
 
@@ -60,23 +62,23 @@ int yf_list_add(struct yf_list * list, void * element) {
     block->data[block->numfull] = element;
     block->numfull++;
 
-    return 0;
+    return YF_OK;
 
 }
 
-int yf_list_merge(struct yf_list * dst, struct yf_list * src) {
+yf_result yf_list_merge(struct yf_list * dst, struct yf_list * src) {
     if (dst == src)
-        return -1;
+        return YF_ERROR;
 
     if (src->first == NULL)
-        return 0;
+        return YF_OK;
 
     struct yf_list_block ** pblock;
     for (pblock = &dst->first; *pblock; pblock = &(*pblock)->next) {}
     *pblock = src->first;
     dst->last = src->last;
     src->first = src->last = NULL;
-    return 0;
+    return YF_OK;
 }
 
 void yf_list_destroy(struct yf_list * list, int free_elements) {
@@ -101,7 +103,5 @@ void yf_list_destroy(struct yf_list * list, int free_elements) {
 }
 
 /* External inline function definitions */
-extern inline int yf_list_get(struct yf_list_cursor * cur, void ** elem);
-extern inline void yf_list_reset_cursor(struct yf_list_cursor * cur, struct yf_list * list);
-extern inline bool yf_list_is_empty(struct yf_list *list);
+extern inline yf_result yf_list_get(struct yf_list_cursor * cur, void ** elem);
 extern inline size_t yf_list_get_count(struct yf_list *list);

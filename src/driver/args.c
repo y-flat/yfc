@@ -15,7 +15,7 @@
  */
 static void yf_set_error(struct yf_args * args) {
     args->error = 1;
-    args->wanted_output = YF_ERROR;
+    args->wanted_output = YF_INFO_ERROR;
 }
 
 /**
@@ -27,7 +27,7 @@ static void yf_set_error(struct yf_args * args) {
  * Check if the wanted action is not already set.
  */
 static void yf_check_action(struct yf_args * args, enum yf_info_output out) {
-    if (args->wanted_output != YF_NONE) {
+    if (args->wanted_output != YF_INFO_NONE) {
         yf_set_error(args);
     } else {
         args->wanted_output = out;
@@ -39,7 +39,7 @@ static void yf_check_action(struct yf_args * args, enum yf_info_output out) {
  */
 static int yf_add_file(struct yf_args * args, char * file) {
     /* No actions allowed. e.g. : no "yfc --version foo.yf" */
-    if (args->wanted_output != YF_NONE) {
+    if (args->wanted_output != YF_INFO_NONE) {
         yf_set_error(args);
         return 1;
     }
@@ -48,7 +48,8 @@ static int yf_add_file(struct yf_args * args, char * file) {
         yf_set_error(args);
         return 1;
     }
-    yf_list_add(&args->files, file);
+    if (yf_list_add(&args->files, file) != YF_OK)
+        abort();
     return 0;
 }
 
@@ -63,9 +64,10 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
 
     /* Zero the args structure. */
     memset(args, 0, sizeof *args);
-    args->wanted_output = YF_NONE;
+    args->wanted_output = YF_INFO_NONE;
     args->run_c_comp = true;
-    yf_list_init(&args->files);
+    if (yf_list_init(&args->files) != YF_OK)
+        abort();
 
     /* Start at 1 - avoid program name */
     for (i = 1; i < argc; ++i) {
@@ -110,12 +112,12 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
             ++arg;
             if (!arg[1]) {
                 if (arg[0] == 'h' || arg[0] == '?') {
-                    yf_check_action(args, YF_HELP);
+                    yf_check_action(args, YF_INFO_HELP);
                     continue;
                 }
 
                 if (arg[0] == 'v') {
-                    yf_check_action(args, YF_VERSION);
+                    yf_check_action(args, YF_INFO_VERSION);
                     continue;
                 }
             }
@@ -124,12 +126,12 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
                 ++arg;
 
             if (STREQ(arg, "help")) {
-                yf_check_action(args, YF_HELP);
+                yf_check_action(args, YF_INFO_HELP);
                 continue;
             }
 
             if (STREQ(arg, "version")) {
-                yf_check_action(args, YF_VERSION);
+                yf_check_action(args, YF_INFO_VERSION);
                 continue;
             }
 
@@ -195,7 +197,7 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
             }
 
             if (STREQ(arg, "benchmark")) {
-                if (args->profile || args->wanted_output != YF_NONE) {
+                if (args->profile || args->wanted_output != YF_INFO_NONE) {
                     yf_set_error(args);
                     return;
                 }
@@ -233,32 +235,32 @@ void yf_parse_args(int argc, char ** argv, struct yf_args * args) {
 
     }
 
-    if (args->wanted_output == YF_NONE && !args->project && yf_list_is_empty(&args->files)) {
+    if (args->wanted_output == YF_INFO_NONE && !args->project && yf_list_is_empty(&args->files)) {
         args->error = 1;
-        args->wanted_output = YF_ERROR_NO_ARGS;
+        args->wanted_output = YF_INFO_ERROR_NO_ARGS;
     }
 
 }
 
 bool yf_should_compile(struct yf_args * args) {
-    return args->wanted_output == YF_NONE;
+    return args->wanted_output == YF_INFO_NONE;
 }
 
 int yf_output_info(struct yf_args * args) {
 
     switch (args->wanted_output) {
-        case YF_NONE:
+        case YF_INFO_NONE:
             return 0;
-        case YF_VERSION:
+        case YF_INFO_VERSION:
             printf("%s", VERSION_MSG);
             return 0;
-        case YF_HELP:
+        case YF_INFO_HELP:
             printf("%s", USAGE_MSG);
             return 0;
-        case YF_ERROR:
+        case YF_INFO_ERROR:
             printf("%s", HELP_HINT_MSG);
             return 1;
-        case YF_ERROR_NO_ARGS:
+        case YF_INFO_ERROR_NO_ARGS:
             printf("%s", NO_ARGS_MSG);
             return 1;
     }

@@ -76,7 +76,7 @@ yf_nodiscard yf_result yf_list_next(struct yf_list_cursor * cur);
  * Reset to the beginning.
  * If list is NULL, uses the last used list in cursor, it is undefined behaviour if the cursor hasn't been used before.
  */
-inline void yf_list_reset_cursor(struct yf_list_cursor * cur, struct yf_list * list) {
+yf_always_inline void yf_list_reset_cursor(struct yf_list_cursor * cur, struct yf_list * list) {
 
     if (list != NULL) {
         cur->list = list;
@@ -107,7 +107,7 @@ void yf_list_destroy(struct yf_list * list, int free_elements);
 /**
  * Fast check if list is empty.
  */
-inline bool yf_list_is_empty(struct yf_list * list) {
+yf_always_inline bool yf_list_is_empty(struct yf_list * list) {
     if (list->first == NULL)
         return true;
 

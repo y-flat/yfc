@@ -199,7 +199,8 @@ static int validate_funccall(
         * the types are compatible for each one and the number of arguments
         * matches.
         */
-    yf_list_init(&a->args);
+    if (yf_list_init(&a->args) != YF_OK)
+        abort();
     yf_list_reset_cursor(&param_cursor, &a->name->fn.params);
     yf_list_reset_cursor(&arg_cursor, &c->args);
     for (;;) {
@@ -256,9 +257,11 @@ static int validate_funccall(
             return 1;
         }
 
-        yf_list_add(&a->args, aarg);
-        yf_list_next(&arg_cursor);
-        yf_list_next(&param_cursor);
+        if (yf_list_add(&a->args, aarg) != YF_OK ||
+            yf_list_next(&arg_cursor) != YF_OK ||
+            yf_list_next(&param_cursor) != YF_OK)
+
+            abort();
 
     }
 

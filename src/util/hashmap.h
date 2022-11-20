@@ -8,6 +8,7 @@
 
 #include "allocator.h"
 #include "result.h"
+#include "platform.h"
 #include <stdbool.h>
 
 #define YFH_INIT_BUCKETS (0x1000 / sizeof(void*))

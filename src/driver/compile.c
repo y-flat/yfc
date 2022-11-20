@@ -160,13 +160,16 @@ static int yf_create_compiler_jobs(
     yf_backend_find_compiler(args);
 
     struct yf_list link_objs;
-    yf_list_init(&link_objs);
+    if (yf_list_init(&link_objs) != YF_OK)
+        abort();
 
     /* Fill project info */
     compilation->project_name = data->project_name;
-    yf_list_init(&compilation->jobs);
+    if (yf_list_init(&compilation->jobs) != YF_OK)
+        abort();
     yfh_init(&compilation->symtables);
-    yf_list_init(&compilation->garbage);
+    if (yf_list_init(&compilation->garbage) != YF_OK)
+        abort();
 
     struct yfh_cursor cursor;
     for (yfh_cursor_init(&cursor, &data->files); yfh_cursor_next(&cursor) == YF_OK; ) {
@@ -186,7 +189,8 @@ static int yf_create_compiler_jobs(
                                    YF_COMPILE_FULL;
 
         yfh_cursor_set(&cursor, ujob); // Set the job for further stages
-        yf_list_add(&compilation->jobs, ujob);
+        if (yf_list_add(&compilation->jobs, ujob) != YF_OK)
+            abort();
     }
 
     for (yfh_cursor_init(&cursor, &data->files); yfh_cursor_next(&cursor) == YF_OK; ) {
@@ -197,11 +201,13 @@ static int yf_create_compiler_jobs(
         cjob = malloc(sizeof(struct yf_compile_compile_job));
         cjob->job.type = YF_COMPILATION_COMPILE;
         cjob->unit = ujob;
-        yf_list_add(&compilation->jobs, cjob);
+        if (yf_list_add(&compilation->jobs, cjob) != YF_OK)
+            abort();
 
         if (ujob->stage >= YF_COMPILE_CODEGENONLY) {
             char * object_file = yf_backend_add_compile_job(compilation, args, ujob->unit_info);
-            yf_list_add(&link_objs, object_file);
+            if (yf_list_add(&link_objs, object_file) != YF_OK)
+                abort();
             has_compiled_files = true;
         }
     }
@@ -210,7 +216,8 @@ static int yf_create_compiler_jobs(
         yf_backend_add_link_job(compilation, args, &link_objs);
     }
 
-    yf_list_merge(&compilation->garbage, &link_objs);
+    if (yf_list_merge(&compilation->garbage, &link_objs) != YF_OK)
+        abort();
     yfh_destroy(&data->files, NULL);
 
     return 0;

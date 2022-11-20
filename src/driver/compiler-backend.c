@@ -180,7 +180,8 @@ char * yf_backend_add_compile_job(
     cjob->command[5] = "-fdollars-in-identifiers";
     cjob->command[6] = NULL;
 
-    yf_list_add(&compilation->jobs, cjob);
+    if (yf_list_add(&compilation->jobs, cjob) != YF_OK)
+        abort();
 
     return object_file;
 
@@ -214,8 +215,11 @@ int yf_backend_add_link_job(
     struct yf_list_cursor link_objs_cur;
     yf_list_reset_cursor(&link_objs_cur, link_objs);
     for (obj_it = 0; obj_it < num_objs; ++obj_it) {
-        yf_list_get(&link_objs_cur, (void **)it);
-        yf_list_next(&link_objs_cur);
+        if (yf_list_get(&link_objs_cur, (void **)it) != YF_OK ||
+            yf_list_next(&link_objs_cur) != YF_OK)
+
+            abort();
+
         ++it;
     }
 
@@ -234,7 +238,8 @@ int yf_backend_add_link_job(
     ljob->job.type = YF_COMPILATION_EXEC;
     ljob->command = link_cmd;
 
-    yf_list_add(&compilation->jobs, ljob);
+    if (yf_list_add(&compilation->jobs, ljob) != YF_OK)
+        abort();
 
     return 0;
 

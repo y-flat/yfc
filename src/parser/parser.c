@@ -27,7 +27,8 @@ int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer) {
     node->loc.line = node->loc.column = -1;
 
     node->type = YFCS_PROGRAM;
-    yf_list_init(&node->program.decls);
+    if (yf_list_init(&node->program.decls) != YF_OK)
+        abort();
 
     for (;;) {
 
@@ -78,7 +79,8 @@ int yfp_program(struct yf_parse_node * node, struct yf_lexer * lexer) {
         }
 
         /* Now, we have a node - add it to the list. */
-        yf_list_add(&node->program.decls, decl);
+        if (yf_list_add(&node->program.decls, decl) != YF_OK)
+            abort();
 
     }
 
@@ -258,7 +260,8 @@ int yfp_bstmt(struct yf_parse_node * node, struct yf_lexer * lexer) {
     P_GETCT(node, tok);
 
     node->type = YFCS_BSTMT;
-    yf_list_init(&node->bstmt.stmts);
+    if (yf_list_init(&node->bstmt.stmts) != YF_OK)
+        abort();
 
     for (;;) {
         P_PEEK(lexer, &tok);
@@ -272,7 +275,8 @@ int yfp_bstmt(struct yf_parse_node * node, struct yf_lexer * lexer) {
             free(stmt);
             return 1;
         }
-        yf_list_add(&node->bstmt.stmts, stmt);
+        if (yf_list_add(&node->bstmt.stmts, stmt) != YF_OK)
+            abort();
     }
 
 }

@@ -87,7 +87,8 @@ static int yfs_add_fn(struct yf_hashmap * symtab, struct yf_parse_node * f) {
 
     fsym->fn.name = fn->name.name;
 
-    yf_list_init(&fsym->fn.params);
+    if (yf_list_init(&fsym->fn.params) != YF_OK)
+        abort();
 
     /* Adding parameters to symbol */
     YF_LIST_FOREACH(fn->params, narg) {
@@ -99,7 +100,8 @@ static int yfs_add_fn(struct yf_hashmap * symtab, struct yf_parse_node * f) {
 
         param->name = arg->name.name;
         param->type = arg->type.databuf;
-        yf_list_add(&fsym->fn.params, param);
+        if (yf_list_add(&fsym->fn.params, param) != YF_OK)
+            abort();
 
     }
 

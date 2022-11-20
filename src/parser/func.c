@@ -19,7 +19,8 @@ int yfp_funcdecl(struct yf_parse_node * node, struct yf_lexer * lexer) {
     node->funcdecl.extc = false;
 
     /* Start arg list for writing */
-    yf_list_init(&node->funcdecl.params);
+    if (yf_list_init(&node->funcdecl.params) != YF_OK)
+        abort();
     argct = 0;
 
     for (;;) {
@@ -61,7 +62,8 @@ int yfp_funcdecl(struct yf_parse_node * node, struct yf_lexer * lexer) {
         ++argct;
 
         /* Add to arg list */
-        yf_list_add(&node->funcdecl.params, argp);
+        if (yf_list_add(&node->funcdecl.params, argp) != YF_OK)
+            abort();
 
     }
 

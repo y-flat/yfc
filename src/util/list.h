@@ -7,6 +7,8 @@
 
 #include <stddef.h>
 #include <stdbool.h>
+#include "result.h"
+#include "platform.h"
 
 /**
  * How it works - each linked list is theoretically a list of nodes with a
@@ -46,29 +48,29 @@ struct yf_list_cursor {
  */
 
 /**
- * Initialize a new list. Return -1 if memory allocation has failed.
+ * Initialize a new list.
  */
-int yf_list_init(struct yf_list * list);
+yf_nodiscard yf_result yf_list_init(struct yf_list * list);
 
 /**
  * Get the currently pointed-to element. Returns -1 if we've passed the end, or
  * 0 otherwise.
  */
-inline int yf_list_get(struct yf_list_cursor * cur, void ** elem) {
+yf_nodiscard inline yf_result yf_list_get(struct yf_list_cursor * cur, void ** elem) {
 
     if (cur->block_index >= cur->block->numfull) {
-        return -1;
+        return YF_REACHED_END;
     }
 
     *elem = cur->block->data[cur->block_index];
-    return 0;
+    return YF_OK;
 
 }
 
 /**
  * Move to the next element. Return -1 if we've passed the end, or 0.
  */
-int yf_list_next(struct yf_list_cursor * cur);
+yf_nodiscard yf_result yf_list_next(struct yf_list_cursor * cur);
 
 /**
  * Reset to the beginning.
@@ -87,15 +89,15 @@ inline void yf_list_reset_cursor(struct yf_list_cursor * cur, struct yf_list * l
 }
 
 /**
- * Add an element. Returns -1 if we've run out of memory, or 0 otherwise.
+ * Add an element.
  */
-int yf_list_add(struct yf_list * list, void * element);
+yf_nodiscard yf_result yf_list_add(struct yf_list * list, void * element);
 
 /**
  * Merges two lists together.
- * src will be empty after the operation, if successful
+ * src will be empty after the operation, if successful.
  */
-int yf_list_merge(struct yf_list * dst, struct yf_list * src);
+yf_nodiscard yf_result yf_list_merge(struct yf_list * dst, struct yf_list * src);
 
 /**
  * Destroy a list.
@@ -142,6 +144,6 @@ inline size_t yf_list_get_count(struct yf_list * list) {
  * @param out an lvalue denoting the element
  */
 #define YF_LIST_FOREACH_CUR(cur, list, out) \
-    for (yf_list_reset_cursor(&(cur), &(list)); yf_list_get(&(cur), (void **)&(out)) == 0; yf_list_next(&(cur)))
+    for (yf_list_reset_cursor(&(cur), &(list)); yf_list_get(&(cur), (void **)&(out)) == YF_OK; (void)yf_list_next(&(cur)))
 
 #endif /* UTIL_LIST_H */

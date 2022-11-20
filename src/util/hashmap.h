@@ -111,7 +111,7 @@ yf_always_inline void yfh_cursor_init(struct yfh_cursor * cur, struct yf_hashmap
  * @param key key of the entry
  * @param value value of the entry
  */
-yf_always_inline yf_result yfh_cursor_get(struct yfh_cursor * cur, const char ** key, void ** value) {
+yf_nodiscard yf_always_inline yf_result yfh_cursor_get(struct yfh_cursor * cur, const char ** key, void ** value) {
     if (cur->current == NULL || *cur->current == NULL)
         return YF_ERROR;
 
@@ -138,6 +138,22 @@ yf_always_inline yf_result yfh_cursor_set(struct yfh_cursor * cur, void * value)
  * Tries to find next element. Refer to values of @ref yf_result for info
  */
 yf_nodiscard yf_result yfh_cursor_next(struct yfh_cursor * cur);
+
+/**
+ * Combines @ref yfh_cursor_next and @ref yfh_cursor_get
+ * @param key key of the next entry
+ * @param value value of the next entry
+ */
+yf_nodiscard yf_always_inline yf_result yfh_cursor_next_get(struct yfh_cursor * cur, const char ** key, void ** value) {
+    yf_result res = yfh_cursor_next(cur);
+    if (res == YF_OK) {
+        if (key)
+            *key = (**cur->current).key;
+        if (value)
+            *value = (**cur->current).value;
+    }
+    return res;
+}
 
 /**
  * Used to repoint the cursor at next element after yfh_remove_at.

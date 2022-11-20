@@ -172,8 +172,7 @@ static int yf_create_compiler_jobs(
         abort();
 
     struct yfh_cursor cursor;
-    for (yfh_cursor_init(&cursor, &data->files); yfh_cursor_next(&cursor) == YF_OK; ) {
-        yfh_cursor_get(&cursor, NULL, (void **)&fdata);
+    for (yfh_cursor_init(&cursor, &data->files); yfh_cursor_next_get(&cursor, NULL, (void **)&fdata) == YF_OK; ) {
 
         ujob = malloc(sizeof(struct yf_compile_analyse_job));
         memset(ujob, 0, sizeof(struct yf_compile_analyse_job));
@@ -193,8 +192,8 @@ static int yf_create_compiler_jobs(
             abort();
     }
 
-    for (yfh_cursor_init(&cursor, &data->files); yfh_cursor_next(&cursor) == YF_OK; ) {
-        yfh_cursor_get(&cursor, NULL, (void **)&ujob);
+    for (yfh_cursor_init(&cursor, &data->files); yfh_cursor_next_get(&cursor, NULL, (void **)&ujob) == YF_OK; ) {
+
         if (ujob->stage < YF_COMPILE_ANALYSEONLY)
             continue;
 
@@ -362,8 +361,7 @@ static int yf_compile_project(struct yf_args * args, struct yf_compilation_data 
     if (args->dump_projfiles) {
         YF_PRINT_DEFAULT("Project files: (green = needs to be recompiled):");    
         struct yfh_cursor cursor;
-        for (yfh_cursor_init(&cursor, &data.files); yfh_cursor_next(&cursor) == YF_OK; ) {
-            yfh_cursor_get(&cursor, NULL, (void **)&fdata);
+        for (yfh_cursor_init(&cursor, &data.files); yfh_cursor_next_get(&cursor, NULL, (void **)&fdata) == YF_OK; ) {
             if (fdata->parse_anew) {
                 YF_PRINT_WITH_COLOR(
                     YF_CODE_YELLOW,

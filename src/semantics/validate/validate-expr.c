@@ -167,7 +167,7 @@ static int validate_funccall(
     struct yf_list_cursor param_cursor;
     struct yf_list_cursor arg_cursor;
 
-    int lgres;
+    yf_result pres, ares;
 
     /* Make sure the function exists. */
     if (find_symbol(
@@ -201,32 +201,33 @@ static int validate_funccall(
         */
     if (yf_list_init(&a->args) != YF_OK)
         abort();
+
     yf_list_reset_cursor(&param_cursor, &a->name->fn.params);
     yf_list_reset_cursor(&arg_cursor, &c->args);
+    pres = yf_list_get(&param_cursor, (void **) &param);
+    ares = yf_list_get(&arg_cursor, (void **) &carg);
     for (;;) {
 
-        aarg = yf_malloc(sizeof (struct yf_ast_node));
-        if (!aarg)
-            return 2;
+        if (pres == YF_ERROR || ares == YF_ERROR)
+            abort();
 
-        if (
-            yf_list_get(&param_cursor, (void **) &param) !=
-            (lgres = yf_list_get(&arg_cursor, (void **) &carg))
-        ) {
+        if (pres != ares) {
             YF_PRINT_ERROR(
                 "%s %d:%d: too %s arguments in function call",
                 loc->file,
                 loc->line,
                 loc->column,
-                lgres ? "few" : "many"
+                (pres == YF_OK) ? "few" : "many"
             );
-            yf_free(aarg);
             return 1;
         }
-        if (lgres == -1) {
-            yf_free(aarg);
+
+        if (pres == YF_REACHED_END)
             break;
-        }
+
+        aarg = yf_malloc(sizeof (struct yf_ast_node));
+        if (!aarg)
+            return 2;
 
         if (validate_expr(
             validator, carg, aarg
@@ -257,12 +258,19 @@ static int validate_funccall(
             return 1;
         }
 
-        if (yf_list_add(&a->args, aarg) != YF_OK ||
-            yf_list_next(&arg_cursor) != YF_OK ||
-            yf_list_next(&param_cursor) != YF_OK)
-
+        if (yf_list_add(&a->args, aarg) != YF_OK)
             abort();
 
+        ares = yf_list_next(&arg_cursor);
+        pres = yf_list_next(&param_cursor);
+
+        if (ares == YF_ERROR || pres == YF_ERROR)
+            abort();
+
+        if (ares == YF_OK && pres == YF_OK) {
+            pres = yf_list_get(&param_cursor, (void **) &param);
+            ares = yf_list_get(&arg_cursor, (void **) &carg);
+        }
     }
 
     return 0;
